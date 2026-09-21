@@ -1,4 +1,4 @@
-﻿分类,位号,数量,规格,品牌,厂家型号,立创编号,导入封装,用途与状态,本地已有封装,来源
+分类,位号,数量,规格,品牌,厂家型号,立创编号,导入封装,用途与状态,本地已有封装,来源
 
 现用型号,U1,1,ESP32-S3R8,Espressif,ESP32-S3R8,C2913194,QFN-56 7x7mm EP4x4mm,现用主控,否,https://www.lcsc.com/product-detail/C2913194.html
 
@@ -16,7 +16,7 @@
 
 现用型号,Y1,1,40MHz CL15pF,YJX雅晶鑫,TAXM40M4ZHBCDT2T,C424432,2016 4焊盘,现用晶振,是,https://item.szlcsc.com/417823.html
 
-现用型号,J1,1,18P 0.5mm屏幕连接器,XUNPU,FPC-05F-18PH20,C2856802,FPC 18P P0.5mm H2mm,这是屏幕连接器；不是屏幕本体,是,https://www.lcsc.com/product-image/C2856802.html
+首板换装规格,J1,1,FFC/FPC 0.5mm 18P 抽屉式上接触,未提供,未提供,,保留原PCB封装；替换件尺寸需核对,用户提供换装商品规格截图；原C2856802不再作为现用采购料号,原封装保留；新件无厂家图纸,../docs/J1-CONNECTOR.md
 
 现用型号,J2,1,USB Type-C,HRO,TYPE-C-31-M-12,C165948,USB-C 16P,现用型号,是,https://jlcpcb.com/partdetail/C165948
 

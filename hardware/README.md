@@ -1,3 +1,5 @@
+> **J1 采购更正：首板实际换装规格为 FFC/FPC 0.5 mm、18P、抽屉式上接触；原 FPC-05F-18PH20 / C2856802 不再作为当前采购料号。原设计文件保持冻结，详见 [连接器更正](../docs/J1-CONNECTOR.md)。**
+
 # 计协电子吧唧 KiCad EVT 草稿
 
 **首板文件已导出（2026-09-09 晚）：**上传嘉立创使用 [JXBadge_EVT_20260909_c7c59dff_PCB.zip](fabrication/JXBadge_EVT_20260909_c7c59dff/JXBadge_EVT_20260909_c7c59dff_PCB.zip)。9 个 Gerber + 2 个钻孔文件，246 个孔及 340 个带编号顶层焊盘逐项回读匹配，ZIP 完整性检查通过。下单参数与可选顶层钢网见 [下单说明](fabrication/JXBadge_EVT_20260909_c7c59dff/下单说明.md)。目标四层、1.6 mm、直径 50 mm、JLC04161H-7628 叠层；订单工艺仍需嘉立创确认。没有代下单。
