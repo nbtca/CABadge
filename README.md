@@ -110,4 +110,4 @@ GIF、BLE 传图和 OTA 尚未作为本版功能提供。完整的异常场景�
 
 ## 许可
 
-项目目前为私有仓库，尚未授予整体开源许可。字体、第三方库、模型和素材分别遵循各自许可；字体许可见 [FONT-LICENSE.txt](firmware-v7/ui/FONT-LICENSE.txt)。公开前将继续整理相关来源与授权信息。
+本项目原创内容采用 [MIT License](LICENSE)。第三方字体、库、模型和素材仍遵循各自许可，不因本项目采用 MIT 而改变；字体许可见 [FONT-LICENSE.txt](firmware-v7/ui/FONT-LICENSE.txt)。
