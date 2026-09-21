@@ -1,3 +1,4 @@
+<img width="3072" height="4096" alt="88569985ac7f61f3d5de8dce82ad0e6c" src="https://github.com/user-attachments/assets/56aa3db0-04ef-42d9-ad3d-c7750fe75b80" />
 # CABadge · 计协电子吧唧
 
 CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将传统吧唧的身份表达与电子屏幕的可变内容结合，让佩戴者通过壁纸、图案和协会名片展示个人喜好与社团归属。
@@ -17,6 +18,10 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 - **连接与管理设备**：Wi-Fi、BLE 连接管理，通过 USB 或本地 HTTP 上传壁纸。
 - **基础交互**：触摸操作、亮度设置、息屏后摇晃唤醒，以及可选 FPS 显示。
 - **电脑端调试**：Windows 原生 NBTCA Badge TOOL 提供固件安装与设备联调入口。
+<img width="3072" height="4096" alt="f127c2311e6975bcbb1e0da0139dcabc" src="https://github.com/user-attachments/assets/d9802ecb-7fec-4a99-b3ec-366d318ba858" />
+<img width="3072" height="4096" alt="88569985ac7f61f3d5de8dce82ad0e6c" src="https://github.com/user-attachments/assets/6f152d87-9b11-4fe5-9f6d-3fc743dd4ae8" />
+
+<img width="3072" height="4096" alt="7a818832bde0ab2d23f22a8cb55320ab" src="https://github.com/user-attachments/assets/55c0a312-ae43-4fd6-9f06-7dc37cb0cea6" />
 
 GIF、BLE 传图和 OTA 尚未作为本版功能提供。完整的异常场景和长期稳定性测试仍在完善中。
 
