@@ -1,0 +1,29 @@
+﻿{
+    "pcb_sha256":  "c7c59dff5e6f2065a2157a81414d9d21c5cb1196a7b277656e15007753801a8d",
+    "purpose":  "Shared v7 LVGL UI with physical ST77916 LCD, touch and USB services",
+    "performance":  "Modes 1/2 legacy three scenes; 3 six scenes with DMA callback timing and per-frame bytes; 4 manual touch for 8 seconds; mode 0 disables profiling. Detailed probe fences each frame; runtime probe measures normal overlapped UI. SPI completions are not panel scan Hz; input-to-next-flush is not photon latency",
+    "render_optimization":  "ESP-IDF performance -O2; opaque RGB565 wallpaper cached in RAM; opaque 180px RGB565 thumbnails cached on source change; static member page cached as RGB565; native snap scrolling without per-frame scale",
+    "hardware_test":  "PENDING; not flashed or physically verified",
+    "product":  "CABadge",
+    "firmware_version":  "7.3.7-mem",
+    "memory":  "Octal PSRAM 80 MHz; data cache 32 KB / 64-byte line; PSRAM boot memtest enabled; internal DMA 2x32 rows",
+    "ui":  "Native horizontal wallpaper paging; blue member card; interruptible navigation; down control/up functions",
+    "management":  "P0 management protocol; UI v7: explicit 5-minute 128-bit authorization; local HTTP status/control; BLE GATT Status/Control/Session; no BLE image transfer",
+    "display":  "360x360 RGB565; semantic bridge v1; legacy USB pixel transport removed",
+    "actual_lcd":  "ST77916 QSPI 40MHz; two RGB565 PARTIAL draw buffers in PSRAM; core1 worker CS-held DMA with two internal 32-row buffers; TE unconnected, tear-free not guaranteed; CST816 touch; BL GPIO1 capped at 51/1024; CHG_ALLOW GPIO38 LOW",
+    "radio":  "Wi-Fi; NimBLE peripheral CABadge plus central scan/connect; one inbound and one outbound BLE link",
+    "motion":  "SC7A20 50Hz; shake wakes only while screen asleep; no navigation or photo change",
+    "wallpaper":  "USB and authenticated local HTTP RGB565 upload; 1MB dual-slot partition at 0x710000; persistent default reset; explicit WPA2 direct hotspot",
+    "hashes":  {
+                   "bootloader.bin":  "5e086b19bf05c16726e16b6a1a564e6bb69d55a3d9c7a4aed2b39c49797fda05",
+                   "partitions.bin":  "05571e0981bbd84b3f00815adbd72ee464f6458a99d3a958224369b45aa6e184",
+                   "firmware.bin":  "0cb362981efb451003435bc424bdccc38edfd879d75f9a6fb037d54fa9e4f44a",
+                   "firmware.elf":  "22a2a01d7332319549dd3aeb44bca8a07be86b97191afa28328f8ee3914b2e7d"
+               },
+    "shared_ui_sources":  {
+                              "badge_ui.c":  "5a6ef56c15235f65d5015b3506dabf2c5371cf9886f8e7aaf4f64b5a14352fb4",
+                              "badge_ui.h":  "ddd7912e783c63b8b6274c28016cc248fcc96b0d8b94cc5b04b20a6d552aa1a1",
+                              "wifi_panel.c":  "62e9c7b1cae5916b37c451a8634ec76fb1d3f311dd0679c3f5b665468b0c4494",
+                              "assets.c":  "e2d658c6cfeb65402a714e3c7be30f05c642b8fcd293d0c5f869aad07a03aa0e"
+                          }
+}

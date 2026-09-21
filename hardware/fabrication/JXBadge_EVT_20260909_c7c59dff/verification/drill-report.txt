@@ -1,0 +1,28 @@
+Drill report for JXBadge_V1.kicad_pcb
+Created on 2026-09-09T21:08:26
+
+Copper Layer Stackup:
+    =============================================================
+    L1 :  F.Cu                      front
+    L2 :  In1.Cu                    in1
+    L3 :  In2.Cu                    in2
+    L4 :  B.Cu                      back
+
+
+Drill file 'JXBadge_V1-PTH.drl' contains
+    plated through holes:
+    =============================================================
+    T1  0.200mm  0.0079"  (15 holes))
+    T2  0.250mm  0.0098"  (219 holes))
+    T3  0.800mm  0.0315"  (4 holes)  (with 4 slots)
+
+    Total plated holes count 238
+
+
+Drill file 'JXBadge_V1-NPTH.drl' contains
+    unplated through holes:
+    =============================================================
+    T1  0.600mm  0.0236"  (6 holes))
+    T2  1.000mm  0.0394"  (2 holes))
+
+    Total unplated holes count 8

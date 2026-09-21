@@ -1,0 +1,313 @@
+{
+  "board_sha256": "c7c59dff5e6f2065a2157a81414d9d21c5cb1196a7b277656e15007753801a8d",
+  "nets": {
+    "FLASH_CLK": {
+      "copper_length_mm": 3.2466828996322965,
+      "vias": 0,
+      "widths_mm": [
+        0.15
+      ],
+      "layers": [
+        "F.Cu"
+      ]
+    },
+    "FLASH_CLK_MCU": {
+      "copper_length_mm": 1.3850333254743459,
+      "vias": 0,
+      "widths_mm": [
+        0.15
+      ],
+      "layers": [
+        "F.Cu"
+      ]
+    },
+    "FLASH_CS": {
+      "copper_length_mm": 17.584850509188822,
+      "vias": 3,
+      "widths_mm": [
+        0.127,
+        0.15
+      ],
+      "layers": [
+        "F.Cu",
+        "In2.Cu"
+      ]
+    },
+    "FLASH_CS_MCU": {
+      "copper_length_mm": 4.5879022337294675,
+      "vias": 0,
+      "widths_mm": [
+        0.15
+      ],
+      "layers": [
+        "F.Cu"
+      ]
+    },
+    "FLASH_D": {
+      "copper_length_mm": 4.138873964472017,
+      "vias": 0,
+      "widths_mm": [
+        0.15
+      ],
+      "layers": [
+        "F.Cu"
+      ]
+    },
+    "FLASH_D_MCU": {
+      "copper_length_mm": 5.233264501987818,
+      "vias": 0,
+      "widths_mm": [
+        0.15
+      ],
+      "layers": [
+        "F.Cu"
+      ]
+    },
+    "FLASH_HD": {
+      "copper_length_mm": 3.5088739644720173,
+      "vias": 0,
+      "widths_mm": [
+        0.15
+      ],
+      "layers": [
+        "F.Cu"
+      ]
+    },
+    "FLASH_HD_MCU": {
+      "copper_length_mm": 1.2602106781186548,
+      "vias": 0,
+      "widths_mm": [
+        0.15
+      ],
+      "layers": [
+        "F.Cu"
+      ]
+    },
+    "FLASH_Q": {
+      "copper_length_mm": 11.01022895117974,
+      "vias": 0,
+      "widths_mm": [
+        0.15
+      ],
+      "layers": [
+        "F.Cu"
+      ]
+    },
+    "FLASH_Q_MCU": {
+      "copper_length_mm": 8.14979393668845,
+      "vias": 2,
+      "widths_mm": [
+        0.15
+      ],
+      "layers": [
+        "B.Cu",
+        "F.Cu"
+      ]
+    },
+    "FLASH_WP": {
+      "copper_length_mm": 11.111262547323944,
+      "vias": 2,
+      "widths_mm": [
+        0.15
+      ],
+      "layers": [
+        "F.Cu",
+        "In2.Cu"
+      ]
+    },
+    "FLASH_WP_MCU": {
+      "copper_length_mm": 4.60598807918984,
+      "vias": 2,
+      "widths_mm": [
+        0.127,
+        0.15
+      ],
+      "layers": [
+        "B.Cu",
+        "F.Cu"
+      ]
+    },
+    "RF_ANT": {
+      "copper_length_mm": 15.380279361637688,
+      "vias": 0,
+      "widths_mm": [
+        0.3
+      ],
+      "layers": [
+        "F.Cu"
+      ]
+    },
+    "RF_CHIP": {
+      "copper_length_mm": 2.939561764917493,
+      "vias": 0,
+      "widths_mm": [
+        0.28,
+        0.3
+      ],
+      "layers": [
+        "F.Cu"
+      ]
+    },
+    "USB_D+": {
+      "copper_length_mm": 20.77305496015237,
+      "vias": 0,
+      "widths_mm": [
+        0.2921,
+        0.2922
+      ],
+      "layers": [
+        "F.Cu"
+      ]
+    },
+    "USB_D-": {
+      "copper_length_mm": 20.95394721983803,
+      "vias": 0,
+      "widths_mm": [
+        0.2921,
+        0.2922
+      ],
+      "layers": [
+        "F.Cu"
+      ]
+    },
+    "USB_MCU_D+": {
+      "copper_length_mm": 2.034594558142372,
+      "vias": 0,
+      "widths_mm": [
+        0.15
+      ],
+      "layers": [
+        "F.Cu"
+      ]
+    },
+    "USB_MCU_D-": {
+      "copper_length_mm": 1.5602935208311295,
+      "vias": 0,
+      "widths_mm": [
+        0.15,
+        0.2922
+      ],
+      "layers": [
+        "F.Cu"
+      ]
+    },
+    "XTAL_N": {
+      "copper_length_mm": 6.927830148968127,
+      "vias": 0,
+      "widths_mm": [
+        0.15
+      ],
+      "layers": [
+        "F.Cu"
+      ]
+    },
+    "XTAL_P": {
+      "copper_length_mm": 2.0385256331329877,
+      "vias": 0,
+      "widths_mm": [
+        0.15
+      ],
+      "layers": [
+        "F.Cu"
+      ]
+    },
+    "XTAL_P_LOAD": {
+      "copper_length_mm": 5.773403296504257,
+      "vias": 0,
+      "widths_mm": [
+        0.15
+      ],
+      "layers": [
+        "F.Cu"
+      ]
+    }
+  },
+  "usb_paths_mm": {
+    "+": {
+      "A6": 23.05074951829475,
+      "B6": 22.226426870939058
+    },
+    "-": {
+      "A7": 24.019811636668976,
+      "B7": 21.38131389436369
+    }
+  },
+  "capacitors": {
+    "C3": {
+      "to_supply_pin_mm": 2.8951349277710627,
+      "nearest_gnd_via_mm": 0.8000000000000114
+    },
+    "C5": {
+      "to_supply_pin_mm": 1.4507950406587418,
+      "nearest_gnd_via_mm": 0.75
+    },
+    "C6": {
+      "to_supply_pin_mm": 1.5628903640370968,
+      "nearest_gnd_via_mm": 0.6500000000000057
+    },
+    "C7": {
+      "to_supply_pin_mm": 1.3425000148975803,
+      "nearest_gnd_via_mm": 0.7999999999999972
+    },
+    "C8": {
+      "to_supply_pin_mm": 1.3924999999999983,
+      "nearest_gnd_via_mm": 0.8000000000000114
+    },
+    "C9": {
+      "to_supply_pin_mm": 3.8676266999285347,
+      "nearest_gnd_via_mm": 0.7999999999999972
+    },
+    "C10": {
+      "to_supply_pin_mm": 2.8182505726070635,
+      "nearest_gnd_via_mm": 0.7999999999999972
+    }
+  },
+  "usb_skew_mm": {
+    "A": 0.9690621183742252,
+    "B": 0.8451129765753684
+  },
+  "ep_ground_vias": [
+    [
+      100.5,
+      93.6
+    ],
+    [
+      99.5,
+      94.6
+    ],
+    [
+      100.5,
+      95.6
+    ],
+    [
+      99.5,
+      93.6
+    ],
+    [
+      98.5,
+      95.6
+    ],
+    [
+      99.5,
+      95.6
+    ],
+    [
+      100.5,
+      94.6
+    ],
+    [
+      98.5,
+      94.6
+    ],
+    [
+      98.5,
+      93.6
+    ]
+  ],
+  "usb_reference": {
+    "samples": 2907,
+    "coverage": "center and both copper edges, 0.05 mm longitudinal step",
+    "missing": []
+  },
+  "l2_signal_tracks": 0
+}

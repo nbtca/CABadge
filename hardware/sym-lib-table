@@ -1,0 +1,1 @@
+(sym_lib_table (version 7) (lib (name "JXBadge") (type "KiCad") (uri "${KIPRJMOD}/JXBadge.kicad_sym") (options "") (descr "Datasheet-specific badge symbols")))

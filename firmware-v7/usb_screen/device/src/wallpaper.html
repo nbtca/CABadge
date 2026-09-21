@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CABadge</title>
+<style>
+:root{color-scheme:light;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#20252d;background:#f5f6f8}
+*{box-sizing:border-box}body{margin:0}main{max-width:460px;padding:28px 24px 40px;margin:auto}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px}.brand{font-size:12px;letter-spacing:2px;font-weight:700}.tag{font-size:12px;color:#727b88}
+h1{font-size:30px;letter-spacing:-1px;margin:0 0 24px;font-weight:650}
+.stage{padding:0;position:relative}canvas{display:block;width:100%;aspect-ratio:1;border-radius:50%;background:#d9e2ed;touch-action:none;cursor:grab}canvas:active{cursor:grabbing}
+.empty{position:absolute;inset:0;display:grid;place-content:center;color:#63758b;pointer-events:none;font-size:15px}
+.row{display:flex;align-items:center;gap:14px;margin:20px 0}.row label{font-size:13px;color:#59677a}input[type=range]{flex:1;accent-color:#365b86;min-width:0}
+button,.choose{font:inherit;font-size:14px;border:0;border-radius:12px;min-height:46px;padding:12px 18px;cursor:pointer;background:#e5eaf0;color:#354c68;text-align:center;display:block}
+button:active,.choose:active{opacity:.72}button:disabled{opacity:.4;cursor:default}.primary{background:#365b86;color:white;width:100%;font-weight:600;margin-top:24px}
+.secondary{background:transparent;color:#707b89;margin:6px auto}.choose{flex:1;font-weight:600}input[type=file]{position:absolute;width:1px;height:1px;opacity:0}.choose:focus-within{outline:2px solid #365b86;outline-offset:3px}
+details{font-size:13px;margin:24px 0;color:#59677a}input[type=text]{font:inherit;width:100%;padding:12px;border:1px solid #d6dfe9;border-radius:10px;margin-top:10px;background:#fff}
+#status{min-height:22px;font-size:13px;text-align:center;color:#506885;margin:16px 0 0}progress{width:100%;height:5px;accent-color:#365b86}progress[hidden]{display:none}
+:focus-visible{outline:2px solid #365b86;outline-offset:4px}@media(prefers-reduced-motion:no-preference){button{transition:opacity .12s}}
+
+[hidden]{display:none!important}nav{display:flex;gap:8px;margin-bottom:28px}nav button{flex:1;background:transparent;border-radius:0;border-bottom:2px solid transparent}nav button[aria-selected=true]{border-color:#365b86;color:#365b86}
+h2{font-size:20px;margin:32px 0 16px}dl{font-size:14px;display:grid;grid-template-columns:100px 1fr;gap:14px;margin:20px 0}dd{margin:0;text-align:right;overflow-wrap:anywhere}dt{color:#707b89}select,input[type=password]{font:inherit;max-width:100%;padding:12px;width:100%;border:1px solid #d6dfe9;background:white;border-radius:8px}ul{list-style:none;margin:0;padding:0}li button{width:100%;text-align:left;background:transparent;border-radius:0;border-bottom:1px solid #dfe5ec;overflow-wrap:anywhere}.switch{display:flex;justify-content:space-between;align-items:center;margin:20px 0;font-size:15px}.switch input{accent-color:#365b86;width:20px;height:20px}.notice{font-size:13px;color:#59677a;min-height:22px;overflow-wrap:anywhere}input,button{touch-action:manipulation}
+
+nav{position:relative;isolation:isolate;padding:4px;gap:0;background:#e6ebf1;border-radius:15px}
+nav::before{content:"";position:absolute;z-index:-1;inset:4px auto 4px 4px;width:calc(50% - 4px);border-radius:11px;background:white;transform:translateX(0) scaleX(var(--stretch,1));transition:transform var(--tab-time,180ms) cubic-bezier(.23,1,.32,1)}
+nav[data-tab=device]::before{transform:translateX(100%) scaleX(var(--stretch,1))}nav button,nav button[aria-selected=true]{border:0;border-radius:11px}
+.confirm{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows 160ms ease,opacity 160ms ease}
+.confirm.open{grid-template-rows:1fr;opacity:1;transition-duration:200ms}.confirm>div{overflow:hidden}.confirm p{margin:12px 0 0;font-size:14px;text-align:center}.confirm .row{justify-content:center;margin:12px 0}.confirm button{min-width:108px}
+button span{display:inline-block}.reduce-motion *,.reduce-motion *::before{transition:none!important;animation:none!important}
+@media(prefers-reduced-motion:reduce){*,*::before{transition:none!important;animation:none!important}}
+</style>
+<main>
+<header><span class="brand">CABadge</span><span class="tag">本地管理</span></header>
+<nav aria-label="管理页面"><button id="wallTab" aria-selected="true">壁纸</button><button id="deviceTab" aria-selected="false">设备</button></nav>
+<p id="sessionState" class="notice" role="status">等待授权</p>
+<details id="access"><summary>管理授权码</summary><input id="key" type="text" autocomplete="off" spellcheck="false" maxlength="32" placeholder="输入设备显示的授权码" aria-label="管理授权码"><button id="authorize">连接</button></details>
+<section id="wallPage"><h1>壁纸</h1>
+<div class="stage"><canvas id="preview" width="360" height="360" tabindex="0" aria-label="壁纸裁剪预览，可拖动或按方向键调整"></canvas><div id="empty" class="empty">选择照片</div></div>
+<div class="row"><label class="choose">选择照片<input id="file" type="file" accept="image/jpeg,image/png"></label><button id="center" disabled>居中</button></div>
+<div class="row"><label for="zoom">缩放</label><input id="zoom" type="range" min="1" max="4" value="1" step=".01" disabled></div>
+<button class="primary" id="send" disabled>上传并应用</button>
+<button class="secondary" id="reset">恢复默认壁纸</button><button class="secondary" id="cancelUpload" hidden>取消上传</button>
+<div id="confirm" class="confirm" inert aria-hidden="true"><div><p id="confirmText"></p><div class="row"><button id="confirmNo">继续保留</button><button id="confirmYes">确认</button></div></div></div>
+<progress id="progress" max="100" value="0" hidden></progress><p id="status" role="status" aria-live="polite"></p>
+</section>
+<section id="devicePage" hidden>
+<h1>设备</h1><dl><dt>名称</dt><dd id="product">—</dd><dt>固件</dt><dd id="firmware">—</dd><dt>电池电压</dt><dd id="battery">—</dd><dt>壁纸</dt><dd id="wallState">—</dd></dl>
+<h2>显示</h2><label class="switch">息屏<input id="sleep" type="checkbox" disabled></label><label class="switch">减少动态<input id="reduced" type="checkbox" disabled></label>
+<div class="row"><label for="brightness">预览亮度</label><input id="brightness" type="range" min="10" max="100" value="70" disabled><span id="brightnessValue">—</span></div>
+<h2>Wi-Fi</h2><label class="switch">Wi-Fi<input id="wifiEnabled" type="checkbox" disabled></label><p id="wifiState" class="notice">—</p>
+<div class="row"><button id="wifiScan" disabled>扫描网络</button><button id="wifiDisconnect" disabled>断开</button></div>
+<ul id="networks"></ul>
+<form id="wifiForm" hidden><label for="ssid">网络名称</label><input id="ssid" type="text" maxlength="32" required><label for="password">密码</label><input id="password" type="password" maxlength="63" autocomplete="off"><div class="row"><button type="submit">连接</button><button type="button" id="wifiCancel">取消</button></div></form>
+<h2>蓝牙</h2><label class="switch">蓝牙<input id="bleEnabled" type="checkbox" disabled></label><p id="bleState" class="notice">—</p>
+<div class="row"><button id="bleScan" disabled>扫描设备</button><button id="bleIncoming" disabled>断开来访</button><button id="bleOutgoing" disabled>断开主动</button></div><ul id="devices"></ul>
+<p id="operation" class="notice" role="status" aria-live="polite"></p><button class="secondary" id="refresh">刷新状态</button>
+</section>
+</main>
+<script>
+'use strict';
+const $=id=>document.getElementById(id),canvas=$('preview'),ctx=canvas.getContext('2d',{willReadFrequently:true});
+let picture=null,cx=0,cy=0,base=1,drag=null,busy=false,request=null,authorized=false,pendingId=0,awaitingApply=false;
+let confirmAction=null,confirmOrigin=null,notifyTimer=0,notifyButton=null,lastGeneration=null,uploadGeneration=null;
+const reducedMotion=()=>document.documentElement.classList.contains('reduce-motion')||matchMedia('(prefers-reduced-motion:reduce)').matches;
+function buttonText(button,value){
+ let label=button.querySelector('span');if(!label){label=document.createElement('span');label.textContent=button.textContent;button.replaceChildren(label);}
+ if(label.textContent===value)return;label.getAnimations().forEach(a=>a.cancel());label.textContent=value;
+ if(!reducedMotion())label.animate([{opacity:.4,transform:'translateY(3px)'},{opacity:1,transform:'translateY(0)'}],{duration:180,easing:'cubic-bezier(.23,1,.32,1)'});
+}
+function notify(value,success=false){
+ clearTimeout(notifyTimer);if(!notifyButton)return;buttonText(notifyButton,value);
+ if(success)notifyTimer=setTimeout(()=>{buttonText(notifyButton,notifyButton.id==='send'?'上传并应用':'恢复默认壁纸');notifyButton=null;notifyTimer=0;controls(busy);},1200);
+}
+function closeConfirm(){const origin=confirmOrigin;confirmAction=null;$('confirm').classList.remove('open');$('confirm').inert=true;$('confirm').setAttribute('aria-hidden','true');if(origin&&!origin.hidden&&!origin.disabled)origin.focus();}
+function askConfirm(origin,message,action){confirmOrigin=origin;confirmAction=action;$('confirmText').textContent=message;$('confirm').inert=false;$('confirm').setAttribute('aria-hidden','false');$('confirm').classList.add('open');$('confirmNo').focus();}
+$('confirmNo').onclick=closeConfirm;$('confirmYes').onclick=()=>{const action=confirmAction;closeConfirm();if(action)action();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeConfirm();});
+$('key').value=new URLSearchParams(location.hash.slice(1)).get('key')||'';
+if($('key').value)history.replaceState(null,'',location.pathname);else $('access').open=true;
+function constrain(){if(!picture)return;const side=360/(base*Number($('zoom').value));cx=Math.max(side/2,Math.min(picture.width-side/2,cx));cy=Math.max(side/2,Math.min(picture.height-side/2,cy));}
+function draw(){ctx.fillStyle='#000';ctx.fillRect(0,0,360,360);if(!picture)return;constrain();const s=base*Number($('zoom').value);ctx.drawImage(picture,180-cx*s,180-cy*s,picture.width*s,picture.height*s);}
+function center(){if(!picture)return;cx=picture.width/2;cy=picture.height/2;$('zoom').value=1;draw();}
+$('center').onclick=center;$('zoom').oninput=draw;
+$('file').onchange=()=>{
+ const file=$('file').files[0];if(!file||busy)return;
+ if(!['image/jpeg','image/png'].includes(file.type)||file.size>20*1024*1024){$('status').textContent='请选择 20 MB 以内的 JPG 或 PNG';return;}
+ const image=new Image(),url=URL.createObjectURL(file);
+ image.onload=()=>{URL.revokeObjectURL(url);if(image.width*image.height>40000000){$('status').textContent='照片尺寸过大，请先缩小';return;}picture=image;base=Math.max(360/image.width,360/image.height);center();$('empty').hidden=true;$('empty').style.display='none';$('center').disabled=$('zoom').disabled=false;$('send').disabled=!authorized;$('status').textContent='';};
+ image.onerror=()=>{URL.revokeObjectURL(url);$('status').textContent='无法读取这张照片';};image.src=url;
+};
+canvas.onpointerdown=e=>{if(!picture||busy)return;canvas.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,cx,cy};};
+canvas.onpointermove=e=>{if(!drag)return;const s=base*Number($('zoom').value)*canvas.getBoundingClientRect().width/360;cx=drag.cx-(e.clientX-drag.x)/s;cy=drag.cy-(e.clientY-drag.y)/s;draw();};
+canvas.onpointerup=canvas.onpointercancel=()=>{drag=null;};
+canvas.onkeydown=e=>{const shift={ArrowLeft:[-5,0],ArrowRight:[5,0],ArrowUp:[0,-5],ArrowDown:[0,5]}[e.key];if(shift&&picture&&!busy){e.preventDefault();cx+=shift[0];cy+=shift[1];draw();}};
+function rgb565(rgba){const bytes=new Uint8Array(360*360*2);for(let i=0,j=0;i<rgba.length;i+=4,j+=2){const v=((rgba[i]>>3)<<11)|((rgba[i+1]>>2)<<5)|(rgba[i+2]>>3);bytes[j]=v&255;bytes[j+1]=v>>8;}return bytes;}
+function crc32(bytes){let c=0xffffffff;for(const b of bytes){c^=b;for(let i=0;i<8;i++)c=(c>>>1)^((c&1)?0xedb88320:0);}return ((c^0xffffffff)>>>0).toString(16).padStart(8,'0');}
+function controls(value){busy=value;drag=null;for(const id of ['file','center','zoom','send','reset'])$(id).disabled=value||awaitingApply||!!notifyTimer||(['center','zoom','send'].includes(id)&&!picture)||(['send','reset'].includes(id)&&!authorized);}
+function upload(reset){
+ if(busy||awaitingApply||!authorized||(!reset&&!picture))return;const key=$('key').value.trim();
+ if(!/^[0-9a-f]{32}$/i.test(key)){$('access').open=true;$('key').focus();$('status').textContent='请扫码进入，或填写设备上的授权码';return;}
+ const bytes=reset?new Uint8Array():rgb565(ctx.getImageData(0,0,360,360).data);request=new XMLHttpRequest();$('cancelUpload').hidden=false;
+ uploadGeneration=lastGeneration;notifyButton=reset?$('reset'):$('send');notify(reset?'正在恢复…':'正在上传…');controls(true);$('progress').hidden=false;$('progress').value=0;$('status').textContent=reset?'正在恢复…':'正在上传…';
+ request.open('POST',reset?'/reset':'/upload');request.timeout=45000;request.setRequestHeader('Content-Type','application/octet-stream');request.setRequestHeader('X-JX-Key',key);request.setRequestHeader('X-JX-CRC',crc32(bytes));
+ request.upload.onprogress=e=>{if(e.lengthComputable)$('progress').value=e.loaded/e.total*100;};
+ request.onload=()=>{if(request.status===200){awaitingApply=true;notify('正在应用…');$('status').textContent='已保存，等待设备应用';refreshStatus();}else{notify('重试');$('status').textContent=request.status===403?'授权码已失效，请重新扫码':request.status===409?'设备忙，请稍后重试':'上传未完成，请重试';}};
+ request.onerror=()=>{notify('重试');$('status').textContent='连接中断，请重新连接设备后重试';};request.ontimeout=()=>{notify('重试');$('status').textContent='上传超时，请重试';};
+ request.onloadend=()=>{closeConfirm();controls(false);$('progress').hidden=true;$('cancelUpload').hidden=true;request=null;};request.send(bytes);
+}
+$('send').onclick=()=>upload(false);$('reset').onclick=()=>{askConfirm($('reset'),'恢复默认壁纸？',()=>upload(true));};
+
+const commandControls=['sleep','reduced','brightness','wifiEnabled','wifiScan','wifiDisconnect','bleEnabled','bleScan','bleIncoming','bleOutgoing'];
+function key(){return $('key').value.trim();}
+async function api(path,body){
+ const response=await fetch(path,{method:body===undefined?'GET':'POST',headers:{'X-JX-Key':key(),...(body===undefined?{}:{'Content-Type':'application/octet-stream'})},body,cache:'no-store',signal:AbortSignal.timeout(8000)});
+ if(response.status===403)throw new Error('授权已失效，请在设备上重新允许手机管理');
+ if(response.status===409)throw new Error('设备忙，请稍后重试');
+ if(!response.ok)throw new Error('请求失败，请检查设备状态');return response.json();
+}
+function access(value){authorized=value;for(const id of commandControls)$(id).disabled=!value||!!pendingId||busy;$('reset').disabled=!value||busy;controls(busy);}
+async function control(op,args=[]){
+ if(!authorized||pendingId||busy)return;
+ try{const result=await api('/control',new Uint8Array([1,op,...args]));pendingId=result.id;$('operation').textContent='操作已提交';access(true);}
+ catch(error){$('operation').textContent=error.message;}
+}
+let refreshing=false,lastNetworks='',lastDevices='';
+async function refreshStatus(){
+ if(refreshing||!/^[0-9a-f]{32}$/i.test(key()))return;refreshing=true;
+ try{
+ const state=await api('/status');if(state.protocol!==1)throw new Error('不支持的设备协议');
+ if(pendingId&&state.command_id>=pendingId&&state.command_result!==5){pendingId=0;$('operation').textContent=state.command_result===0?'操作已交给设备，状态如下':state.command_result===1?'设备忙，请重试':state.command_result===4?'授权已失效':'操作未执行，请重试';}
+ access(true);$('sessionState').textContent=`已授权 · 剩余 ${state.remaining} 秒`;
+ $('product').textContent=state.product;$('firmware').textContent=state.firmware;$('battery').textContent=state.battery_mv===null?'暂无读数':(state.battery_mv/1000).toFixed(3)+' V';
+ const phases=['空闲','接收中','校验中','保存中','已应用','失败','已取消','已超时'];$('wallState').textContent=phases[state.wallpaper.phase]||'处理中';
+ lastGeneration=state.wallpaper.generation;
+ if(awaitingApply&&state.wallpaper.phase===4&&lastGeneration!==uploadGeneration){$('status').textContent='已保存并应用';awaitingApply=false;notify('已应用',true);}
+ if(awaitingApply&&state.wallpaper.phase>=5){awaitingApply=false;notify('重试');$('status').textContent='未应用，请重试';}
+ document.documentElement.classList.toggle('reduce-motion',state.reduced_motion);
+ $('sleep').checked=state.asleep;$('reduced').checked=state.reduced_motion;
+ if(document.activeElement!==$('brightness'))$('brightness').value=state.brightness;$('brightnessValue').textContent=state.brightness+'%';
+ const wifi=state.wifi;$('wifiEnabled').checked=wifi.enabled;
+ $('wifiState').textContent=!wifi.enabled?'已关闭':wifi.scanning?'扫描中':wifi.connecting?'连接中':wifi.connected?`${wifi.ssid} · ${wifi.rssi} dBm · ${wifi.ip}`:wifi.error?'连接或操作失败':'未连接';
+ $('wifiScan').disabled=!wifi.enabled||wifi.scanning||wifi.connecting||!!pendingId||busy;$('wifiDisconnect').disabled=!wifi.connected||!!pendingId||busy;
+ const networks=JSON.stringify(wifi.networks);
+ if(networks!==lastNetworks){lastNetworks=networks;$('networks').replaceChildren();for(const network of wifi.networks){
+ const row=document.createElement('li'),button=document.createElement('button');button.textContent=network.ssid+(network.security===2?' · 企业网络暂不支持':'');button.disabled=network.security===2;
+ button.onclick=()=>{if(pendingId||busy)return;$('ssid').value=network.ssid;$('password').value='';$('password').disabled=network.security===0;$('wifiForm').hidden=false;};row.append(button);$('networks').append(row);}}
+ const ble=state.ble;$('bleEnabled').checked=ble.enabled;
+ $('bleState').textContent=!ble.enabled?'已关闭':ble.error?'蓝牙操作失败':ble.connecting?'正在主动连接':ble.scanning?'正在扫描':`来访：${ble.incoming||'未连接'} · 主动：${ble.outgoing||'未连接'}${ble.advertising?' · 广播中':''}`;
+ $('bleScan').disabled=!ble.enabled||ble.scanning||ble.connecting||!!pendingId||busy;$('bleIncoming').disabled=!ble.incoming||!!pendingId||busy;$('bleOutgoing').disabled=!ble.outgoing||!!pendingId||busy;
+ const devices=JSON.stringify(ble.devices);
+ if(devices!==lastDevices){lastDevices=devices;$('devices').replaceChildren();for(const device of ble.devices){const row=document.createElement('li'),button=document.createElement('button');
+ button.textContent=(device.name||'未命名设备')+` · ${device.rssi} dBm`+(device.connectable?'':' · 仅广播');button.disabled=!device.connectable;
+ button.onclick=()=>control(7,[device.type,...device.address.match(/../g).map(v=>parseInt(v,16))]);row.append(button);$('devices').append(row);}}
+ }catch(error){access(false);$('sessionState').textContent=error.message;}
+ finally{refreshing=false;}
+}
+let tabTimer=0;
+function tabMotion(tab){const nav=document.querySelector('nav');clearTimeout(tabTimer);nav.dataset.tab=tab;nav.style.setProperty('--tab-time','180ms');nav.style.setProperty('--stretch',reducedMotion()?'1':'1.06');if(!reducedMotion())tabTimer=setTimeout(()=>{nav.style.setProperty('--tab-time','90ms');nav.style.setProperty('--stretch','1');},90);}
+$('wallTab').onclick=()=>{tabMotion('wall');$('wallPage').hidden=false;$('devicePage').hidden=true;$('wallTab').setAttribute('aria-selected','true');$('deviceTab').setAttribute('aria-selected','false');};
+$('deviceTab').onclick=()=>{tabMotion('device');$('wallPage').hidden=true;$('devicePage').hidden=false;$('wallTab').setAttribute('aria-selected','false');$('deviceTab').setAttribute('aria-selected','true');refreshStatus();};
+$('authorize').onclick=()=>{pendingId=0;refreshStatus();};$('refresh').onclick=refreshStatus;
+$('sleep').onchange=()=>control(10,[+$('sleep').checked]);$('reduced').onchange=()=>control(11,[+$('reduced').checked]);$('brightness').onchange=()=>control(9,[+$('brightness').value]);
+$('wifiEnabled').onchange=()=>control(1,[+$('wifiEnabled').checked]);$('wifiScan').onclick=()=>control(2);$('wifiDisconnect').onclick=()=>control(4);
+$('bleEnabled').onchange=()=>control(5,[+$('bleEnabled').checked]);$('bleScan').onclick=()=>control(6);$('bleIncoming').onclick=()=>control(8,[0]);$('bleOutgoing').onclick=()=>control(8,[1]);
+$('wifiCancel').onclick=()=>{$('wifiForm').hidden=true;$('password').value='';};
+$('wifiForm').onsubmit=e=>{e.preventDefault();const encoder=new TextEncoder(),ssid=encoder.encode($('ssid').value),password=encoder.encode($('password').disabled?'':$('password').value);
+ if(!ssid.length||ssid.length>32||password.length>63||(password.length&&password.length<8)||password.some(b=>b<32||b>126)){$('operation').textContent='请检查网络名称与密码长度';return;}
+ control(3,[ssid.length,password.length,...ssid,...password]);$('password').value='';$('wifiForm').hidden=true;};
+$('cancelUpload').onclick=()=>askConfirm($('cancelUpload'),'取消这次上传？',async()=>{if(!busy||!request)return;try{await api('/cancel',new Uint8Array());if(request)request.abort();awaitingApply=false;notify('已取消');$('status').textContent='上传已取消';}catch(error){$('status').textContent=error.message+'；保存开始后无法取消';}});
+access(false);refreshStatus();setInterval(()=>{if(!document.hidden)refreshStatus();},2000);
+</script>
+</html>

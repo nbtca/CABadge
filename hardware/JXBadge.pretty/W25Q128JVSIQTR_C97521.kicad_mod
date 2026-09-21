@@ -1,0 +1,215 @@
+(footprint "W25Q128JVSIQTR_C97521"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(uuid "e0732d51-0bed-4390-b6ce-2e18efce643c")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.12)
+			)
+		)
+	)
+	(property "Value" "W25Q128JVSIQTR_C97521"
+		(at 0 2.5 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "c94e0647-7d0b-4d89-a9d8-c9f743b21896")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "193fb3fd-fc44-4fb1-93ce-ac6feef8bc82")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "a04bcd9b-85ba-4915-8b69-6036ee295874")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -3.08 -4.91)
+		(end 2.89 -4.91)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "4f2e1dd9-84ed-4fe6-9091-c2fdb0d59405")
+	)
+	(fp_line
+		(start -3.08 4.91)
+		(end -3.08 -4.91)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "ca46866c-0223-46ea-91c9-79dd2d155e01")
+	)
+	(fp_line
+		(start 2.89 -4.91)
+		(end 2.89 4.91)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "403e7965-a812-4dc7-bf35-ae7dc8a8aa48")
+	)
+	(fp_line
+		(start 2.89 4.91)
+		(end -3.08 4.91)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "5e7c864a-96ed-498c-9788-598cfed8fe7d")
+	)
+	(fp_line
+		(start -2.6387 -2.1764)
+		(end 2.6387 -2.1764)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "f391c740-fd17-461c-9036-e02d5050b82a")
+	)
+	(fp_line
+		(start -2.6387 2.1764)
+		(end -2.6387 -2.1764)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "7562fbec-d174-4b01-961e-9e58360d1162")
+	)
+	(fp_line
+		(start 2.6387 -2.1764)
+		(end 2.6387 2.1764)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "b50daf62-1fea-4ce2-8d0b-cc9a7b2acb98")
+	)
+	(fp_line
+		(start 2.6387 2.1764)
+		(end -2.6387 2.1764)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "a6f81bdc-ad03-49b0-89a5-2d0d75695c7a")
+	)
+	(fp_circle
+		(center -2.6723 3.5301)
+		(end -2.5222 3.5301)
+		(stroke
+			(width 0.0762)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "5339bbd6-650f-401f-9c64-a4f720e1d7e9")
+	)
+	(fp_circle
+		(center -1.905 1.4239)
+		(end -1.7549 1.4239)
+		(stroke
+			(width 0.0762)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "75434160-2473-47da-81bd-99823d28c046")
+	)
+	(pad "1" smd oval
+		(at -1.905 3.5301)
+		(size 0.63 2.25)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "49517abe-970b-49f5-9cbc-52f2d7f44888")
+	)
+	(pad "2" smd oval
+		(at -0.635 3.5301)
+		(size 0.63 2.25)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "cb7bb2fd-1b5a-4160-aaf0-692c87514497")
+	)
+	(pad "3" smd oval
+		(at 0.635 3.5301)
+		(size 0.63 2.25)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "88fa386c-e480-4e17-a26f-ef30cbd079e6")
+	)
+	(pad "4" smd oval
+		(at 1.905 3.5301)
+		(size 0.63 2.25)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "e641003c-cfda-4289-8b5b-8a546e7611aa")
+	)
+	(pad "5" smd oval
+		(at 1.905 -3.5301)
+		(size 0.63 2.25)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "f9ac9358-0f40-4e55-ba84-04f021d14d65")
+	)
+	(pad "6" smd oval
+		(at 0.635 -3.5301)
+		(size 0.63 2.25)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "e6ceb00b-6464-4e2d-8b78-7e36ef164268")
+	)
+	(pad "7" smd oval
+		(at -0.635 -3.5301)
+		(size 0.63 2.25)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "f71c8791-07d8-4eaf-9ba5-9b89cc224ce4")
+	)
+	(pad "8" smd oval
+		(at -1.905 -3.5301)
+		(size 0.63 2.25)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "9f7f8146-c845-4554-8cda-adfb03d70b6c")
+	)
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/JXBadge.3dshapes/SOIC-8_L5_3-W5_3-H1_9-LS7_9-P1_27_C97521.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)

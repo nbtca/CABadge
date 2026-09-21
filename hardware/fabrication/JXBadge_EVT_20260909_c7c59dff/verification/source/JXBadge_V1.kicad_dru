@@ -1,0 +1,23 @@
+(version 1)
+(rule "No acute track joins"
+  # KiCad stores this bound in whole degrees. Allow 1 degree of coordinate rounding.
+  # Nominal joins remain 90 or 135 degrees; actual 45-degree branches are rejected.
+  (constraint track_angle (min 89)))
+
+(rule "Antenna region: RF feed and tuning copper only"
+  (condition "A.intersectsArea('ANTENNA_CLEAR_ALL_LAYERS') && A.NetName != 'RF_ANT' && A.NetName != 'RF_STUB'")
+  (constraint disallow track via))
+
+(rule "L2 is the ground reference plane"
+  (layer "In1.Cu")
+  (condition "A.NetName != 'GND'")
+  (constraint disallow track))
+
+(rule "RF coplanar ground gap 0.2mm"
+ (condition "(A.Type == 'Track' && (A.NetName == 'RF_CHIP' || A.NetName == 'RF_ANT') && B.NetName == 'GND') || (B.Type == 'Track' && (B.NetName == 'RF_CHIP' || B.NetName == 'RF_ANT') && A.NetName == 'GND')")
+ (constraint clearance (min 0.2mm)))
+
+(rule "QFN fine pitch escape clearance"
+ (condition "A.intersectsArea('QFN_ESCAPE') && B.intersectsArea('QFN_ESCAPE')")
+ (constraint clearance (min 0.11mm))
+ (constraint hole_clearance (min 0.225mm)))

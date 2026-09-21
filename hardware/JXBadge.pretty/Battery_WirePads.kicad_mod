@@ -1,0 +1,160 @@
+(footprint "Battery_WirePads"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "Direct solder wire pads. Battery supplier polarity and strain relief must be checked.")
+	(property "Reference" "REF**"
+		(at 0 -3 0)
+		(layer "F.SilkS")
+		(uuid "93af54ef-295e-4f40-ae80-a31d8aa3509e")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.12)
+			)
+		)
+	)
+	(property "Value" "Battery_WirePads"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "060bbf58-75e4-430f-94e6-f11ad864e0d0")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "54beec13-cc20-499e-ae0b-80afd1f0bc64")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "204a930e-c662-4ebf-b4a0-1f17d811306c")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -1.9 -1.85)
+		(end -1.6 -1.85)
+		(stroke
+			(width 0.2)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "cabd579b-e218-4443-a32c-bfe83cb46de9")
+	)
+	(fp_line
+		(start -3 -1.75)
+		(end 3 -1.75)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "384230aa-3124-468c-a338-8f14725ef2ec")
+	)
+	(fp_line
+		(start -3 1.75)
+		(end -3 -1.75)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "7e58b509-190f-4e56-9602-1be70fd159fe")
+	)
+	(fp_line
+		(start 3 -1.75)
+		(end 3 1.75)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "daa100f6-f630-4eaa-900f-3461d312cd65")
+	)
+	(fp_line
+		(start 3 1.75)
+		(end -3 1.75)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "bebd9e1e-44ec-448b-9573-147654cb4e46")
+	)
+	(fp_line
+		(start -2.75 -1.5)
+		(end 2.75 -1.5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "fac6178a-b4d9-4b7d-8596-8993f9c521a9")
+	)
+	(fp_line
+		(start -2.75 1.5)
+		(end -2.75 -1.5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "34e9fbec-6678-4ce9-8e11-c8cae4cc4795")
+	)
+	(fp_line
+		(start 2.75 -1.5)
+		(end 2.75 1.5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "d411dd9e-2bd9-40c4-82c0-59d880df4e45")
+	)
+	(fp_line
+		(start 2.75 1.5)
+		(end -2.75 1.5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "2326d561-6d4b-4c35-b4ef-912e1070e1bc")
+	)
+	(pad "1" smd roundrect
+		(at -1.75 0)
+		(size 2 3)
+		(layers "F.Cu" "F.Mask")
+		(roundrect_rratio 0.15)
+		(thermal_bridge_angle 45)
+		(uuid "8e4974f1-c2b7-4c6d-b104-c2de95fc25c6")
+	)
+	(pad "2" smd roundrect
+		(at 1.75 0)
+		(size 2 3)
+		(layers "F.Cu" "F.Mask")
+		(roundrect_rratio 0.15)
+		(thermal_bridge_angle 45)
+		(uuid "5d9c6f61-2c8a-4e21-b81f-5a32c04435ce")
+	)
+	(embedded_fonts no)
+)

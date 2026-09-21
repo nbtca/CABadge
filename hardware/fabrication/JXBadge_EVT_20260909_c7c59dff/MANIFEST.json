@@ -1,0 +1,223 @@
+{
+  "release": "JXBadge_EVT_20260909_c7c59dff",
+  "created": "2026-09-09T21:17:08",
+  "upload_zip": "JXBadge_EVT_20260909_c7c59dff_PCB.zip",
+  "source_board_sha256": "c7c59dff5e6f2065a2157a81414d9d21c5cb1196a7b277656e15007753801a8d",
+  "files": [
+    {
+      "path": "gerber/JXBadge_V1-B_Cu.gbl",
+      "bytes": 325906,
+      "sha256": "fb6ffe0483d26be11f6172d55b5d5b25c7113b98130fd293fa034900023bef70"
+    },
+    {
+      "path": "gerber/JXBadge_V1-B_Mask.gbs",
+      "bytes": 18031,
+      "sha256": "daac8070df118b2e24162a677ddfd27daeb24d2e7e33da8023dd6d2739a596db"
+    },
+    {
+      "path": "gerber/JXBadge_V1-B_Silkscreen.gbo",
+      "bytes": 940638,
+      "sha256": "ea4a5169a58037d2465e4a030b841b9825a48a3d8bda25b5e3b6d959020d8d75"
+    },
+    {
+      "path": "gerber/JXBadge_V1-Edge_Cuts.gm1",
+      "bytes": 668,
+      "sha256": "89eecc499fb396b815ba66bce032715a99ba9e7d8fa2f9638db53e12afbcc115"
+    },
+    {
+      "path": "gerber/JXBadge_V1-F_Cu.gtl",
+      "bytes": 375062,
+      "sha256": "7544fe6e5a1ac90703b12300c012d467a04d124cc13bf29f863204386f8bf3e1"
+    },
+    {
+      "path": "gerber/JXBadge_V1-F_Mask.gts",
+      "bytes": 93257,
+      "sha256": "1c9ef47b155ffc10d33b56a49161c6a6047b787bfc0d987d34b848a337105b40"
+    },
+    {
+      "path": "gerber/JXBadge_V1-F_Silkscreen.gto",
+      "bytes": 47815,
+      "sha256": "22a5901a32ea7472309a78f3fdea6098e7e1bbbf412fe1fa1419096e3e37e3de"
+    },
+    {
+      "path": "gerber/JXBadge_V1-In1_Cu.g1",
+      "bytes": 166768,
+      "sha256": "15ad3563f9a18ddb7dfcc631ab4c901120ff45cc15d870ac672a599e0a1fc694"
+    },
+    {
+      "path": "gerber/JXBadge_V1-In2_Cu.g2",
+      "bytes": 87879,
+      "sha256": "4515aa41cc57806eeae7be44dff3145ad8e0a51e45af2a81c58ce17092824856"
+    },
+    {
+      "path": "gerber/JXBadge_V1-job.gbrjob",
+      "bytes": 3623,
+      "sha256": "3b028409297390b4043bbc4d5aa1e14b635ddd33e0533a5b1893fde627ec0c16"
+    },
+    {
+      "path": "gerber/JXBadge_V1-NPTH.drl",
+      "bytes": 540,
+      "sha256": "407e5c43e56f38edc1196b5e68909825dc63f9aaa2d04ac9b4c38eff68151d30"
+    },
+    {
+      "path": "gerber/JXBadge_V1-PTH.drl",
+      "bytes": 4308,
+      "sha256": "980ac4ed0e10abe328e140653ee455dbd3a2e54394e2abf941433cfc0f86122f"
+    },
+    {
+      "path": "JXBadge_EVT_20260909_c7c59dff_PCB.zip",
+      "bytes": 564297,
+      "sha256": "05483e675097e62539e266a895df819c6233df136710901881709c98bf55bbf1"
+    },
+    {
+      "path": "JXBadge_EVT_20260909_c7c59dff_TOP_STENCIL.zip",
+      "bytes": 4011,
+      "sha256": "f9fb356776ffc127470c2ba91e57aef1417c062c763e93aa609b5aad70f9fba3"
+    },
+    {
+      "path": "stencil/JXBadge_V1-Edge_Cuts.gm1",
+      "bytes": 668,
+      "sha256": "479da9ba865f0b8ebff046a60a030ece3243547e6dd375ce9c3971e49f53e244"
+    },
+    {
+      "path": "stencil/JXBadge_V1-F_Paste.gtp",
+      "bytes": 14203,
+      "sha256": "327580d7a3964dd3395e151ee1ffaa90154c98a72052e05e48a959d1c5824c4d"
+    },
+    {
+      "path": "stencil/JXBadge_V1-job.gbrjob",
+      "bytes": 2721,
+      "sha256": "2c8ae80599c61911cff577839e7d02d1de119eec418cc292ba4a0ee576ac482c"
+    },
+    {
+      "path": "verification/capability_mode.json",
+      "bytes": 257,
+      "sha256": "2d21b08c728a803f33cf338495e403baf091109c486865689a7316a69740f35c"
+    },
+    {
+      "path": "verification/drc-final.json",
+      "bytes": 4701,
+      "sha256": "9c989a56f639e1b268cfbd913de605933663fad3a92aefcdf570d9487e7db8bb"
+    },
+    {
+      "path": "verification/drill-crosscheck.json",
+      "bytes": 212,
+      "sha256": "bdcd5e308cad986707918cc2c793c5a9b35a2a5780366e3420cb8c7969f4424c"
+    },
+    {
+      "path": "verification/drill-report.txt",
+      "bytes": 865,
+      "sha256": "c578d26b188088b6e858510b3e2219052247788345c16cd51e717251d00bc460"
+    },
+    {
+      "path": "verification/erc-final.json",
+      "bytes": 2288,
+      "sha256": "681669b9a2e89c9056a4ad63a94db2dbbdda7bab3d023ef1ed9eaf611f3c0d1a"
+    },
+    {
+      "path": "verification/export-checks.json",
+      "bytes": 1808,
+      "sha256": "6490106f12fe8b0545c573d93bc52dc4ebdf6a9e04de315ebfee3b603eeace74"
+    },
+    {
+      "path": "verification/gerber-analysis.json",
+      "bytes": 63549,
+      "sha256": "a2a8fee423262c6d90a31ff434531ef5cca52d5d48b69ff43f10d31d6127e67a"
+    },
+    {
+      "path": "verification/gerber-bottom.svg",
+      "bytes": 470083,
+      "sha256": "d56ad4d23c56925fdb05fd2528abd86cb60fe4f153c2f8ad586a474ea0d8b556"
+    },
+    {
+      "path": "verification/gerber-readback.html",
+      "bytes": 471,
+      "sha256": "8abd0ee1513e72c3280333969873a3b2bcda2fe63032b3ba93f1f2ea8225ff5b"
+    },
+    {
+      "path": "verification/gerber-readback.png",
+      "bytes": 345118,
+      "sha256": "c0a778725d6e1a3975dd0d1017b0fe4873aaa51905ed7cfc9cb8f3ea0b25c05d"
+    },
+    {
+      "path": "verification/gerber-top.svg",
+      "bytes": 390029,
+      "sha256": "0ed0b614b9f934531d7f189b40cb838e53e234644e41f78a7705a42e8a822e95"
+    },
+    {
+      "path": "verification/In1_Cu.g1.svg",
+      "bytes": 130098,
+      "sha256": "1d404f6cb407a066ad725f7dee60dcfd8fb0e2cd818434c1c0604458a71e803b"
+    },
+    {
+      "path": "verification/In2_Cu.g2.svg",
+      "bytes": 224688,
+      "sha256": "43d5edf7eb044e5d920b2e05877d49df652bf9bbb008e77130df3e3045dba407"
+    },
+    {
+      "path": "verification/pad-crosscheck.json",
+      "bytes": 97,
+      "sha256": "bc4f20191a4e2102083931d7d4946973323a587252468b6ccd6a8c85ef5f101d"
+    },
+    {
+      "path": "verification/source/Controls_Test.kicad_sch",
+      "bytes": 113896,
+      "sha256": "d1fa44df3030c039390085d6334541687fec34d20a391af7dba46bd31f4f5d3f"
+    },
+    {
+      "path": "verification/source/Display_Sensor.kicad_sch",
+      "bytes": 80215,
+      "sha256": "8fd49c5543f5ec6602046c7890a38eb40a29fc53f9f979a00235bf7750f50464"
+    },
+    {
+      "path": "verification/source/JXBadge_V1.kicad_dru",
+      "bytes": 1085,
+      "sha256": "98fe6bc7ca3c450788f6dd1d989ca62c0e319d30cdf4e5ec9094dd901fe5b173"
+    },
+    {
+      "path": "verification/source/JXBadge_V1.kicad_pcb",
+      "bytes": 3024447,
+      "sha256": "c7c59dff5e6f2065a2157a81414d9d21c5cb1196a7b277656e15007753801a8d"
+    },
+    {
+      "path": "verification/source/JXBadge_V1.kicad_prl",
+      "bytes": 2297,
+      "sha256": "8b6ceb647aab23213b2a46c4d1d9e1a627ac771170e3eb76de3f760c197088da"
+    },
+    {
+      "path": "verification/source/JXBadge_V1.kicad_pro",
+      "bytes": 11132,
+      "sha256": "6efc6ab8b4f76fda4f3267eea407ec84e6dbb16eb66810c21d0849c8385538ff"
+    },
+    {
+      "path": "verification/source/JXBadge_V1.kicad_sch",
+      "bytes": 135782,
+      "sha256": "621be698aab77851daec7c3dbeedd865b60a1645e716317fb4ac90b9d9b1bff2"
+    },
+    {
+      "path": "verification/source/USB_Power.kicad_sch",
+      "bytes": 127276,
+      "sha256": "ab693b34864f1a556e0fd749b8c0cedf2ff7d577797459052e16059cff27b9ed"
+    },
+    {
+      "path": "verification/source-holes.json",
+      "bytes": 32130,
+      "sha256": "0cb6b5c85020b28e12fa382972194974b168268d315c46b56299b40285542ab7"
+    },
+    {
+      "path": "verification/source-pads.json",
+      "bytes": 36017,
+      "sha256": "3ba45164340ed868ec3daa1811404634479db2c118f2b5aa327ad0173a262500"
+    },
+    {
+      "path": "verification/verification.json",
+      "bytes": 5771,
+      "sha256": "850c5bf1a8b7d77cec40de2fdaf0cc3e59f81f2ab64a20728fd3fcd9892328cd"
+    },
+    {
+      "path": "下单说明.md",
+      "bytes": 5553,
+      "sha256": "d163c88de3d0f8aba60c257bf23df1d222f57267e3de4b2cd0a24642cb0d1e3d"
+    }
+  ]
+}

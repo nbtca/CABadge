@@ -1,0 +1,42 @@
+{
+  "timestamp": "2026-09-09T21:15:02",
+  "source_board_sha256": "c7c59dff5e6f2065a2157a81414d9d21c5cb1196a7b277656e15007753801a8d",
+  "source_unchanged": true,
+  "copper_layers": 4,
+  "physical_board_diameter_mm": 50,
+  "outline_closed": true,
+  "outline_arcs": 2,
+  "drill_comparison": {
+    "source_holes": 246,
+    "excellon_holes": 246,
+    "matched_holes": 246,
+    "max_position_error_mm": 0.0006403124237534442,
+    "pth": 238,
+    "npth": 8,
+    "plated_slots": 4,
+    "missing_or_extra_holes": 0
+  },
+  "pad_comparison": {
+    "source_numbered_front_pads": 340,
+    "matched_position_and_net": 340,
+    "unmatched": []
+  },
+  "analyzer_findings_triage": [
+    {
+      "rule": "GR-005",
+      "disposition": "false positive",
+      "evidence": "Two matching clockwise semicircles with common center (100,-100), radius 25 mm, form a closed 50 mm circular profile."
+    },
+    {
+      "rule": "GR-002",
+      "disposition": "false positive",
+      "evidence": "Copper extents differ because L3 contains sparse power/signals and antenna keepout exists. All 340 numbered F.Cu pads match source coordinates and nets; all 246 drill features match source coordinates and sizes."
+    }
+  ],
+  "gerbonara_notes": [
+    "G90 placement warning is accepted KiCad absolute Excellon output; all drill positions independently match.",
+    "RoundRect macro unused-parameter warning did not prevent parsing; source-numbered pad coordinates/nets match.",
+    "Stack pretty-render outline fill was unsuitable for semicircle profile; final copper previews render individual Gerber layers directly."
+  ],
+  "scope": "Manufacturing-file export and readback verification; no new full electrical, SPICE, EMC, thermal or lifecycle review in this export step; no order submitted."
+}

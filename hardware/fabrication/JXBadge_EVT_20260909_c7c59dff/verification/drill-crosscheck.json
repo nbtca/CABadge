@@ -1,0 +1,10 @@
+{
+  "source_holes": 246,
+  "excellon_holes": 246,
+  "matched_holes": 246,
+  "max_position_error_mm": 0.0006403124237534442,
+  "pth": 238,
+  "npth": 8,
+  "plated_slots": 4,
+  "missing_or_extra_holes": 0
+}

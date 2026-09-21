@@ -1,0 +1,1 @@
+(fp_lib_table (version 7) (lib (name "JXBadge") (type "KiCad") (uri "${KIPRJMOD}/JXBadge.pretty") (options "") (descr "Datasheet-specific footprints; see verification notes")))

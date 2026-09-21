@@ -1,0 +1,67 @@
+{
+    "$schema": "https://schemas.kicad.org/erc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-09-09T20:50:34",
+    "ignored_checks": [
+        {
+            "description": "Global label only appears once in the schematic",
+            "key": "single_global_label"
+        },
+        {
+            "description": "Four connection points are joined together",
+            "key": "four_way_junction"
+        },
+        {
+            "description": "SPICE model issue",
+            "key": "simulation_model_issue"
+        },
+        {
+            "description": "Assigned footprint doesn't match footprint filters",
+            "key": "footprint_filter"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning"
+    ],
+    "kicad_version": "10.0.6",
+    "sheets": [
+        {
+            "path": "/",
+            "uuid_path": "/603d7942-e364-54d6-8c26-59f48cbc26d8",
+            "violations": [
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "全局标签 'RF_STUB'",
+                            "pos": {
+                                "x": 3.81,
+                                "y": 1.1176
+                            },
+                            "uuid": "3c2ee8e4-f859-43c0-82c1-65155fddb138"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                }
+            ]
+        },
+        {
+            "path": "/02 Display and Motion Sensor/",
+            "uuid_path": "/603d7942-e364-54d6-8c26-59f48cbc26d8/242caac5-2340-5c80-aa30-87b1d70c41eb",
+            "violations": []
+        },
+        {
+            "path": "/03 USB, Charger and Power Path/",
+            "uuid_path": "/603d7942-e364-54d6-8c26-59f48cbc26d8/2001555a-be51-59cf-9969-676e5784ce3f",
+            "violations": []
+        },
+        {
+            "path": "/04 Controls and Test Points/",
+            "uuid_path": "/603d7942-e364-54d6-8c26-59f48cbc26d8/4d491b27-9386-5813-9a02-a714a50109da",
+            "violations": []
+        }
+    ],
+    "source": "JXBadge_V1.kicad_sch"
+}

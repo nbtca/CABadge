@@ -1,0 +1,89 @@
+﻿分类,位号,数量,规格,品牌,厂家型号,立创编号,导入封装,用途与状态,本地已有封装,来源
+
+现用型号,U1,1,ESP32-S3R8,Espressif,ESP32-S3R8,C2913194,QFN-56 7x7mm EP4x4mm,现用主控,否,https://www.lcsc.com/product-detail/C2913194.html
+
+现用型号,U2,1,128Mbit Flash,Winbond,W25Q128JVSIQ,C97521,SOIC-8 208mil,现用Flash；注意208mil宽体,否,https://lcsc.com/product-detail/NOR-FLASH_Winbond-Elec-W25Q128JVSIQ_C97521.html
+
+现用型号,U3,1,三轴加速度计,士兰微,SC7A20TR,C5126709,LGA-12 2x2mm,现用型号,是,https://www.lcsc.com/product-detail/C5126709.html
+
+现用型号,U4,1,USB ESD保护,ST,USBLC6-2SC6,C7519,SOT-23-6,现用ST型号；不混用同名其他品牌,否,https://www.lcsc.com/product-detail/C7519.html
+
+现用型号,U5,1,单节锂电池充电,MSKSEMI,TP4056-MS,C7473158,ESOP-8 EP3x3.5mm,现用型号；包含底部散热焊盘9,是,https://item.szlcsc.com/8533532.html
+
+现用型号,U6,1,升降压电源,SGMICRO,SGM62117XTGH10G/TR,C5152031,TDFN-10 3x2mm,现用型号,否,https://jlcpcb.com/partdetail/SGMICRO-SGM62117XTGH10GTR/C5152031
+
+现用型号,AE1,1,2.4GHz贴片天线,Walsin,RFANT5220110A0T,C127611,5.2x2.0mm,现用型号,是,https://www.lcsc.com/product-detail/C127611.html
+
+现用型号,Y1,1,40MHz CL15pF,YJX雅晶鑫,TAXM40M4ZHBCDT2T,C424432,2016 4焊盘,现用晶振,是,https://item.szlcsc.com/417823.html
+
+现用型号,J1,1,18P 0.5mm屏幕连接器,XUNPU,FPC-05F-18PH20,C2856802,FPC 18P P0.5mm H2mm,这是屏幕连接器；不是屏幕本体,是,https://www.lcsc.com/product-image/C2856802.html
+
+现用型号,J2,1,USB Type-C,HRO,TYPE-C-31-M-12,C165948,USB-C 16P,现用型号,是,https://jlcpcb.com/partdetail/C165948
+
+现用型号,J3,1,电池连接器 SH1.0 2P,SHOU HAN,1.0-2P WT,C2906268,SH1.0 2P 卧贴,两线电池；无NTC,是,https://item.szlcsc.com/3178978.html
+
+现用型号,SW1,1,电源拨动开关,C&K,JS102011SAQN,C221660,SPDT 侧拨SMD,现用型号,是,https://item.szlcsc.com/222090.html
+
+现用型号,SW2 SW3,2,BOOT与RESET按键,HANXIA,HX-2X4X3.5CA-2.5N,C49234137,侧按SMD,Final user selection; radial actuator protrudes nominal 0.5mm; 2 x 0.6mm NPTH,是,datasheets/HX-2X4X3.5CA-2.5N.pdf
+
+现用型号,Q1 Q3 Q4,3,P沟道MOSFET,AOS,AO3401A,C15127,SOT-23,现用AOS型号,否,https://www.lcsc.com/product-detail/C15127.html
+
+现用型号,Q2 Q5 Q6 Q7,4,NPN三极管,Nexperia,"MMBT3904,215",C426835,SOT-23,按现用Nexperia数据手册选同型号编带订货号,否,https://www.lcsc.com/product-detail/C426835.html
+
+现用型号,D1,1,5V单向TVS 200W,Littelfuse,SMF5.0A,C151296,SOD-123FL,已改板；项目焊盘按厂商推荐尺寸；保护协调及淘宝库存待验证,是,https://www.lcsc.com/product-detail/C151296.html
+
+现用型号,D2,1,DSK34,Vishay,DSK34,C727076,SOD-123FL,现用大封装；小型候选在表末单列,否,https://www.lcsc.com/product-detail/C727076.html
+
+补选具体料号,D3,1,红色LED,KENTO,KT-0603R,C2286,0603,按现有红灯规格选料；未改设计,否,https://www.lcsc.com/product-detail/C2286.html
+
+补选具体料号,D4,1,绿色LED,EVERLIGHT,19-217/GHC-YR1S2/3T,C72043,0603,按现有绿灯规格选料；未改设计,否,https://www.lcsc.com/product-detail/C72043.html
+
+现用型号,FB1,1,600ohm@100MHz 500mA,Murata,BLM18AG601SN1D,C19330,0603,现用磁珠,否,https://lcsc.com/product-detail/Ferrite-Beads_Murata-Electronics-BLM18AG601SN1D_C19330.html
+
+补选具体料号,L1,1,24nH,Murata,LQG15WZ24NH02D,C1012734,0402,按现有晶振串联电感规格选料；保留0402；未改设计,否,https://www.lcsc.com/product-detail/Inductors-SMD_Murata-Electronics_C1012734.html
+
+补选具体料号,L2,1,2nH,Murata,LQP03TN2N0B02D,C86125,0201,射频匹配；按现有初始值选料；最终数值需实测调谐,否,https://www.lcsc.com/product-detail/C86125.html
+
+现用型号,L3,1,0.47uH Isat=4.8A,Wurth,DFE201610E-R47M=P2,C269773,2016 2.0x1.6x1.0mm,现用大电感；小型候选在表末单列,否,https://www.lcsc.com/product-detail/C269773.html
+
+0603待改方案,R1 R2 R3 R4 R5 R6,6,0ohm,UNI-ROYAL,0603WAF0000T5E,C21189,0603,当前0402；仅备库尚未改板,否,https://www.lcsc.com/product-detail/C21189.html
+
+0603待改方案,R13,1,5.1ohm 1% 0.1W,UNI-ROYAL,0603WAF510KT5E,C25197,0603,当前已是0603；补选具体料号,否,https://item.szlcsc.com/25940.html
+
+0603待改方案,R20 R21,2,22ohm 1% 0.1W,UNI-ROYAL,0603WAF220JT5E,C23345,0603,当前0402；仅备库尚未改板,否,https://www.lcsc.com/product-detail/C23345.html
+
+0603待改方案,R31 R32,2,2.2kohm 1% 0.1W,UNI-ROYAL,0603WAF2201T5E,C4190,0603,当前0402；仅备库尚未改板,否,https://www.lcsc.com/product-detail/C4190.html
+
+0603待改方案,R23,1,4.02kohm 1% 0.1W,UNI-ROYAL,0603WAF4021T5E,C23040,0603,当前0402；仅备库尚未改板,否,https://www.lcsc.com/product-detail/C23040.html
+
+0603待改方案,R14 R15,2,4.7kohm 1% 0.1W,UNI-ROYAL,0603WAF4701T5E,C23162,0603,当前0402；仅备库尚未改板,否,https://www.lcsc.com/product-detail/C23162.html
+
+0603待改方案,R18 R19,2,5.1kohm 1% 0.1W,UNI-ROYAL,0603WAF5101T5E,C23186,0603,当前0402；仅备库尚未改板,否,https://item.szlcsc.com/23913.html
+
+0603待改方案,R7 R8 R9 R11 R16 R17 R29 R30 R40,9,10kohm 1% 0.1W,UNI-ROYAL,0603WAF1002T5E,C25804,0603,当前0402；仅备库尚未改板,否,https://www.lcsc.com/product-detail/C25804.html
+
+0603待改方案,R38 R39,2,47kohm 1% 0.1W,UNI-ROYAL,0603WAF4702T5E,C25819,0603,当前0402；仅备库尚未改板,否,https://item.szlcsc.com/26562.html
+
+0603待改方案,R10 R12 R22 R27 R28 R33 R34 R35 R37 R41,10,100kohm 1% 0.1W,UNI-ROYAL,0603WAF1003T5E,C25803,0603,当前0402；仅备库尚未改板,否,https://www.lcsc.com/product-detail/C25803.html
+
+0603待改方案,R36,1,200kohm 1% 0.1W,UNI-ROYAL,0603WAF2003T5E,C25811,0603,当前0402；仅备库尚未改板,否,https://www.lcsc.com/product-detail/C25811.html
+
+0603待改方案,R26,1,560kohm 1% 0.1W,UNI-ROYAL,0603WAF5603T5E,C23203,0603,当前0402；仅备库尚未改板,否,https://www.lcsc.com/product-detail/C23203.html
+
+0603待改方案,C1 C2,2,24pF 50V C0G 5%,FH,0603CG240J500NT,C1654,0603,当前0402；仅备库尚未改板；晶振负载实测确认,否,https://www.lcsc.com/product-detail/C1654.html
+
+0603待改方案,C5 C6 C7 C8 C10 C11 C14 C16 C17 C20 C23 C26 C28,13,100nF 50V X7R 10%,YAGEO,CC0603KRX7R9BB104,C14663,0603,当前0402/10V；备选耐压提高；未改板,否,https://www.lcsc.com/product-detail/C14663.html
+
+0603待改方案,C4 C9 C15 C18 C27,5,1uF 25V X7R 10%,Samsung,CL10B105KA8NNNC,C29936,0603,当前0402/10V；备选耐压提高；未改板,否,https://www.lcsc.com/product-detail/C29936.html
+
+现用型号,"C22,C29",2,10uF 25V X5R 10%,Samsung,CL21A106KAYNNNE,C15850,0805,按用户决定保留0805；升降压输入电容,是,https://www.lcsc.com/product-detail/C15850.html
+现用型号,C3 C19 C21,3,10u 10V X5R,Samsung,CL10A106KP8NNNC,C19702,0603,原理图与PCB已同步；淘宝当前库存未核实,是,https://www.lcsc.com/product-detail/C19702.html
+
+补选具体料号,C24 C25,2,22u 6.3V X5R,Samsung,CL10A226MQ8NRNC,C59461,0603,保留0805；原规格10V；备选耐压提高；有效容量仍需核对,否,https://www.lcsc.com/product-detail/C59461.html
+
+DNP,C12 C13,2,射频调谐预留；不装,,,,0201,数值未定且不装；无采购料号；无需另导入,不适用,
+
+小型候选,D2,1,DSK34,MDD,DSK34,C727076,SOD-123FL,小于现用SMC；仅预先导库；替换与温升尚未验证,否,https://www.lcsc.com/product-detail/C727076.html
+
+小型候选,L3,1,0.47uH Isat=4.8A,Murata,DFE201610E-R47M=P2,C269773,2016 2.0x1.6x1.0mm,小于现用4.1mm电感；仅预先导库；饱和及损耗待复核,否,https://www.lcsc.com/product-detail/C269773.html
+
