@@ -1,3 +1,5 @@
+> 历史设计/阶段记录：保留当时版本、方案和测量值，不作为当前安装或验收说明。当前正式版为 v1.1.0 / 7.9.2-memory，参见[文档索引](docs/INDEX.md)。
+
 # CABadge v7 动效选型与架构修订
 
 日期：2026-09-20。下文保留最初研究参数。R19 已在独立 v7.1.0-preview 落地既定清单；实现与采样说明见 [当前交接](firmware-v7/HANDOFF.md)。软件验证不代表 MCU 或实体屏性能已验证。
@@ -10,9 +12,9 @@
 
 使用 Edge 浏览器打开 [Bencho](https://bencho.dev/) 首页的 30 个公开组件详情，触发各自的演示播放，保存状态截图；另打开 Finds 和 Bench。Finds 本次未加载出条目，Bench 查看了画布与引导，未登录或编辑保存。以下不是对登录后内容或所有历史作品的全覆盖声明。
 
-- [30 项截图总览](outputs/ui-v7-bencho-research/catalog-overview.png)
-- [实际网站动效录像，约 33.6 秒](outputs/ui-v7-bencho-research/bencho-reference-motion.mp4)：Carousel 0:00、Create menu 0:03.7、Liquid toggle 0:07.4、Slosh slider 0:11.1、Icon bar 0:15.9、Inline confirm 0:19.6、Notify 0:23.2、Pull to refresh 0:26.9。
-- [浏览记录](outputs/ui-v7-bencho-research/browser-tour.json)、[录像章节](outputs/ui-v7-bencho-research/video-chapters.json)。录像来自网站演示，不是 CABadge 原型；页面之间的导航等待已移除，不能作为性能基准。
+- 30 项截图总览（本地历史资料，未入库：`outputs/ui-v7-bencho-research/catalog-overview.png`）
+- 实际网站动效录像，约 33.6 秒（本地历史资料，未入库：`outputs/ui-v7-bencho-research/bencho-reference-motion.mp4`）：Carousel 0:00、Create menu 0:03.7、Liquid toggle 0:07.4、Slosh slider 0:11.1、Icon bar 0:15.9、Inline confirm 0:19.6、Notify 0:23.2、Pull to refresh 0:26.9。
+- 浏览记录（本地历史资料，未入库：`outputs/ui-v7-bencho-research/browser-tour.json`）、录像章节（本地历史资料，未入库：`outputs/ui-v7-bencho-research/video-chapters.json`）。录像来自网站演示，不是 CABadge 原型；页面之间的导航等待已移除，不能作为性能基准。
 - 结合浏览器实际画面、公开前端实现、项目 LVGL 9.4.0 源码和 USB 显示路径评估。没有将网站组件代码引入固件。
 
 ## 2. 选用的七组动效

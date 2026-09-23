@@ -35,4 +35,4 @@ CABadge v1.0 对应固件 **7.3.7-mem**，已上板使用，基本功能可正�
 
 首板实际换装商品规格为 **FFC/FPC 0.5 mm、18P、抽屉式上接触**。当前主分支 BOM / 采购表已更正；厂家型号与尺寸图尚未提供。**v1.0 标签源码中的 FPC-05F-18PH20 / C2856802 是原设计记录，不是换座后已确认的采购料号。**
 
-复刻请先阅读 [J1 连接器更正](https://github.com/Egger0/CABadge/blob/main/docs/J1-CONNECTOR.md)；历史标签、硬件生产包与固件附件保持不变。
+复刻请先阅读 [J1 连接器更正](https://github.com/nbtca/CABadge/blob/main/docs/J1-CONNECTOR.md)；历史标签、硬件生产包与固件附件保持不变。

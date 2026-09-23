@@ -1,3 +1,7 @@
+## 2026-09-23 仓库文档维护
+
+main 文档已统一当前 v1.1.0 / 7.9.2-memory，索引见 [docs/INDEX](../docs/INDEX.md)，检查范围与遗留工具见 [仓库检查](../docs/REPOSITORY_CHECK.md)。不修改发布标签/附件、固件逻辑或测试结论；未重新编译/烧录。下方按时间保留历史交接。
+
 ## 2026-09-23 正式发布 v1.1.0
 
 用户授权将当前固件推送 nbtca/CABadge。远端已有 v1.0，因此新项目标签使用 v1.1.0，内部版本保持7.9.2-memory。复用R63完全相同BIN，不重新编译/烧录/增加测试。附件位于outputs/release-v1.1.0；说明docs/RELEASE-v1.1.0.md，实板验证边界仍以R63为准。
@@ -127,7 +131,7 @@
 - 共用圆屏 UI：纯壁纸、蓝色 Egger/NBTCA 名片、横滑展示、下拉控制中心、上滑功能面、二维 Carousel 浏览/应用、跟手与反向接续、减少动态、息屏摇晃唤醒。
 - USB 服务桥：版本/硬件握手、真实 Wi-Fi/BLE/电压/设置状态、动作与回执；Windows 异步读写。上传及资源读回复用现有 RGB565/双槽存储，以 generation/offset/CRC 校验，不持续传帧。
 - 保持兼容的旧像素镜像路径、现有 HTTP 和 BLE 管理服务；手机 Web 外观本轮未改。BLE Status 的固件主次版本更新为 7/0。
-- [独立固件与证据](../outputs/cabadge-v7-preview-20260920)、[截图](../outputs/cabadge-v7-preview-20260920/preview/index.html)、[实际 LVGL 动效](../outputs/cabadge-v7-preview-20260920/v7-motion.mp4)。
+- 独立固件与证据（本地历史资料，未入库：`../outputs/cabadge-v7-preview-20260920`）、截图（本地历史资料，未入库：`../outputs/cabadge-v7-preview-20260920/preview/index.html`）、实际 LVGL 动效（本地历史资料，未入库：`../outputs/cabadge-v7-preview-20260920/v7-motion.mp4`）。
 
 ## 已验证与限制
 

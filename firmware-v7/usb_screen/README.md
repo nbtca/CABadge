@@ -1,84 +1,29 @@
-> v7 工作副本：以下是历史像素镜像说明。当前入口与构建方式见 [v7 README](../README.md)，请勿按旧目录发布。
+# CABadge 板端服务与 USB 工具
 
-# NBTCA Badge TOOL
-
-ESP32 运行共用 LVGL 用户层、扫描和连接 Wi-Fi；电脑只显示 ESP32 发来的像素，并回传鼠标触摸与键盘输入。硬件基线为已打板 c7c59dff，360×360 圆屏。必须先烧录本目录配套的新固件，旧诊断固件不能发送这套 UI。
-
-## 圆屏交互
-
-开机展示壁纸；左右滑动切换可用素材，上滑打开“壁纸 / 连接 / 设置”菜单。轻触首页短暂显示状态，3 秒后隐藏。壁纸页浏览后点“设为壁纸”，手机传图沿用现有管理入口。设置中可调整预览亮度、减少动态、查看电池电压和版本、立即息屏。摇晃只在息屏时唤醒。完整设计见 [UI v5](../UI_DESIGN_V5.md)。
+当前版本 **v1.1.0 / 7.9.2-memory**。本目录名称沿用早期 USB 屏幕阶段；现固件直接驱动实体 ST77916，旧 USB 像素投屏及壁纸读回已移除。
 
 ## 使用
 
-1. 保持实际屏幕拔除，接电脑 USB，打开电源开关。关闭其他占用串口的窗口。
-2. 关闭占用串口的旧工作台，打开项目根目录 **`NBTCA Badge TOOL.lnk`**。左侧选择串口，打开 **固件** 页，选择“CABadge v5 · 圆屏界面”。配套 EXE 位于 `outputs/badge-tool-v5/NBTCA_Badge_TOOL/NBTCA_Badge_TOOL.exe`。旧快捷方式也转向新应用，历史程序与固件保留。
-3. 点击 **安装固件**。应用校验文件、硬件版本与分区；若已连接屏幕，会先释放串口再烧录。默认成功后自动连接。失败时展开记录，不自动连接。若原串口未恢复，按 RESET 后刷新重连。旧用户层须更新到 v5 才支持本版短时授权与手机管理。
-4. 已烧录过 v5 时，直接点左侧 **连接** 即可。工作台有屏幕、壁纸、固件三个入口，帧数和常驻教程提示已移除，安装记录可按需展开。
-5. 点屏幕下方“连接”，再点圆屏中的 Wi-Fi 行。板子扫描附近 2.4 GHz 网络，点网络名称，输入密码，点“连接”。可以点屏内键盘，也可直接用电脑键盘输入；Enter 连接、Backspace 删除、Esc 取消。
-6. 获取 IP 后显示已连接，并把最后一个成功连接的 SSID/密码保存在板端 NVS。重启时自动连接这个网络，不必重新输入。错误密码不会替换已保存的成功配置。
+- 安装：见 [正式发布与升级](../../docs/RELEASE-v1.1.0.md)，或运行 `../run.cmd` 的工作台安装入口。默认包为 outputs/cabadge-v7.9.2-memory。
+- USB：烧录、状态/控制、壁纸上传；不提供实时画面镜像。
+- 手机管理：在设备“连接 → 手机管理”打开。同一网络访问设备显示的地址；直连模式连接 CABadge-xxxx 开放热点并访问 http://192.168.4.1/ 。无访问码或 300 秒授权窗口。
+- 壁纸：手机/电脑裁剪为 360×360 RGB565 后上传，支持保存多张、应用与删除。wallpaper 分区从 0x710000 起，长度 0x8f0000，最多 31 张用户图片；恢复默认不删除图库。旧分区升级注意事项见正式发布说明。
+- Wi-Fi：扫描、连接、保存历史网络和重连；手机热点要允许设备访问所需网络。
+- BLE：NimBLE 状态/控制、广播与扫描连接；不提供经典蓝牙音频或 BLE 图片传输。
+- SC7A20：仅息屏时摇晃唤醒，亮屏不跳页；不是主控深度睡眠。
 
-固件页同时保留四版历史诊断固件，或用“选择本地固件”加载发布目录（须保留三个 bin 与 verification.json）。诊断固件不支持 UI 投屏，烧录成功后不会自动连屏。
+## 源码导航
 
-界面为深色分组列表、蓝色已连接项和独立密码页，针对 360×360 圆屏排版。支持滚动列表、刷新、Wi-Fi 开关，当前最多显示 12 个不同名称的网络。开放网络无需密码；个人热点使用 8～63 位英文、数字、符号密码。企业账号认证暂未提供。中文字库仍为界面文案子集，部分中文网络名可能缺字；SSID 原始字节仍用于连接。
-
-## 壁纸与手机管理（沿用 v4 协议）
-
-- **USB：** 连接设备，进入工作台“壁纸”页，选择 JPG/PNG/BMP，拖动调整位置，滑条缩放，点“上传并应用”。进度仅表示已确认的数据，板端保存成功后才显示“已保存并应用”；可取消或恢复默认。
-- **同网 Wi-Fi：** 板子连接 Wi-Fi 后，在圆屏“连接 → 手机管理”直接扫码；或在工作台壁纸页允许管理、复制地址。手机浏览器选择 JPG/PNG、圆形裁剪、上传。页面由板子提供，无需互联网或手机 App。路由器/校园网若隔离客户端，可使用直连热点。
-- **直连热点：** 在圆屏换壁纸页或工作台壁纸页点“开启直连热点”。手机连接显示的 `CABadge-xxxx` 网络，无需密码，再扫码打开 `http://192.168.4.1/` 上传。手机提示网络无互联网时须保持此连接。上传完可关闭热点；Wi-Fi 开关关闭也会关闭热点。
-- 7.5.1 起取消授权码、授权开关和时间窗口。设备在同网或直连热点可达时，打开地址即可管理；BLE Status/Control 连接后直接使用。
-- 电脑/手机先生成 360×360 RGB565 数据，固定 259,200 字节，再经 USB 分块应答或 HTTP 发送。两条入口互斥，一次只接收一张；接收超时约 30 秒释放资源。完整长度与 CRC 验证通过后写入独立 Flash 分区。
-- 7.5.x 分区从 `0x710000` 起，长度 `0x8f0000`；原1MB保留迁移区，后部支持31张自定义图片。每张数据校验后最后写提交头，上传只使用空槽，不覆盖已有图片。支持应用、删除及双向循环浏览；恢复默认不删除图库。
-- 正常安装本项目 v5 时只写三个固件区域，保留壁纸。整片擦除、修改分区布局或写入其他固件可能清除素材。末尾 `0xFFF000` 的旧诊断扇区不占用；v1/v2/v3 发布文件不修改。
-
-## 蓝牙与摇晃唤醒
-
-连接页点“蓝牙”打开分组列表。蓝牙默认开启，本机名为 **CABadge**：
-
-- 手机连接徽章：在 nRF Connect 扫描 CABadge 并连接；徽章列表显示来访设备地址，点该行可以断开。断开后重新广播；已有手机连接时停止接受第二个来访设备。
-- 徽章连接外设：点“扫描附近设备”，约 8 秒后显示最多 12 个信号较强的设备，点可连接设备发起连接，点已连接行断开。“仅广播”设备不能连接。允许一条来访连接与一条主动连接同时存在。
-- 蓝牙开关控制广播、扫描及连接，关闭时断开两类连接。本版启动默认打开，未保存开关状态。Wi-Fi 可同时运行；新版本共存效果待实测。
-- 已有 BLE 发现、连接和 CABadge GATT 状态/控制，不包含经典蓝牙音频、任意外设专用协议或持久配对；不能据此承诺任意蓝牙外设可用。部分中文设备名可能缺字。
-
-**摇晃只在息屏时唤醒，恢复原页面和图片；亮屏摇晃不跳转、不换图。** 实板使用 SC7A20，电脑也可点“息屏 / 唤醒”和“模拟摇晃”检查同一套 UI 行为。模拟器保留模拟摇晃入口。
-
-当前是 UI 息屏，主控继续运行，并非芯片深度睡眠；实际 LCD/背光仍关闭。检测采用 50 Hz 数据的连续变化，阈值在 `shake_detector.h`，实物灵敏度与静置误触发仍须测试后调整。
-
-## 本版范围（v5）
-
-- 壁纸首页、三项菜单及对应功能页 与 Windows 离线模拟器共用 `ui/badge_ui.c`、`wifi_panel.c`、字体和素材；发布清单记录共用源码哈希。
-- 电池显示板端 GPIO8 ADC 经校准后的电压，不估算百分比；必须实际接电池才有意义。
-- 背光 GPIO1、CHG_ALLOW GPIO38 始终为 LOW；亮度控件目前只改变显示内容的视觉亮度，不驱动实际背光。
-- BLE 服务与 SC7A20 摇晃唤醒已接入板端用户层；此前诊断通过不代表 v5 实板回归已通过。
-- 实际 LCD、触摸驱动未接入；壁纸上传已接入 USB/Wi-Fi。本版不擦写 Flash 末尾的诊断扇区。烧录会替换应用与分区表，NVS 地址保持不变；不是 OTA 产品版本。
-- USB 原生 Serial/JTAG 传送 RGB565 变化区域，刷新速度取决于实际 USB 链路；尚未实测帧率和延迟。
-
-## 源码与检查
-
-| 文件 | 用途 |
+|路径|职责|
 |---|---|
-| `device/src/main.c` | 板端 LVGL、USB 显示/输入、电池采样 |
-| `device/src/wifi_service.c` | 异步 Wi-Fi 扫描、连接、重试和 NVS 保存 |
-| `device/src/ble_service.c` | NimBLE 广播、扫描、双角色连接，事件队列回传 UI |
-| `device/src/motion_service.c`、`shake_detector.h` | SC7A20 采样与仅息屏摇晃检测 |
-| `device/src/wallpaper_service.c`、`wallpaper_store.c` | 共享接收会话、HTTP 服务、双槽保存与 LVGL 应用 |
-| `device/src/wallpaper.html`、`wallpaper.py` | 手机网页与原生工作台的圆形裁剪/上传 |
-| `../ui/wifi_panel.c` | 共用 Wi-Fi / BLE 列表、密码页与屏内键盘 |
-| `viewer.py` | Windows 原生工作台：像素显示、输入回传、烧录流程与串口交接 |
-| `../../tools/flasher/app.py` | 复用既有固件校验、写入地址、esptool 烧录与日志逻辑 |
-| `protocol.h` | CRC32 二进制报文、矩形和输入协议 |
-| `test_viewer.py`、`protocol_test.c` | 软件协议、像素、输入与模拟串口检查 |
+|device/src/main.c|Adapter 接入、GUI 调度与 USB 服务|
+|device/src/physical_display.c|ST77916、触摸、显示 ownership、共享 DMA staging|
+|device/src/wifi_service.c / ble_service.c|无线任务与状态|
+|device/src/wallpaper_service.c / wallpaper_store.c|HTTP/USB 壁纸库、异步缩略图与持久化|
+|device/src/wallpaper.html|手机本地管理页面|
+|device/src/app_service.c / map_png.c|BlueMap 网络与流式解码|
+|../ui/ui_transition_cache.c / ui_transition_compositor.c|缓存、预热及 Direct 转场|
+|../workbench.py / wallpaper.py|当前原生工作台及上传工具|
+|viewer.py / WIRELESS_P0.md|早期像素镜像工具与协议历史，不是当前产品入口|
 
-在项目根目录执行：
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File firmware\build.ps1
-firmware\.venv\Scripts\ctest.exe --test-dir firmware\build --output-on-failure
-python -m unittest discover -s firmware\usb_screen -p "test_*.py" -v
-powershell -NoProfile -ExecutionPolicy Bypass -File firmware\usb_screen\build.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File firmware\usb_screen\build-viewer.ps1
-```
-
-ESP32 构建暂存于 `%LOCALAPPDATA%\JXBadge\usb-screen`，绕开中文路径工具链限制；本版产物在 `outputs/usb-screen-v5-20260920`。电脑应用使用现有 Python、pyserial、Pillow、Tkinter 和 PyInstaller。浏览器软件检查额外使用现有 Playwright + Edge；不是应用运行依赖。前版投屏和 BLE 来访连接已有用户截图，v4 的手机上传/断电保留、Web 控制、BLE 授权/读写/通知已有用户反馈通过（R12～R14）；**本次 v5 尚未上板，新 UI 与壁纸选择记忆待回归 N17**，旧授权自然到期等未完成项仍保留 N16。软件检查含生产服务的宿主执行（替代 ESP I/O 与调度）、真实浏览器对本地 HTTP 替身、原生窗口、USB 应答、双槽写入中断模拟，不冒充板端 HTTP、RF 或 Flash 实测。
-
-完整审计、状态机、权限模型、接口与 nRF 操作见 [无线 P0 协议与交付说明](WIRELESS_P0.md)。
+构建入口 `build.ps1`，实际环境见 [构建说明](../../docs/BUILD.md)。当前有真实背光 PWM 和 LCD/触摸驱动，不再采用早期“只在电脑显示”的接法。不要按旧说明拔屏或烧录 v4/v5 预览包。

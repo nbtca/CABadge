@@ -1,3 +1,5 @@
+> 本功能保留于 v1.1.0 / 7.9.2-memory，以下原始实现和测试段落保留当时版本含义。当前内存/显示架构见 [固件说明](README.md)，本体继续实时绘制。
+
 # Grok 表情球
 
 基于 tycoding/grok-ball 的 MIT 眼形数据改编，入口为“功能 → 应用 → Grok”。版权与下载源码哈希保存在 `ui/grok_source/`。BlueMap 优化继续搁置。

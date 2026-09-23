@@ -1,3 +1,5 @@
+> 历史设计/阶段记录：保留当时版本、方案和测量值，不作为当前安装或验收说明。当前正式版为 v1.1.0 / 7.9.2-memory，参见[文档索引](docs/INDEX.md)。
+
 # CABadge DESIGN
 
 > 状态：基础规范与 v7 架构已审核；核心 Preview 已实现，完整规范待验收 · 版本 0.7 · 2026-09-20  
@@ -10,7 +12,7 @@
 
 - 默认首页仍为纯壁纸。恢复独立的蓝色名片展示页，与壁纸横向切换；多张壁纸选择移到壁纸浏览页，避免同一手势承担两种用途。
 - 壁纸选择页采用用户指定的 Carousel：中央大图、侧后方小图，二维环绕、缩放和前后遮挡随拖动连续变化，松手吸附。这是有任务目的的选图交互，不受下文禁止装饰卡片墙/直接切图的旧建议限制；应用后回纯壁纸。保留已有图片数量，不新增多图相册。
-- 名片视觉依据是现存 [旧名片预览](firmware/build/02-identity.png)：蓝色卡面、大号姓名、协会文字、右侧标志与弧形图案。历史截图中的示例成员身份不等同于已认证身份，不新增真实认证或用户资料后台。
+- 名片视觉依据是现存 旧名片预览（本地历史资料，未入库：`firmware/build/02-identity.png`）：蓝色卡面、大号姓名、协会文字、右侧标志与弧形图案。历史截图中的示例成员身份不等同于已认证身份，不新增真实认证或用户资料后台。
 - 操作界面采用明亮中性底色，暂定画布 #F4F6F8、操作面 #FFFFFF、正文 #1B2430、次要文字 #5B6778、主要操作 #365B86。通过标题、分组与留白形成层级；不保留 v5 等粗、等大的黑底文字按钮列表。
 - 工具入口为从底部进入的操作面，壁纸是主要入口，连接/设置为较轻的次级操作；保留三种管理职责，但不要求三个入口画成相同文字行。
 - 新增下拉控制中心：从壁纸/名片展示向下拖出，上推收起；提供电池电压、Wi-Fi/BLE 快捷开关、预览亮度、手机管理及息屏。与上滑功能面分工，两个抽屉不能同时打开；滑条、列表及输入不触发全局导航。控制中心没有 3 秒自动关闭计时。
@@ -74,7 +76,7 @@ CABadge 的辨识度来自圆形内容画面、计协蓝与简洁文字导航。
 
 ### 4.1 颜色
 
-品牌依据为本地 [logo.png](firmware/ui/logo.png) 不透明像素众数 **#124689**。这是现有标识取色，不声称是协会官方品牌手册的精确标准值。使用同一蓝色方向的明暗变体，适配不同底色。
+品牌依据为本地 logo.png（本地历史资料，未入库：`firmware/ui/logo.png`） 不透明像素众数 **#124689**。这是现有标识取色，不声称是协会官方品牌手册的精确标准值。使用同一蓝色方向的明暗变体，适配不同底色。
 
 | 语义 token | 圆屏暗色 | 手机 Web 浅色 | 用途 |
 |---|---|---|---|
@@ -282,7 +284,7 @@ Web 使用语义化按钮、标签、状态区和顺序合理的键盘焦点；�
 
 ### 8.1 字库策略
 
-当前 [generate_assets.py](firmware/generate_assets.py) 从指定源码收集字符并生成 14/18/24/36/56 px 字体，使用 8 bpp 字形数据；[assets.c](firmware/ui/assets.c) 是生成产物，不能手动修改。
+当前 generate_assets.py（本地历史资料，未入库：`firmware/generate_assets.py`） 从指定源码收集字符并生成 14/18/24/36/56 px 字体，使用 8 bpp 字形数据；assets.c（本地历史资料，未入库：`firmware/ui/assets.c`） 是生成产物，不能手动修改。
 
 - 固定 UI 文案加入源文件后通过原生成器更新；标点、单位、错误状态也必须纳入检查。
 - 当前子集不能保证任意中文 SSID/设备名完整显示，更不涵盖全部 Unicode 与 emoji。
@@ -375,10 +377,10 @@ Web 使用语义化按钮、标签、状态区和顺序合理的键盘焦点；�
 
 项目依据：
 
-- [用户端设计准则](用户端设计准则.md)、[无线与本地管理任务](CABadge_BLE_WiFi_开发提示词.md)
-- [当前 v5 设计实现说明](firmware/UI_DESIGN_V5.md)、[固件交接](firmware/HANDOFF.md)
-- [共用 UI 与色值](firmware/ui/badge_ui.h)、[圆屏页面](firmware/ui/badge_ui.c)、[无线页面](firmware/ui/wifi_panel.c)
-- [手机管理页面](firmware/usb_screen/device/src/wallpaper.html)、[板端显示路径](firmware/usb_screen/device/src/main.c)
-- [分区表](firmware/usb_screen/device/partitions.csv)、[v5 构建记录](firmware/build/v5-device-build.log)
+- [用户端设计准则](用户端设计准则.md)、无线与本地管理任务（本地历史资料，未入库：`CABadge_BLE_WiFi_开发提示词.md`）
+- 当前 v5 设计实现说明（本地历史资料，未入库：`firmware/UI_DESIGN_V5.md`）、固件交接（本地历史资料，未入库：`firmware/HANDOFF.md`）
+- 共用 UI 与色值（本地历史资料，未入库：`firmware/ui/badge_ui.h`）、圆屏页面（本地历史资料，未入库：`firmware/ui/badge_ui.c`）、无线页面（本地历史资料，未入库：`firmware/ui/wifi_panel.c`）
+- 手机管理页面（本地历史资料，未入库：`firmware/usb_screen/device/src/wallpaper.html`）、板端显示路径（本地历史资料，未入库：`firmware/usb_screen/device/src/main.c`）
+- 分区表（本地历史资料，未入库：`firmware/usb_screen/device/partitions.csv`）、v5 构建记录（本地历史资料，未入库：`firmware/build/v5-device-build.log`）
 
 后续修改本文时，记录日期与设计理由；新增参数标明目标或实测，不用设计文档覆盖历史测试事实。先审核本稿，再安排 UI 实现。

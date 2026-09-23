@@ -16,6 +16,7 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 - **展示协会名片**：内置计协风格名片页面。
 - **连接与管理设备**：Wi-Fi、BLE 连接管理，通过 USB 或本地 HTTP 上传壁纸。
 - **基础交互**：触摸操作、亮度设置、息屏后摇晃唤醒，以及可选 FPS 显示。
+- **小应用**：Grok 表情、MC 二维地图、奶蛙矿工；使用说明见 [应用](firmware-v7/APPS.md)。
 - **电脑端调试**：Windows 原生 NBTCA Badge TOOL 提供固件安装与设备联调入口。
 
 <img width="3072" height="4096" alt="微信图片_20260921232252_387_45" src="https://github.com/user-attachments/assets/523d6919-6138-4dc7-834d-ff6c042c3ed2" />
@@ -46,16 +47,14 @@ GIF、BLE 传图和 OTA 尚未作为本版功能提供。完整的异常场景�
 
 ### 1. 下载固件与配套硬件
 
-**最新固件请下载 [v1.1.0](https://github.com/nbtca/CABadge/releases/tag/v1.1.0)**，升级方法见[当前发布说明](docs/RELEASE-v1.1.0.md)。下面 v1.0 附件表保留为硬件制造包与历史基线索引，不是最新固件。
-
-打开 [v1.0 Release](https://github.com/Egger0/CABadge/releases/tag/v1.0)，按用途下载：
+固件下载 [v1.1.0 Release](https://github.com/nbtca/CABadge/releases/tag/v1.1.0)，硬件生产包沿用 [v1.0 Release](https://github.com/nbtca/CABadge/releases/tag/v1.0)。固件版本与 PCB 修订独立编号，v1.1.0 没有改板。
 
 |文件|用途|
 |---|---|
-|`CABadge-v1.0-hardware-c7c59dff.zip`|PCB 生产包、可选钢网文件与下单说明|
-|`CABadge-v1.0-firmware-7.3.7-mem.zip`|已发布的烧录文件、安装说明与校验值|
-|`Source code (zip)`|查看原理图、BOM、固件源码和项目文档|
-|`CABadge-v1.0-debug-7.3.7-mem.zip`|ELF 与构建配置，仅排查问题时需要|
+|`CABadge-v1.1.0-firmware.zip`|当前三个 BIN、安装说明、原始验证清单与校验值|
+|`CABadge-v1.1.0-debug.zip`|ELF、有效构建配置，仅排查问题时需要|
+|`CABadge-v1.0-hardware-c7c59dff.zip`|冻结 PCB 生产包、可选钢网文件与下单说明|
+|v1.1.0 的 `Source code (zip)`|该次发布源码、硬件设计与文档|
 
 首次点亮直接使用发布固件，无需先搭建编译环境。下载后可通过 Release 的 `SHA256SUMS.txt` 核对附件完整性。
 
@@ -81,9 +80,9 @@ GIF、BLE 传图和 OTA 尚未作为本版功能提供。完整的异常场景�
 
 首板换装的 J1 规格为 **FFC/FPC 0.5 mm、18P、抽屉式上接触**，换座后已成功显示。当前 [BOM](hardware/BOM-DRAFT.csv) 与 [采购表](hardware/LCSC_IMPORT_LIST.csv) 已按截图更正；厂家型号和尺寸图仍未提供，采购前须核对封装与接触方向。**v1.0 旧源码、原理图和交互式 BOM 中仍有原 J1 条目，采购请以 [J1 连接器更正](docs/J1-CONNECTOR.md) 为准。**
 
-### 5. 烧录 7.3.7-mem
+### 5. 烧录当前固件 7.9.2-memory
 
-解压固件包，按包内 `INSTALL.md` 或 [安装与构建说明](docs/BUILD.md) 操作。烧录前核对校验值和硬件版本，使用支持数据传输的 USB 线，并释放被其他程序占用的串口。
+解压固件包，按包内 `README.md` 或 [安装与构建说明](docs/BUILD.md) 操作。烧录前核对校验值和硬件版本，使用支持数据传输的 USB 线，并释放被其他程序占用的串口。
 
 |文件|烧录地址|
 |---|---|
@@ -91,15 +90,15 @@ GIF、BLE 传图和 OTA 尚未作为本版功能提供。完整的异常场景�
 |`partitions.bin`|`0x8000`|
 |`firmware.bin`|`0x10000`|
 
-可以用 esptool 直接烧录，也可以使用 v7 工作台的固件安装入口。使用工作台时，将固件解压到源码根目录下的 `outputs/cabadge-v7-mem-20260921/`；具体 Python 依赖见安装说明。
+可以用 esptool 直接烧录，也可以使用 v7 工作台的固件安装入口。使用工作台时，将固件解压到源码根目录下的 `outputs/cabadge-v7.9.2-memory/`；具体 Python 依赖见安装说明。
 
-烧录完成后 RESET，确认启动的固件版本为 **7.3.7-mem**。不要为了普通升级额外执行全片擦除，以免清掉已有设置和壁纸。
+烧录完成后 RESET，确认启动的固件版本为 **7.9.2-memory**。不要为了普通升级额外执行全片擦除，以免清掉已有设置和壁纸。
 
 ### 6. 检查自己的板子
 
 依次检查开机显示、触摸与翻页、壁纸切换、Wi-Fi/BLE 基本连接，再检查上传壁纸及重启后的保留情况。遇到问题时记录固件版本、触发步骤和现象，附上照片或串口日志，方便复现与修复。
 
-当前固件保留背光上限和充电使能限制，不能把“成功开机”当作电池充电、满亮度或长期运行都已验证。显示 TE 未连接，动态画面仍需观察是否撕裂；具体待办见 [已知问题](docs/KNOWN_ISSUES.md)。
+当前背光已使用平方曲线调节实际 PWM，旧 5% 测试上限已取消；CHG_ALLOW 仍保持 LOW。成功开机不代表充电、电流温升或长期运行已完整验收。显示 TE 未连接，动态画面仍需观察是否撕裂；具体待办见 [已知问题](docs/KNOWN_ISSUES.md)。
 
 ## 继续开发
 
@@ -112,7 +111,7 @@ GIF、BLE 传图和 OTA 尚未作为本版功能提供。完整的异常场景�
 |`tools/flasher/`|共用烧录工具|
 |`docs/`|安装、构建、发布与已知问题说明|
 
-历史实验固件、原始日志和本地备份没有全部随仓库上传，旧文档中的部分研究链接仅保留为历史出处。`v1.0` 标签固定首次发布快照，后续改进从主分支继续。
+历史实验固件、原始日志和本地备份没有全部随仓库上传，旧文档中的部分研究链接仅保留为历史出处。`v1.0`、`v1.1.0` 标签固定各次发布快照；主分支继续更新。文档分类见 [仓库索引](docs/INDEX.md)。
 
 ## 许可
 

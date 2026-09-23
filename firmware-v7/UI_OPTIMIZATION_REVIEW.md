@@ -1,3 +1,5 @@
+> 历史设计/阶段记录：保留当时版本、方案和测量值，不作为当前安装或验收说明。当前正式版为 v1.1.0 / 7.9.2-memory，参见[文档索引](../docs/INDEX.md)。
+
 > 历史评审稿：用户随后明确授权流畅度优先重构、允许取消 Carousel；已实施结果见 [7.3.3 报告](FLUID_PERFORMANCE_REPORT.md)。下文保留评审时事实，不代表当前固件。
 
 # CABadge 实体 UI 优化评审稿
@@ -20,12 +22,12 @@
 
 |用途|实际接口/签名|证据|
 |---|---|---|
-|显示回调|`void (*)(lv_display_t *, const lv_area_t *, uint8_t *)`；`lv_display_set_flush_cb`、`lv_display_flush_ready`|[lv_display.h](vendor/lvgl-9.4.0/src/display/lv_display.h:81)|
-|输入回调|`void (*)(lv_indev_t *, lv_indev_data_t *)`；`lv_indev_set_read_cb`|[lv_indev.h](vendor/lvgl-9.4.0/src/indev/lv_indev.h:78)|
-|时间源|`uint32_t (*)(void)`；`lv_tick_set_cb`|[lv_tick.h](vendor/lvgl-9.4.0/src/tick/lv_tick.h:30)|
-|事件|PRESSED、PRESSING、RELEASED、PRESS_LOST、SCROLL_BEGIN/END、INDEV_RESET、DELETE；不是文章中的 DRAG_EXEC/DRAG_END|[lv_event.h](vendor/lvgl-9.4.0/src/misc/lv_event.h:36)|
-|动画|exec 为 `void (*)(void *, int32_t)`，completed 为 `void (*)(lv_anim_t *)`；`lv_anim_set_duration`、`lv_anim_set_completed_cb`、`lv_anim_delete`|[lv_anim.h](vendor/lvgl-9.4.0/src/misc/lv_anim.h:97)|
-|内置滚动|`lv_obj_set_scroll_dir`、`lv_obj_set_scroll_snap_x`、`lv_obj_stop_scroll_anim`；SCROLL_ONE、SNAPPABLE、SCROLL_CHAIN|[lv_obj_scroll.h](vendor/lvgl-9.4.0/src/core/lv_obj_scroll.h:66)、[lv_obj.h](vendor/lvgl-9.4.0/src/core/lv_obj.h:56)|
+|显示回调|`void (*)(lv_display_t *, const lv_area_t *, uint8_t *)`；`lv_display_set_flush_cb`、`lv_display_flush_ready`|lv_display.h（本地历史资料，未入库：`vendor/lvgl-9.4.0/src/display/lv_display.h:81`）|
+|输入回调|`void (*)(lv_indev_t *, lv_indev_data_t *)`；`lv_indev_set_read_cb`|lv_indev.h（本地历史资料，未入库：`vendor/lvgl-9.4.0/src/indev/lv_indev.h:78`）|
+|时间源|`uint32_t (*)(void)`；`lv_tick_set_cb`|lv_tick.h（本地历史资料，未入库：`vendor/lvgl-9.4.0/src/tick/lv_tick.h:30`）|
+|事件|PRESSED、PRESSING、RELEASED、PRESS_LOST、SCROLL_BEGIN/END、INDEV_RESET、DELETE；不是文章中的 DRAG_EXEC/DRAG_END|lv_event.h（本地历史资料，未入库：`vendor/lvgl-9.4.0/src/misc/lv_event.h:36`）|
+|动画|exec 为 `void (*)(void *, int32_t)`，completed 为 `void (*)(lv_anim_t *)`；`lv_anim_set_duration`、`lv_anim_set_completed_cb`、`lv_anim_delete`|lv_anim.h（本地历史资料，未入库：`vendor/lvgl-9.4.0/src/misc/lv_anim.h:97`）|
+|内置滚动|`lv_obj_set_scroll_dir`、`lv_obj_set_scroll_snap_x`、`lv_obj_stop_scroll_anim`；SCROLL_ONE、SNAPPABLE、SCROLL_CHAIN|lv_obj_scroll.h（本地历史资料，未入库：`vendor/lvgl-9.4.0/src/core/lv_obj_scroll.h:66`）、lv_obj.h（本地历史资料，未入库：`vendor/lvgl-9.4.0/src/core/lv_obj.h:56`）|
 |SPI 回调|`void (*)(spi_transaction_t *)`；事务提交与取回是 `spi_device_queue_trans` / `spi_device_get_trans_result`|`F:/CABadgeBuild/platformio/packages/framework-espidf/components/esp_driver_spi/include/driver/spi_master.h` 第 56、222、244 行|
 
 本地 `lv_anim_start()` 会复制 `lv_anim_t`，所以局部动画描述结构本身可以使用；它不会延长 user_data 指向的局部变量寿命。当前 `badge_panel_slide()` 使用长期存在的对象，没有照搬文章的栈地址写法。
@@ -34,16 +36,16 @@
 
 |项目|已核实情况|具体证据|
 |---|---|---|
-|构建框架|PlatformIO `espressif32@6.12.0`；ESP-IDF **5.5.0**|[platformio.ini](usb_screen/device/platformio.ini:1)；本地 `esp_common/include/esp_idf_version.h`|
-|UI|LVGL **9.4.0**、C、软件绘制、`LV_USE_OS=LV_OS_NONE`|[lv_version.h](vendor/lvgl-9.4.0/lv_version.h:9)、[lv_conf.h](lv_conf.h:1)|
-|CPU/存储配置|最终包 CPU 240 MHz；Flash 16 MB、DIO 40 MHz；PSRAM Octal 40 MHz|[sdkconfig.verified.h](../outputs/cabadge-v7-fps-20260921/sdkconfig.verified.h:705)。这是构建配置，不是本轮频率实测|
-|PSRAM 实际启用|既有启动日志识别 8 MB 并通过存储测试；R32 有实际 PSRAM 堆数据。当前 `app_main()` 在 PSRAM 未初始化时直接返回|[main.c](usb_screen/device/src/main.c:285)、主测试记录及 R32 JSON|
-|屏幕|W180TE010I-18Z(CTP-A1)，**360×360 圆形可视区**，ST77916，RGB565|[panel_init.h](usb_screen/device/src/panel_init.h:1)、[physical_display.c](usb_screen/device/src/physical_display.c:56)、[硬件计划](../计协电子吧唧开发计划书.md:35)|
+|构建框架|PlatformIO `espressif32@6.12.0`；ESP-IDF **5.5.0**|[platformio.ini](usb_screen/device/platformio.ini)（历史行号 1，以对应版本为准）；本地 `esp_common/include/esp_idf_version.h`|
+|UI|LVGL **9.4.0**、C、软件绘制、`LV_USE_OS=LV_OS_NONE`|lv_version.h（本地历史资料，未入库：`vendor/lvgl-9.4.0/lv_version.h:9`）、[lv_conf.h](lv_conf.h)（历史行号 1，以对应版本为准）|
+|CPU/存储配置|最终包 CPU 240 MHz；Flash 16 MB、DIO 40 MHz；PSRAM Octal 40 MHz|sdkconfig.verified.h（本地历史资料，未入库：`../outputs/cabadge-v7-fps-20260921/sdkconfig.verified.h:705`）。这是构建配置，不是本轮频率实测|
+|PSRAM 实际启用|既有启动日志识别 8 MB 并通过存储测试；R32 有实际 PSRAM 堆数据。当前 `app_main()` 在 PSRAM 未初始化时直接返回|[main.c](usb_screen/device/src/main.c)（历史行号 285，以对应版本为准）、主测试记录及 R32 JSON|
+|屏幕|W180TE010I-18Z(CTP-A1)，**360×360 圆形可视区**，ST77916，RGB565|[panel_init.h](usb_screen/device/src/panel_init.h)（历史行号 1，以对应版本为准）、[physical_display.c](usb_screen/device/src/physical_display.c)（历史行号 56，以对应版本为准）、[硬件计划](../计协电子吧唧开发计划书.md)（历史行号 35，以对应版本为准）|
 |接口|SPI2、半双工、Mode 0、QSPI 像素四线；8 bit 命令+24 bit 地址；请求 40 MHz，驱动读取实际分频频率|`physical_display_init()`；`lcd_tx()`/`physical_display_flush()` 使用命令与像素不同发送模式|
 |DMA|`SPI_DMA_CH_AUTO`，事务队列 2，内部 DMA 缓冲 2×32 行；不是两个全屏 LVGL 缓冲|`physical_display_init()`、`physical_display_flush()`|
 |TE|冻结 PCB 未连接；历史资料允许最大 QSPI 50 MHz，当前保持 40 MHz|R23/R31；本轮不调整面板扫描寄存器、不超频|
-|触摸|资料指定 **CST816D**，I²C 地址 0x15、100 kHz，与 SC7A20 共用 I²C0，SCL GPIO2/SDA GPIO3|[硬件计划](../计协电子吧唧开发计划书.md:35)、`physical_touch_init/read()`、`motion_service_init()`|
-|触摸确认边界|驱动读取 0xA7 三字节但没有验证或保存芯片 ID；因此具体实物 ID/固件版本仍待核实。不是 XPT2046|[physical_display.c](usb_screen/device/src/physical_display.c:147)|
+|触摸|资料指定 **CST816D**，I²C 地址 0x15、100 kHz，与 SC7A20 共用 I²C0，SCL GPIO2/SDA GPIO3|[硬件计划](../计协电子吧唧开发计划书.md)（历史行号 35，以对应版本为准）、`physical_touch_init/read()`、`motion_service_init()`|
+|触摸确认边界|驱动读取 0xA7 三字节但没有验证或保存芯片 ID；因此具体实物 ID/固件版本仍待核实。不是 XPT2046|[physical_display.c](usb_screen/device/src/physical_display.c)（历史行号 147，以对应版本为准）|
 
 ### 1.3 刷新、调度与线程约定
 
@@ -60,7 +62,7 @@
 
 当前实体壁纸是静态 RGB565。PC 用 Pillow、手机用 Canvas 处理裁剪/像素转换后上传，板端不在每次拖动时解码 JPG/PNG；没有证据表明当前支持动态图/GIF 播放。PC 当前居中裁剪，手机有拖动/缩放裁剪；圆形显示无法保证任意方形原图的四角都完整可见。
 
-证据：[import_photo.py](import_photo.py:1)、[wallpaper.html](usb_screen/device/src/wallpaper.html:79)、`wallpaper_service_poll()`、`set_tile_source()`、`carousel_layout()`。
+证据：[import_photo.py](import_photo.py)（历史行号 1，以对应版本为准）、[wallpaper.html](usb_screen/device/src/wallpaper.html)（历史行号 79，以对应版本为准）、`wallpaper_service_poll()`、`set_tile_source()`、`carousel_layout()`。
 
 |项目|计算|像素数据占用|位置/生命周期|
 |---|---|---:|---|
@@ -78,7 +80,7 @@
 
 字体为 Noto Sans SC 的构建时子集，14/18/24/36/56 五档，8 bpp；本次只读统计五套字形位图共 **1,403,377 B**，保存在 const 资源中，不是同额常驻堆。资源子集由源码字符生成，**任意中文 SSID/设备名的字形覆盖没有保证**。56 号保留给名片大姓名，普通系统页面不新增大字库。
 
-R32 历史实测：PSRAM 空闲约 **6,647,416 B**，周期采样内部 RAM 最低 **11,803 B**，最大内部连续块 **7,680 B**；最终 `minimum_free` 内部 **3,179 B**、DMA 能力堆 **19 B**。后两项是各堆历史低谷汇总，不一定同时发生；DMA 与内部堆重叠，不能相加。此版本内部 RAM 余量紧，不能因为 PSRAM 空闲多就再增加内部 DMA 缓冲或任务栈。详见 [R32 报告](RUNTIME_PERFORMANCE_REPORT.md:1) 和 [最终状态](../outputs/cabadge-v7-fps-20260921/final-state.json)。
+R32 历史实测：PSRAM 空闲约 **6,647,416 B**，周期采样内部 RAM 最低 **11,803 B**，最大内部连续块 **7,680 B**；最终 `minimum_free` 内部 **3,179 B**、DMA 能力堆 **19 B**。后两项是各堆历史低谷汇总，不一定同时发生；DMA 与内部堆重叠，不能相加。此版本内部 RAM 余量紧，不能因为 PSRAM 空闲多就再增加内部 DMA 缓冲或任务栈。详见 [R32 报告](RUNTIME_PERFORMANCE_REPORT.md)（历史行号 1，以对应版本为准） 和 最终状态（本地历史资料，未入库：`../outputs/cabadge-v7-fps-20260921/final-state.json`）。
 
 ### 1.5 页面结构、事件与生命周期
 

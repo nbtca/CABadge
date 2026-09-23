@@ -1,3 +1,5 @@
+> 历史独立诊断工具：下文预设固件、EXE 和维修接法属于早期阶段。当前 v1.1.0 请用 [安装说明](../../docs/BUILD.md)；本目录 app.py 的校验/烧录函数仍被工作台复用，勿将旧诊断预设当成正式版。
+
 # JXBadge 烧录助手
 
 适用于已打板 c7c59dff 的 ESP32-S3、16 MB Flash。原生 Windows 窗口，封装现有 esptool 5.4.0 和 pyserial 流程。发布目录中的 `JXBadgeFlasher.exe` 可直接双击，不需要打开终端或另装 Python；移动到其他位置时保留整个 `JXBadgeFlasher` 文件夹。

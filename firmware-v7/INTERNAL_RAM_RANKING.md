@@ -1,3 +1,5 @@
+> 历史设计/阶段记录：保留当时版本、方案和测量值，不作为当前安装或验收说明。当前正式版为 v1.1.0 / 7.9.2-memory，参见[文档索引](../docs/INDEX.md)。
+
 # 7.3.10-mem 内部 RAM 占用核算（2026-09-23）
 
 来源：本版 ELF/map、sdkconfig.verified.h、本地 IDF 5.5.0 源码及 final-readback.json。单位 KiB=1024 B。没有运行逐次 heap allocation trace，不能给出覆盖所有动态分配的模块总排名。

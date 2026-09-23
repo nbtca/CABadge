@@ -1,3 +1,5 @@
+> 历史设计/阶段记录：保留当时版本、方案和测量值，不作为当前安装或验收说明。当前正式版为 v1.1.0 / 7.9.2-memory，参见[文档索引](../docs/INDEX.md)。
+
 # 官方显示适配层迁移
 
 候选：7.7.0-adapter；回退：outputs/cabadge-v7-entry-20260923/firmware.bin。
