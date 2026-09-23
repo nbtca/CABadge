@@ -31,13 +31,13 @@ button span{display:inline-block}.reduce-motion *,.reduce-motion *::before{trans
 <main>
 <header><span class="brand">CABadge</span><span class="tag">本地管理</span></header>
 <nav aria-label="管理页面"><button id="wallTab" aria-selected="true">壁纸</button><button id="deviceTab" aria-selected="false">设备</button></nav>
-<p id="sessionState" class="notice" role="status">等待授权</p>
-<details id="access"><summary>管理授权码</summary><input id="key" type="text" autocomplete="off" spellcheck="false" maxlength="32" placeholder="输入设备显示的授权码" aria-label="管理授权码"><button id="authorize">连接</button></details>
+<p id="sessionState" class="notice" role="status">正在连接设备</p>
 <section id="wallPage"><h1>壁纸</h1>
 <div class="stage"><canvas id="preview" width="360" height="360" tabindex="0" aria-label="壁纸裁剪预览，可拖动或按方向键调整"></canvas><div id="empty" class="empty">选择照片</div></div>
 <div class="row"><label class="choose">选择照片<input id="file" type="file" accept="image/jpeg,image/png"></label><button id="center" disabled>居中</button></div>
 <div class="row"><label for="zoom">缩放</label><input id="zoom" type="range" min="1" max="4" value="1" step=".01" disabled></div>
 <button class="primary" id="send" disabled>上传并应用</button>
+<h2>已保存的壁纸</h2><p id="libraryCount" class="notice"></p><ul id="library"></ul>
 <button class="secondary" id="reset">恢复默认壁纸</button><button class="secondary" id="cancelUpload" hidden>取消上传</button>
 <div id="confirm" class="confirm" inert aria-hidden="true"><div><p id="confirmText"></p><div class="row"><button id="confirmNo">继续保留</button><button id="confirmYes">确认</button></div></div></div>
 <progress id="progress" max="100" value="0" hidden></progress><p id="status" role="status" aria-live="polite"></p>
@@ -45,7 +45,7 @@ button span{display:inline-block}.reduce-motion *,.reduce-motion *::before{trans
 <section id="devicePage" hidden>
 <h1>设备</h1><dl><dt>名称</dt><dd id="product">—</dd><dt>固件</dt><dd id="firmware">—</dd><dt>电池电压</dt><dd id="battery">—</dd><dt>壁纸</dt><dd id="wallState">—</dd></dl>
 <h2>显示</h2><label class="switch">息屏<input id="sleep" type="checkbox" disabled></label><label class="switch">减少动态<input id="reduced" type="checkbox" disabled></label>
-<div class="row"><label for="brightness">预览亮度</label><input id="brightness" type="range" min="10" max="100" value="70" disabled><span id="brightnessValue">—</span></div>
+<div class="row"><label for="brightness">亮度</label><input id="brightness" type="range" min="10" max="100" value="70" disabled><span id="brightnessValue">—</span></div>
 <h2>Wi-Fi</h2><label class="switch">Wi-Fi<input id="wifiEnabled" type="checkbox" disabled></label><p id="wifiState" class="notice">—</p>
 <div class="row"><button id="wifiScan" disabled>扫描网络</button><button id="wifiDisconnect" disabled>断开</button></div>
 <ul id="networks"></ul>
@@ -58,7 +58,7 @@ button span{display:inline-block}.reduce-motion *,.reduce-motion *::before{trans
 <script>
 'use strict';
 const $=id=>document.getElementById(id),canvas=$('preview'),ctx=canvas.getContext('2d',{willReadFrequently:true});
-let picture=null,cx=0,cy=0,base=1,drag=null,busy=false,request=null,authorized=false,pendingId=0,awaitingApply=false;
+let picture=null,cx=0,cy=0,base=1,drag=null,busy=false,request=null,connected=false,pendingId=0,awaitingApply=false;
 let confirmAction=null,confirmOrigin=null,notifyTimer=0,notifyButton=null,lastGeneration=null,uploadGeneration=null;
 const reducedMotion=()=>document.documentElement.classList.contains('reduce-motion')||matchMedia('(prefers-reduced-motion:reduce)').matches;
 function buttonText(button,value){
@@ -74,8 +74,6 @@ function closeConfirm(){const origin=confirmOrigin;confirmAction=null;$('confirm
 function askConfirm(origin,message,action){confirmOrigin=origin;confirmAction=action;$('confirmText').textContent=message;$('confirm').inert=false;$('confirm').setAttribute('aria-hidden','false');$('confirm').classList.add('open');$('confirmNo').focus();}
 $('confirmNo').onclick=closeConfirm;$('confirmYes').onclick=()=>{const action=confirmAction;closeConfirm();if(action)action();};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeConfirm();});
-$('key').value=new URLSearchParams(location.hash.slice(1)).get('key')||'';
-if($('key').value)history.replaceState(null,'',location.pathname);else $('access').open=true;
 function constrain(){if(!picture)return;const side=360/(base*Number($('zoom').value));cx=Math.max(side/2,Math.min(picture.width-side/2,cx));cy=Math.max(side/2,Math.min(picture.height-side/2,cy));}
 function draw(){ctx.fillStyle='#000';ctx.fillRect(0,0,360,360);if(!picture)return;constrain();const s=base*Number($('zoom').value);ctx.drawImage(picture,180-cx*s,180-cy*s,picture.width*s,picture.height*s);}
 function center(){if(!picture)return;cx=picture.width/2;cy=picture.height/2;$('zoom').value=1;draw();}
@@ -84,7 +82,7 @@ $('file').onchange=()=>{
  const file=$('file').files[0];if(!file||busy)return;
  if(!['image/jpeg','image/png'].includes(file.type)||file.size>20*1024*1024){$('status').textContent='请选择 20 MB 以内的 JPG 或 PNG';return;}
  const image=new Image(),url=URL.createObjectURL(file);
- image.onload=()=>{URL.revokeObjectURL(url);if(image.width*image.height>40000000){$('status').textContent='照片尺寸过大，请先缩小';return;}picture=image;base=Math.max(360/image.width,360/image.height);center();$('empty').hidden=true;$('empty').style.display='none';$('center').disabled=$('zoom').disabled=false;$('send').disabled=!authorized;$('status').textContent='';};
+ image.onload=()=>{URL.revokeObjectURL(url);if(image.width*image.height>40000000){$('status').textContent='照片尺寸过大，请先缩小';return;}picture=image;base=Math.max(360/image.width,360/image.height);center();$('empty').hidden=true;$('empty').style.display='none';$('center').disabled=$('zoom').disabled=false;$('send').disabled=!connected;$('status').textContent='';};
  image.onerror=()=>{URL.revokeObjectURL(url);$('status').textContent='无法读取这张照片';};image.src=url;
 };
 canvas.onpointerdown=e=>{if(!picture||busy)return;canvas.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,cx,cy};};
@@ -93,44 +91,63 @@ canvas.onpointerup=canvas.onpointercancel=()=>{drag=null;};
 canvas.onkeydown=e=>{const shift={ArrowLeft:[-5,0],ArrowRight:[5,0],ArrowUp:[0,-5],ArrowDown:[0,5]}[e.key];if(shift&&picture&&!busy){e.preventDefault();cx+=shift[0];cy+=shift[1];draw();}};
 function rgb565(rgba){const bytes=new Uint8Array(360*360*2);for(let i=0,j=0;i<rgba.length;i+=4,j+=2){const v=((rgba[i]>>3)<<11)|((rgba[i+1]>>2)<<5)|(rgba[i+2]>>3);bytes[j]=v&255;bytes[j+1]=v>>8;}return bytes;}
 function crc32(bytes){let c=0xffffffff;for(const b of bytes){c^=b;for(let i=0;i<8;i++)c=(c>>>1)^((c&1)?0xedb88320:0);}return ((c^0xffffffff)>>>0).toString(16).padStart(8,'0');}
-function controls(value){busy=value;drag=null;for(const id of ['file','center','zoom','send','reset'])$(id).disabled=value||awaitingApply||!!notifyTimer||(['center','zoom','send'].includes(id)&&!picture)||(['send','reset'].includes(id)&&!authorized);}
+function controls(value){busy=value;drag=null;for(const id of ['file','center','zoom','send','reset'])$(id).disabled=value||awaitingApply||!!notifyTimer||(['center','zoom','send'].includes(id)&&!picture)||(['send','reset'].includes(id)&&!connected);}
 function upload(reset){
- if(busy||awaitingApply||!authorized||(!reset&&!picture))return;const key=$('key').value.trim();
- if(!/^[0-9a-f]{32}$/i.test(key)){$('access').open=true;$('key').focus();$('status').textContent='请扫码进入，或填写设备上的授权码';return;}
+ if(busy||awaitingApply||!connected||(!reset&&!picture))return;
  const bytes=reset?new Uint8Array():rgb565(ctx.getImageData(0,0,360,360).data);request=new XMLHttpRequest();$('cancelUpload').hidden=false;
  uploadGeneration=lastGeneration;notifyButton=reset?$('reset'):$('send');notify(reset?'正在恢复…':'正在上传…');controls(true);$('progress').hidden=false;$('progress').value=0;$('status').textContent=reset?'正在恢复…':'正在上传…';
- request.open('POST',reset?'/reset':'/upload');request.timeout=45000;request.setRequestHeader('Content-Type','application/octet-stream');request.setRequestHeader('X-JX-Key',key);request.setRequestHeader('X-JX-CRC',crc32(bytes));
+ request.open('POST',reset?'/reset':'/upload');request.timeout=45000;request.setRequestHeader('Content-Type','application/octet-stream');request.setRequestHeader('X-JX-CRC',crc32(bytes));
  request.upload.onprogress=e=>{if(e.lengthComputable)$('progress').value=e.loaded/e.total*100;};
- request.onload=()=>{if(request.status===200){awaitingApply=true;notify('正在应用…');$('status').textContent='已保存，等待设备应用';refreshStatus();}else{notify('重试');$('status').textContent=request.status===403?'授权码已失效，请重新扫码':request.status===409?'设备忙，请稍后重试':'上传未完成，请重试';}};
+ request.onload=()=>{if(request.status===200){awaitingApply=true;notify('正在应用…');$('status').textContent='已保存，等待设备应用';refreshStatus();}else{notify('重试');$('status').textContent=request.status===403?'请求被拒绝，请从设备地址重新打开':request.status===409?(JSON.parse(request.responseText||'{}').result===7?'壁纸已满，请先删除一张':'设备忙，请稍后重试'):'上传未完成，请重试';}};
  request.onerror=()=>{notify('重试');$('status').textContent='连接中断，请重新连接设备后重试';};request.ontimeout=()=>{notify('重试');$('status').textContent='上传超时，请重试';};
  request.onloadend=()=>{closeConfirm();controls(false);$('progress').hidden=true;$('cancelUpload').hidden=true;request=null;};request.send(bytes);
 }
 $('send').onclick=()=>upload(false);$('reset').onclick=()=>{askConfirm($('reset'),'恢复默认壁纸？',()=>upload(true));};
 
 const commandControls=['sleep','reduced','brightness','wifiEnabled','wifiScan','wifiDisconnect','bleEnabled','bleScan','bleIncoming','bleOutgoing'];
-function key(){return $('key').value.trim();}
-async function api(path,body){
- const response=await fetch(path,{method:body===undefined?'GET':'POST',headers:{'X-JX-Key':key(),...(body===undefined?{}:{'Content-Type':'application/octet-stream'})},body,cache:'no-store',signal:AbortSignal.timeout(8000)});
- if(response.status===403)throw new Error('授权已失效，请在设备上重新允许手机管理');
- if(response.status===409)throw new Error('设备忙，请稍后重试');
- if(!response.ok)throw new Error('请求失败，请检查设备状态');return response.json();
+function api(path,body){
+ return new Promise((resolve,reject)=>{
+  const xhr=new XMLHttpRequest();
+  xhr.open(body===undefined?'GET':'POST',path);xhr.timeout=8000;
+  if(body!==undefined)xhr.setRequestHeader('Content-Type','application/octet-stream');
+  xhr.onload=()=>{
+   if(xhr.status===403){reject(new Error('请求来源不匹配，请直接打开设备地址'));return;}
+   if(xhr.status===409){reject(new Error('设备忙，请稍后重试'));return;}
+   if(xhr.status<200||xhr.status>=300){reject(new Error('请求失败，请检查设备状态'));return;}
+   try{resolve(JSON.parse(xhr.responseText));}catch(error){reject(new Error('设备响应不完整，请重试'));}
+  };
+  xhr.onerror=()=>reject(new Error('连接中断，请检查 Wi-Fi'));
+  xhr.ontimeout=()=>reject(new Error('设备响应超时，请重试'));
+  xhr.onabort=()=>reject(new Error('请求已取消'));
+  xhr.send(body===undefined?null:body);
+ });
 }
-function access(value){authorized=value;for(const id of commandControls)$(id).disabled=!value||!!pendingId||busy;$('reset').disabled=!value||busy;controls(busy);}
+function access(value){connected=value;for(const id of commandControls)$(id).disabled=!value||!!pendingId||busy;$('reset').disabled=!value||busy;controls(busy);}
 async function control(op,args=[]){
- if(!authorized||pendingId||busy)return;
+ if(!connected||pendingId||busy)return;
  try{const result=await api('/control',new Uint8Array([1,op,...args]));pendingId=result.id;$('operation').textContent='操作已提交';access(true);}
  catch(error){$('operation').textContent=error.message;}
 }
-let refreshing=false,lastNetworks='',lastDevices='';
+let refreshing=false,lastNetworks='',lastDevices='',lastLibrary='';
 async function refreshStatus(){
- if(refreshing||!/^[0-9a-f]{32}$/i.test(key()))return;refreshing=true;
+ if(refreshing)return;refreshing=true;
  try{
  const state=await api('/status');if(state.protocol!==1)throw new Error('不支持的设备协议');
- if(pendingId&&state.command_id>=pendingId&&state.command_result!==5){pendingId=0;$('operation').textContent=state.command_result===0?'操作已交给设备，状态如下':state.command_result===1?'设备忙，请重试':state.command_result===4?'授权已失效':'操作未执行，请重试';}
- access(true);$('sessionState').textContent=`已授权 · 剩余 ${state.remaining} 秒`;
+ if(pendingId&&state.command_id>=pendingId&&state.command_result!==5){pendingId=0;$('operation').textContent=state.command_result===0?'操作已交给设备，状态如下':state.command_result===1?'设备忙，请重试':state.command_result===4?'连接已改变，请重试':'操作未执行，请重试';}
+ access(true);$('sessionState').textContent='已连接';
  $('product').textContent=state.product;$('firmware').textContent=state.firmware;$('battery').textContent=state.battery_mv===null?'暂无读数':(state.battery_mv/1000).toFixed(3)+' V';
  const phases=['空闲','接收中','校验中','保存中','已应用','失败','已取消','已超时'];$('wallState').textContent=phases[state.wallpaper.phase]||'处理中';
  lastGeneration=state.wallpaper.generation;
+ if(state.wallpaper.items){
+ const ids=[0,1,...state.wallpaper.items],signature=JSON.stringify([ids,state.wallpaper.selected]);
+ $('libraryCount').textContent=`${state.wallpaper.items.length} / ${state.wallpaper.capacity} 张自定义壁纸`;
+ if(lastLibrary!==signature){lastLibrary=signature;$('library').replaceChildren();for(const id of ids){
+ const row=document.createElement('li'),apply=document.createElement('button');
+ const name=id===0?'晴日':id===1?'流光':`壁纸 ${String(id-1).padStart(2,'0')}`;
+ apply.textContent=name+(state.wallpaper.selected===id?' · 已应用':' · 应用');apply.onclick=()=>control(12,[id]);row.append(apply);
+ if(id>=2){const remove=document.createElement('button');remove.textContent='删除';remove.onclick=()=>askConfirm(remove,`删除${name}？`,()=>control(13,[id]));row.append(remove);}
+ $('library').append(row);}}
+ }
  if(awaitingApply&&state.wallpaper.phase===4&&lastGeneration!==uploadGeneration){$('status').textContent='已保存并应用';awaitingApply=false;notify('已应用',true);}
  if(awaitingApply&&state.wallpaper.phase>=5){awaitingApply=false;notify('重试');$('status').textContent='未应用，请重试';}
  document.documentElement.classList.toggle('reduce-motion',state.reduced_motion);
@@ -142,7 +159,7 @@ async function refreshStatus(){
  const networks=JSON.stringify(wifi.networks);
  if(networks!==lastNetworks){lastNetworks=networks;$('networks').replaceChildren();for(const network of wifi.networks){
  const row=document.createElement('li'),button=document.createElement('button');button.textContent=network.ssid+(network.security===2?' · 企业网络暂不支持':'');button.disabled=network.security===2;
- button.onclick=()=>{if(pendingId||busy)return;$('ssid').value=network.ssid;$('password').value='';$('password').disabled=network.security===0;$('wifiForm').hidden=false;};row.append(button);$('networks').append(row);}}
+ button.onclick=()=>{if(pendingId||busy)return;if(network.saved){const name=new TextEncoder().encode(network.ssid);control(3,[name.length,0,...name]);return;}$('ssid').value=network.ssid;$('password').value='';$('password').disabled=network.security===0;$('wifiForm').hidden=false;};row.append(button);$('networks').append(row);}}
  const ble=state.ble;$('bleEnabled').checked=ble.enabled;
  $('bleState').textContent=!ble.enabled?'已关闭':ble.error?'蓝牙操作失败':ble.connecting?'正在主动连接':ble.scanning?'正在扫描':`来访：${ble.incoming||'未连接'} · 主动：${ble.outgoing||'未连接'}${ble.advertising?' · 广播中':''}`;
  $('bleScan').disabled=!ble.enabled||ble.scanning||ble.connecting||!!pendingId||busy;$('bleIncoming').disabled=!ble.incoming||!!pendingId||busy;$('bleOutgoing').disabled=!ble.outgoing||!!pendingId||busy;
@@ -157,7 +174,7 @@ let tabTimer=0;
 function tabMotion(tab){const nav=document.querySelector('nav');clearTimeout(tabTimer);nav.dataset.tab=tab;nav.style.setProperty('--tab-time','180ms');nav.style.setProperty('--stretch',reducedMotion()?'1':'1.06');if(!reducedMotion())tabTimer=setTimeout(()=>{nav.style.setProperty('--tab-time','90ms');nav.style.setProperty('--stretch','1');},90);}
 $('wallTab').onclick=()=>{tabMotion('wall');$('wallPage').hidden=false;$('devicePage').hidden=true;$('wallTab').setAttribute('aria-selected','true');$('deviceTab').setAttribute('aria-selected','false');};
 $('deviceTab').onclick=()=>{tabMotion('device');$('wallPage').hidden=true;$('devicePage').hidden=false;$('wallTab').setAttribute('aria-selected','false');$('deviceTab').setAttribute('aria-selected','true');refreshStatus();};
-$('authorize').onclick=()=>{pendingId=0;refreshStatus();};$('refresh').onclick=refreshStatus;
+$('refresh').onclick=refreshStatus;
 $('sleep').onchange=()=>control(10,[+$('sleep').checked]);$('reduced').onchange=()=>control(11,[+$('reduced').checked]);$('brightness').onchange=()=>control(9,[+$('brightness').value]);
 $('wifiEnabled').onchange=()=>control(1,[+$('wifiEnabled').checked]);$('wifiScan').onclick=()=>control(2);$('wifiDisconnect').onclick=()=>control(4);
 $('bleEnabled').onchange=()=>control(5,[+$('bleEnabled').checked]);$('bleScan').onclick=()=>control(6);$('bleIncoming').onclick=()=>control(8,[0]);$('bleOutgoing').onclick=()=>control(8,[1]);

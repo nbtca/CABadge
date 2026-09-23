@@ -14,4 +14,14 @@ typedef struct {int slot;uint32_t generation,size,crc;} wall_record_t;
 uint32_t wall_crc(const void *data,size_t size);
 bool wall_load(wall_record_t *record,uint8_t *pixels);
 bool wall_commit(wall_record_t *record,const uint8_t *pixels,uint32_t size,uint32_t crc);
+/* Keep the legacy 1 MB untouched for migration/rollback. */
+#define WALL_LIBRARY_BASE 0x100000u
+#define WALL_LIBRARY_SLOT 0x41000u
+#define WALL_LIBRARY_COUNT 31
+#define WALL_LIBRARY_END (WALL_LIBRARY_BASE+WALL_LIBRARY_SLOT*WALL_LIBRARY_COUNT)
+bool wall_library_scan(wall_record_t records[WALL_LIBRARY_COUNT]);
+bool wall_library_read(const wall_record_t *record,uint8_t *pixels);
+bool wall_library_add(wall_record_t records[WALL_LIBRARY_COUNT],const uint8_t *pixels,uint32_t crc,int *slot);
+bool wall_library_delete(wall_record_t records[WALL_LIBRARY_COUNT],int slot);
+bool wall_library_migrate(wall_record_t records[WALL_LIBRARY_COUNT],uint8_t *scratch);
 #endif

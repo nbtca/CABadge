@@ -71,8 +71,6 @@ class WallpaperPanel(ttk.Frame):
         links.pack(fill='x')
         ttk.Button(links, text='复制地址', command=self.copy_url).pack(side='left', fill='x', expand=True, padx=(0, 4))
         ttk.Button(links, text='浏览器打开', command=self.open_url).pack(side='left', fill='x', expand=True)
-        self.management_button = ttk.Button(right, text='允许手机管理', command=lambda: self.send(17))
-        self.management_button.pack(fill='x', pady=(12, 3))
         self.hotspot_button = ttk.Button(right, text='开启直连热点', command=lambda: self.send(16))
         self.hotspot_button.pack(fill='x', pady=(18, 3))
         ttk.Button(right, text='刷新', command=lambda: self.send(15)).pack(fill='x', pady=3)
@@ -158,12 +156,10 @@ class WallpaperPanel(ttk.Frame):
 
     def set_info(self, info):
         self.info = info
-        self.management_button.configure(text='关闭手机管理' if info.get('authorized') else '允许手机管理')
         address = '192.168.4.1' if info.get('hotspot') else info.get('ip', '')
-        self.url.set(f"http://{address}/#key={info['key']}" if address and info.get('http') and info.get('key') else '')
+        self.url.set(f"http://{address}/" if address and info.get('http') else '')
         self.hotspot_button.configure(text='关闭直连热点' if info.get('hotspot') else '开启直连热点')
-        code = info.get('key', '')
-        self.network_note.set(f"{info['ssid']}\n密码 {info['password']}" if info.get('hotspot') else (f"{address or 'BLE 管理'} · 剩余 {info.get('remaining', 0)} 秒\n授权码\n{code[:16]}\n{code[16:]}" if info.get('authorized') else '点击允许手机管理后使用'))
+        self.network_note.set(f"{info['ssid']}\n开放热点，无需密码" if info.get('hotspot') else (address or '先连接 Wi-Fi 或开启直连热点'))
 
     def copy_url(self):
         if self.url.get():

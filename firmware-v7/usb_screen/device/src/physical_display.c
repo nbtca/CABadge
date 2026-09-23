@@ -1,142 +1,160 @@
 #include "physical_display.h"
+#include "src/misc/lv_timer_private.h"
+#include "frame_trace.h"
+#include "backlight_curve.h"
 #include "driver/gpio.h"
 #include "driver/spi_master.h"
 #include "driver/ledc.h"
 #include "driver/i2c_master.h"
+#include "esp_lcd_st77916.h"
+#include "esp_lcd_panel_ops.h"
+#include "esp_lv_adapter.h"
 #include "esp_heap_caps.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "panel_init.h"
 #include <stdatomic.h>
+#include <string.h>
 
-/* c7c59dff; supplier init, 40 MHz; one complete frame per CS-held pixel stream. */
-#define LCD_ROWS 32
-static spi_device_handle_t lcd;
+static esp_lcd_panel_handle_t panel;
+static esp_lcd_panel_io_handle_t panel_io;
 static i2c_master_dev_handle_t touch;
-static uint8_t *dma[2];
-static spi_transaction_ext_t transfers[2];
-static uint32_t flush_us,copy_us;
-static bool profiling;
-static int actual_hz;
-static lcd_profile_t profile;
-typedef struct {int64_t queued,started,finished;} dma_stamp_t;
-static dma_stamp_t stamps[2];
-static void IRAM_ATTR dma_start(spi_transaction_t *tx){
-    if(tx->user)((dma_stamp_t*)tx->user)->started=esp_timer_get_time();
-}
-static void IRAM_ATTR dma_finish(spi_transaction_t *tx){
-    if(tx->user)((dma_stamp_t*)tx->user)->finished=esp_timer_get_time();
-}
-static void collect_dma(spi_transaction_t *tx){
-    dma_stamp_t *s=tx->user;if(!s)return;
-    profile.queue_us+=(uint32_t)(s->started-s->queued);
-    profile.wire_us+=(uint32_t)(s->finished-s->started);
-}
-void physical_display_profile(bool on){profiling=on;}
-lcd_profile_t physical_display_profile_result(void){return profile;}
-int physical_display_clock_hz(void){return actual_hz;}
-static _Atomic esp_err_t display_error;
-static atomic_bool display_ok,painted;
+static lv_display_t *display;
+static lv_timer_cb_t adapter_refresh;
 static bool touch_ok;
-static esp_err_t lcd_tx(uint8_t command,const void *data,size_t bytes,bool color){
-    spi_transaction_t tx={.cmd=color?0x32:0x02,.addr=(uint32_t)command<<8,
-        .length=bytes*8,.tx_buffer=bytes?data:NULL,.flags=color?SPI_TRANS_MODE_QIO:0};
-    return spi_device_polling_transmit(lcd,&tx);
+static atomic_bool painted,completed,transition_owner;
+static _Atomic esp_err_t display_error;
+static int64_t transfer_start;
+static uint32_t transfer_us;
+static uint8_t *staging[2];
+static atomic_bool notify_flush;
+static bool IRAM_ATTR color_done(esp_lcd_panel_io_handle_t io,esp_lcd_panel_io_event_data_t *event,void *ctx){
+    if(atomic_load_explicit(&transition_owner,memory_order_acquire)){atomic_store(&painted,true);return false;}
+    if(!atomic_load_explicit(&notify_flush,memory_order_acquire))return false;
+    frame_trace(5,0);(void)io;(void)event;(void)ctx;
+    transfer_us=(uint32_t)(esp_timer_get_time()-transfer_start);
+    atomic_store(&painted,true);
+    bool wake=esp_lv_adapter_display_notify_color_trans_done_from_isr(display);
+    atomic_store_explicit(&completed,true,memory_order_release);
+    return wake;
 }
-static void lcd_window(uint8_t out[4],int first,int last){
-    out[0]=first>>8;out[1]=first;out[2]=last>>8;out[3]=last;
+const char *physical_display_readback(void){return "{\"driver\":\"esp_lcd_st77916\",\"qspi_config_hz\":40000000,\"readback_available\":false}";}
+int physical_display_clock_hz(void){return 40000000;}
+int physical_display_error(void){return display_error;}
+esp_lcd_panel_handle_t physical_display_panel(void){return panel;}
+esp_lcd_panel_io_handle_t physical_display_io(void){return panel_io;}
+static void owned_refresh(lv_timer_t *timer){
+    /* Layout dirtiness can resume a refresh timer even with invalidation off.
+     * Gate the actual entry too; input/service/animation timers stay untouched. */
+    if(physical_display_transition_active()){lv_timer_pause(timer);return;}
+    adapter_refresh(timer);
 }
-static void lcd_copy(uint8_t *out,const uint8_t *in,size_t bytes){
-    for(size_t i=0;i<bytes;i+=2){out[i]=in[i+1];out[i+1]=in[i];}
+void physical_display_bind(lv_display_t *disp){
+    display=disp;
+    lv_timer_t *refresh=lv_display_get_refr_timer(display);
+    adapter_refresh=refresh->timer_cb;lv_timer_set_cb(refresh,owned_refresh);
+    esp_lcd_panel_io_callbacks_t callbacks={.on_color_trans_done=color_done};
+    ESP_ERROR_CHECK(esp_lcd_panel_io_register_event_callbacks(panel_io,&callbacks,NULL));
 }
-static unsigned backlight_duty(int brightness,bool asleep){
-    if(asleep||brightness<=0)return 0;
-    if(brightness>100)brightness=100;
-    /* First-board ceiling: 51/1024 (~5%); raise only after LED current measurement. */
-    return (unsigned)brightness*51/100;
+esp_err_t physical_display_draw(int x1,int y1,int x2,int y2,const void *pixels){
+    if(atomic_load_explicit(&transition_owner,memory_order_acquire))return ESP_ERR_INVALID_STATE;
+    transfer_start=esp_timer_get_time();
+    esp_err_t err=ESP_OK;
+    int width=x2-x1;
+    if(width<=0||width>360||y2<=y1)return ESP_ERR_INVALID_ARG;
+    /* Stride is the compact LVGL flush area. Drain before reusing a DMA source.
+     * Internal sources avoid the SPI driver's two ~24KB PSRAM bounce buffers. */
+    for(int y=y1,index=0;y<y2;y+=PHYSICAL_STAGING_ROWS,index^=1){
+        int rows=y2-y;if(rows>PHYSICAL_STAGING_ROWS)rows=PHYSICAL_STAGING_ROWS;
+        err=esp_lcd_panel_io_tx_param(panel_io,-1,NULL,0);if(err!=ESP_OK)break;
+        memcpy(staging[index],(const uint8_t*)pixels+(y-y1)*width*2,rows*width*2);
+        atomic_store_explicit(&notify_flush,y+rows==y2,memory_order_release);
+        err=esp_lcd_panel_draw_bitmap(panel,x1,y,x2,y+rows,staging[index]);
+        if(err!=ESP_OK)break;
+    }
+    frame_trace(4,err);
+    if(err!=ESP_OK){
+        /* Drain any successfully queued chunks before adapter releases its draw buffer. */
+        ESP_ERROR_CHECK(esp_lcd_panel_io_tx_param(panel_io,-1,NULL,0));
+        display_error=err;
+    }
+    return err;
 }
+void physical_display_wait(void){
+    ESP_ERROR_CHECK(esp_lcd_panel_io_tx_param(panel_io,-1,NULL,0));
+}
+bool physical_display_complete(uint32_t *us){
+    if(!atomic_exchange_explicit(&completed,false,memory_order_acq_rel))return false;
+    *us=transfer_us;return true;
+}
+bool physical_display_transition_active(void){return atomic_load_explicit(&transition_owner,memory_order_acquire);}
+void *physical_display_transition_buffer(unsigned index){return physical_display_transition_active()&&index<2?staging[index]:NULL;}
+bool physical_display_transition_acquire(void){
+    /* Called under the existing GUI lock, outside any refresh callback. Pausing
+     * this timer leaves the adapter's input, animation and service timers alive. */
+    if(!display||physical_display_transition_active()||display_error||!lv_display_is_invalidation_enabled(display))return false;
+    lv_timer_t *timer=lv_display_get_refr_timer(display);
+    if(!timer)return false;
+    lv_timer_pause(timer);
+    esp_err_t err=esp_lcd_panel_io_tx_param(panel_io,-1,NULL,0);
+    if(err!=ESP_OK){lv_timer_resume(timer);return false;}
+    lv_display_enable_invalidation(display,false);
+    atomic_store_explicit(&transition_owner,true,memory_order_release);
+    return true;
+}
+esp_err_t physical_display_transition_draw(int x1,int y1,int x2,int y2,const void *pixels){
+    if(!physical_display_transition_active())return ESP_ERR_INVALID_STATE;
+    return esp_lcd_panel_draw_bitmap(panel,x1,y1,x2,y2,pixels);
+}
+esp_err_t physical_display_transition_drain(void){
+    return esp_lcd_panel_io_tx_param(panel_io,-1,NULL,0);
+}
+void physical_display_transition_release(void){
+    if(!physical_display_transition_active())return;
+    /* Caller has joined the worker. Drain also reclaims SPI descriptors before
+     * its source memory is reusable; elapsed time is never a completion signal. */
+    ESP_ERROR_CHECK(physical_display_transition_drain());
+    atomic_store_explicit(&transition_owner,false,memory_order_release);
+    lv_display_enable_invalidation(display,true);
+    lv_obj_invalidate(lv_display_get_screen_active(display));
+    lv_timer_resume(lv_display_get_refr_timer(display));
+    lv_timer_ready(lv_display_get_refr_timer(display));
+}
+unsigned physical_display_backlight_duty(void){return ledc_get_duty(LEDC_LOW_SPEED_MODE,LEDC_CHANNEL_0);}
 void physical_display_init(void){
     gpio_set_level(6,0);gpio_set_direction(6,GPIO_MODE_OUTPUT);
     vTaskDelay(pdMS_TO_TICKS(10));gpio_set_level(6,1);vTaskDelay(pdMS_TO_TICKS(50));
-    spi_bus_config_t bus={.sclk_io_num=12,.mosi_io_num=11,.miso_io_num=13,
-        .quadwp_io_num=14,.quadhd_io_num=9,.max_transfer_sz=360*LCD_ROWS*2,
-        .flags=SPICOMMON_BUSFLAG_MASTER|SPICOMMON_BUSFLAG_QUAD};
+    spi_bus_config_t bus=ST77916_PANEL_BUS_QSPI_CONFIG(12,11,13,14,9,360*32*2);
     ESP_ERROR_CHECK(spi_bus_initialize(SPI2_HOST,&bus,SPI_DMA_CH_AUTO));
-    spi_device_interface_config_t dev={.command_bits=8,.address_bits=24,.clock_speed_hz=40000000,
-        .pre_cb=dma_start,.post_cb=dma_finish,.mode=0,.spics_io_num=10,.queue_size=2,.cs_ena_pretrans=1,.cs_ena_posttrans=1,.flags=SPI_DEVICE_HALFDUPLEX};
-    ESP_ERROR_CHECK(spi_bus_add_device(SPI2_HOST,&dev,&lcd));
-    ESP_ERROR_CHECK(spi_device_get_actual_freq(lcd,&actual_hz));actual_hz*=1000;
-    gpio_set_level(7,0);gpio_set_direction(7,GPIO_MODE_OUTPUT);
-    vTaskDelay(pdMS_TO_TICKS(10));gpio_set_level(7,1);vTaskDelay(pdMS_TO_TICKS(120));
-    ESP_ERROR_CHECK(lcd_tx(0x36,(uint8_t[]){0},1,false));
-    for(unsigned i=0;i<sizeof(panel_init)/sizeof(panel_init[0]);i++){
-        ESP_ERROR_CHECK(lcd_tx(panel_init[i].command,panel_init[i].data,panel_init[i].count,false));
-        if(panel_init[i].delay_ms)vTaskDelay(pdMS_TO_TICKS(panel_init[i].delay_ms));
+    esp_lcd_panel_io_spi_config_t io=ST77916_PANEL_IO_QSPI_CONFIG(10,NULL,NULL);
+    io.pclk_hz=40000000;io.trans_queue_depth=2;io.cs_ena_pretrans=1;io.cs_ena_posttrans=1;
+    ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)SPI2_HOST,&io,&panel_io));
+    for(unsigned i=0;i<2;i++){
+        staging[i]=heap_caps_malloc(360*PHYSICAL_STAGING_ROWS*2,MALLOC_CAP_INTERNAL|MALLOC_CAP_DMA);
+        ESP_ERROR_CHECK(staging[i]?ESP_OK:ESP_ERR_NO_MEM);
     }
-    for(int i=0;i<2;i++){
-        dma[i]=heap_caps_malloc(360*LCD_ROWS*2,MALLOC_CAP_DMA|MALLOC_CAP_INTERNAL);
-        ESP_ERROR_CHECK(dma[i]?ESP_OK:ESP_ERR_NO_MEM);
-    }
+    /* Preserve this module's verified supplier sequence, not the driver's generic panel defaults. */
+    size_t count=sizeof(panel_init)/sizeof(panel_init[0]);
+    st77916_lcd_init_cmd_t *commands=heap_caps_calloc(count+1,sizeof(*commands),MALLOC_CAP_SPIRAM|MALLOC_CAP_8BIT);
+    ESP_ERROR_CHECK(commands?ESP_OK:ESP_ERR_NO_MEM);
+    static const uint8_t madctl=0;
+    commands[0]=(st77916_lcd_init_cmd_t){0x36,&madctl,1,0};
+    for(size_t i=0;i<count;i++)commands[i+1]=(st77916_lcd_init_cmd_t){panel_init[i].command,panel_init[i].data,panel_init[i].count,panel_init[i].delay_ms};
+    st77916_vendor_config_t vendor={.init_cmds=commands,.init_cmds_size=count+1,.flags.use_qspi_interface=1};
+    esp_lcd_panel_dev_config_t cfg={.reset_gpio_num=7,.rgb_ele_order=LCD_RGB_ELEMENT_ORDER_RGB,.bits_per_pixel=16,.vendor_config=&vendor};
+    ESP_ERROR_CHECK(esp_lcd_new_panel_st77916(panel_io,&cfg,&panel));
+    ESP_ERROR_CHECK(esp_lcd_panel_reset(panel));
+    ESP_ERROR_CHECK(esp_lcd_panel_init(panel));
     ledc_timer_config_t timer={.speed_mode=LEDC_LOW_SPEED_MODE,.duty_resolution=LEDC_TIMER_10_BIT,
         .timer_num=LEDC_TIMER_0,.freq_hz=1000,.clk_cfg=LEDC_AUTO_CLK};
     ledc_channel_config_t channel={.gpio_num=1,.speed_mode=LEDC_LOW_SPEED_MODE,
         .channel=LEDC_CHANNEL_0,.timer_sel=LEDC_TIMER_0,.duty=0};
     ESP_ERROR_CHECK(ledc_timer_config(&timer));ESP_ERROR_CHECK(ledc_channel_config(&channel));
-    display_ok=true;
 }
-void physical_display_flush(const lv_area_t *a,const uint8_t *pixels){
-    flush_us=copy_us=0;profile=(lcd_profile_t){0};
-    if(!display_ok)return;
-    if(a->x1<0||a->y1<0||a->x2>=360||a->y2>=360||a->x1>a->x2||a->y1>a->y2)return;
-    int64_t started=esp_timer_get_time();
-    int w=a->x2-a->x1+1,h=a->y2-a->y1+1;uint8_t window[4];
-    esp_err_t err=spi_device_acquire_bus(lcd,portMAX_DELAY);
-    if(err!=ESP_OK){display_error=err;display_ok=false;return;}
-    lcd_window(window,a->x1,a->x2);err=lcd_tx(0x2a,window,4,false);
-    if(err==ESP_OK){lcd_window(window,a->y1,a->y2);err=lcd_tx(0x2b,window,4,false);}
-    unsigned pending=0,slot=0;
-    for(int row=0;row<h&&err==ESP_OK;row+=LCD_ROWS){
-        if(pending==2){
-            spi_transaction_t *done;
-            int64_t waiting=profiling?esp_timer_get_time():0;
-            ESP_ERROR_CHECK(spi_device_get_trans_result(lcd,&done,portMAX_DELAY));pending--;
-            if(profiling){profile.wait_us+=(uint32_t)(esp_timer_get_time()-waiting);collect_dma(done);}
-        }
-        int rows=h-row<LCD_ROWS?h-row:LCD_ROWS;size_t bytes=w*rows*2;
-        int64_t copying=esp_timer_get_time();
-        lcd_copy(dma[slot],pixels+row*w*2,bytes);copy_us+=(uint32_t)(esp_timer_get_time()-copying);
-        spi_transaction_ext_t *tx=&transfers[slot];*tx=(spi_transaction_ext_t){0};
-        tx->base=(spi_transaction_t){.cmd=0x32,.addr=0x002c00,.length=bytes*8,
-            .tx_buffer=dma[slot],.flags=SPI_TRANS_MODE_QIO};
-        /* First chunk carries RAMWR. The remaining chunks continue the same CS-low data phase. */
-        if(row)tx->base.flags|=SPI_TRANS_VARIABLE_CMD|SPI_TRANS_VARIABLE_ADDR|SPI_TRANS_VARIABLE_DUMMY;
-        if(row+rows<h)tx->base.flags|=SPI_TRANS_CS_KEEP_ACTIVE;
-        if(profiling){stamps[slot]=(dma_stamp_t){.queued=esp_timer_get_time()};tx->base.user=&stamps[slot];}
-        err=spi_device_queue_trans(lcd,&tx->base,portMAX_DELAY);
-        if(err==ESP_OK){pending++;slot^=1;}
-    }
-    while(pending){
-        spi_transaction_t *done;
-        int64_t waiting=profiling?esp_timer_get_time():0;
-            ESP_ERROR_CHECK(spi_device_get_trans_result(lcd,&done,portMAX_DELAY));pending--;
-            if(profiling){profile.wait_us+=(uint32_t)(esp_timer_get_time()-waiting);collect_dma(done);}
-    }
-    if(err!=ESP_OK){
-        /* End any held CS after draining DMA. A failed frame is never counted as presented. */
-        spi_transaction_ext_t end={.base={.flags=SPI_TRANS_VARIABLE_CMD|SPI_TRANS_VARIABLE_ADDR|SPI_TRANS_VARIABLE_DUMMY}};
-        spi_device_polling_transmit(lcd,&end.base);
-    }
-    spi_device_release_bus(lcd);
-    flush_us=(uint32_t)(esp_timer_get_time()-started);display_error=err;
-    if(err!=ESP_OK){display_ok=false;}else painted=true;
-}
-uint32_t physical_display_flush_us(void){return flush_us;}
-uint32_t physical_display_copy_us(void){return copy_us;}
-int physical_display_error(void){return display_error;}
 void physical_display_backlight(int brightness,bool asleep){
     static int previous=-1;
-    int duty=backlight_duty(brightness,asleep||!display_ok||!painted);
+    int duty=backlight_duty(brightness,asleep||display_error||!painted);
     if(duty==previous)return;
     ESP_ERROR_CHECK(ledc_set_duty(LEDC_LOW_SPEED_MODE,LEDC_CHANNEL_0,duty));
     ESP_ERROR_CHECK(ledc_update_duty(LEDC_LOW_SPEED_MODE,LEDC_CHANNEL_0));previous=duty;

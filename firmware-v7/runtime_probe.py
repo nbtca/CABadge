@@ -47,7 +47,7 @@ def main():
     out=Path(__file__).resolve().parent.parent/'outputs/performance';out.mkdir(exist_ok=True)
     stem=out/('runtime-'+datetime.now().strftime('%Y%m%d-%H%M%S'));link=Link(args.port);first=original=None;result={'scenarios':[],'metrics':'CPU percent of one core; both cores total 200%. Stack high-water remaining bytes; heap shared, not per-task ownership. work_wall_pct includes preemption; GUI includes LCD wait.'}
     try:
-        link.request(32,b'\x01',33);original=link.state();first=link.snap();assert first['firmware'] in ('7.2.0-monitor','7.2.1-monitor', '7.2.2-monitor', '7.2.3-monitor','7.3.0-fluid','7.3.1-internal','7.3.2-fluid','7.3.3-fluid','7.3.4-async','7.3.5-refresh16','7.3.6-anim16','7.3.7-mem')
+        link.request(32,b'\x01',33);original=link.state();first=link.snap();assert first['firmware'] in ('7.2.0-monitor','7.2.1-monitor', '7.2.2-monitor', '7.2.3-monitor','7.3.0-fluid','7.3.1-internal','7.3.2-fluid','7.3.3-fluid','7.3.4-async','7.3.5-refresh16','7.3.6-anim16','7.3.7-mem','7.3.8-mem','7.3.9-mem','7.3.10-mem','7.4.0-idf61','7.4.1-idf61','7.4.2-idf61','7.4.3-idf61','7.5.0-library','7.5.1-direct','7.5.2-web','7.5.3-http','7.5.4-upload','7.6.0-apps','7.9.0-direct')
         result['firmware']=first['firmware'];result['original']={k:original[k] for k in ('asleep','brightness','reduced_motion')};result['initial_snapshot']=first
         link.command(10,b'\x00');link.snap(b'\x02\x00')
         if args.animations:assert link.command(11,b'\x00')==0

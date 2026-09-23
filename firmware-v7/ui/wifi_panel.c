@@ -1,24 +1,29 @@
 #include "badge_ui.h"
+#include "ui_transition_cache.h"
+#ifdef ESP_PLATFORM
+#include "display_perf.h"
+#endif
+static void panel_x(void *obj,int32_t x);
+static lv_obj_t *direct_panel;
+static int direct_panel_x;
+static bool direct_panel_rejected;
+void badge_panel_cancel(lv_obj_t *p){if(p){if(direct_panel==p){badge_ui_direct_panel_end();direct_panel=NULL;}lv_anim_delete(p,panel_x);ui_transition_cache_end(p);lv_obj_add_flag(p,LV_OBJ_FLAG_HIDDEN);}}
 #include <string.h>
 #include <stdio.h>
 
+static void cached_text(lv_obj_t *label,const char *text){
+    if(strcmp(lv_label_get_text(label),text)){ui_transition_cache_invalidate(label);lv_label_set_text(label,text);}
+}
 static lv_obj_t *wall_panel,*wall_qr,*wall_address,*wall_message,*wall_ap_label;
 static void (*wall_hotspot)(void);
 static char wall_url[128];
-static lv_obj_t *management_button,*management_code;
-static void (*management_action)(void);
-void badge_management_bind(void (*callback)(void)){management_action=callback;}
-void badge_management_toggle(void){if(management_action)management_action();}
-static void management_clicked(lv_event_t *e){(void)e;badge_management_toggle();}
-void badge_management_update(bool active,const char *code,unsigned remaining){
-    if(!management_button)return;
-    lv_label_set_text(lv_obj_get_child(management_button,0),active?"关闭手机管理":"允许手机管理");
-    lv_label_set_text_fmt(management_code,active?"%.*s\n%s\n剩余 %u 秒":"在设备上授权后使用",16,code,strlen(code)>16?code+16:"",remaining);
-    if(active&&! *wall_url)lv_obj_remove_flag(management_code,LV_OBJ_FLAG_HIDDEN);else if(active)lv_obj_add_flag(management_code,LV_OBJ_FLAG_HIDDEN);else lv_obj_remove_flag(management_code,LV_OBJ_FLAG_HIDDEN);
-}
+/* Legacy PC adapter hooks: phone management is directly available now. */
+void badge_management_bind(void (*callback)(void)){(void)callback;}
+void badge_management_toggle(void){}
+void badge_management_update(bool active,const char *code,unsigned remaining){(void)active;(void)code;(void)remaining;}
 void badge_wallpaper_bind(void (*callback)(void)){wall_hotspot=callback;}
 void badge_wallpaper_hotspot(void){if(wall_hotspot)wall_hotspot();}
-void badge_wallpaper_hide(void){if(wall_panel)lv_obj_add_flag(wall_panel,LV_OBJ_FLAG_HIDDEN);}
+void badge_wallpaper_hide(void){badge_panel_cancel(wall_panel);}
 static void wall_back(lv_event_t *e){(void)e;badge_ui_external_panel(wall_panel,false);}
 static void wall_toggle(lv_event_t *e){(void)e;badge_wallpaper_hotspot();}
 void badge_wallpaper_open(void){badge_wifi_hide();badge_ble_hide();badge_ui_external_panel(wall_panel,true);}
@@ -40,7 +45,7 @@ static lv_obj_t *surface(lv_obj_t *p,int x,int y,int w,int h,uint32_t color,int 
     lv_obj_remove_flag(o,LV_OBJ_FLAG_SCROLLABLE);return o;
 }
 static lv_obj_t *label(lv_obj_t *p,const char *value,int x,int y,int width,const lv_font_t *font,uint32_t color){
-    lv_obj_t *o=lv_label_create(p);lv_label_set_text(o,value);lv_obj_set_pos(o,x,y);lv_obj_set_width(o,width);
+    lv_obj_t *o=lv_label_create(p);cached_text(o,value);lv_obj_set_pos(o,x,y);lv_obj_set_width(o,width);
     lv_obj_set_style_text_font(o,font,0);lv_obj_set_style_text_color(o,lv_color_hex(color),0);
     lv_label_set_long_mode(o,LV_LABEL_LONG_DOT);return o;
 }
@@ -62,32 +67,32 @@ void badge_wallpaper_create(lv_obj_t *parent){
     lv_qrcode_set_quiet_zone(wall_qr,true);
     lv_obj_set_style_border_width(wall_qr,6,0);lv_obj_set_style_border_color(wall_qr,lv_color_white(),0);
     wall_address=label(wall_panel,"",66,251,228,&font14,UI_TEXT);lv_obj_set_style_text_align(wall_address,LV_TEXT_ALIGN_CENTER,0);
-    management_code=label(wall_panel,"在设备上授权后使用",72,139,216,&font14,UI_TEXT);lv_obj_set_style_text_align(management_code,LV_TEXT_ALIGN_CENTER,0);
-    management_button=button(wall_panel,"允许手机管理",70,270,106,44,management_clicked);
-    lv_obj_t *ap=button(wall_panel,"开启直连热点",184,270,106,44,wall_toggle);wall_ap_label=lv_obj_get_child(ap,0);
-    lv_obj_add_flag(wall_qr,LV_OBJ_FLAG_HIDDEN);badge_wallpaper_hide();
+    lv_obj_t *ap=button(wall_panel,"开启直连热点",90,275,180,44,wall_toggle);wall_ap_label=lv_obj_get_child(ap,0);
+    lv_obj_add_flag(wall_qr,LV_OBJ_FLAG_HIDDEN);badge_wallpaper_hide();ui_transition_cache_register(wall_panel,false);ui_transition_cache_identify(wall_panel,32);
 }
 void badge_wallpaper_update(const char *url,bool hotspot,const char *name,const char *password,const char *message){
     if(!wall_panel)return;
     if(strcmp(url,wall_url)){
+        ui_transition_cache_invalidate(wall_panel);
         snprintf(wall_url,sizeof(wall_url),"%s",url);
         if(*url&&lv_qrcode_update(wall_qr,url,strlen(url))==LV_RESULT_OK)lv_obj_remove_flag(wall_qr,LV_OBJ_FLAG_HIDDEN);
         else lv_obj_add_flag(wall_qr,LV_OBJ_FLAG_HIDDEN);
-        if(*url)lv_obj_add_flag(management_code,LV_OBJ_FLAG_HIDDEN);
     }
-    lv_label_set_text(wall_ap_label,hotspot?"关闭直连热点":"开启直连热点");
-    if(hotspot){lv_label_set_text_fmt(wall_message,"%s",name);lv_label_set_text_fmt(wall_address,"密码 %s",password);}
-    else {lv_label_set_text(wall_message,*message?message:*url?"手机扫码，选择照片":"先连接 Wi-Fi");
-        char address[40];size_t n=strcspn(url,"#");snprintf(address,sizeof(address),"%.*s",(int)n,url);lv_label_set_text(wall_address,address);}
+    cached_text(wall_ap_label,hotspot?"关闭直连热点":"开启直连热点");
+    if(hotspot){cached_text(wall_message,name);cached_text(wall_address,"http://192.168.4.1");}
+    else {cached_text(wall_message,*message?message:*url?"手机扫码，选择照片":"先连接 Wi-Fi");
+        char address[40];size_t n=strcspn(url,"#");snprintf(address,sizeof(address),"%.*s",(int)n,url);cached_text(wall_address,address);}
 }
 static void cancel(lv_event_t *e){
+    if(lv_obj_has_flag(sheet,LV_OBJ_FLAG_HIDDEN)&&!lv_textarea_get_text(password)[0])return;
+    ui_transition_cache_invalidate(panel);
     (void)e;lv_textarea_set_text(password,"");lv_obj_add_flag(sheet,LV_OBJ_FLAG_HIDDEN);
 }
 static void submit(lv_event_t *e){
     (void)e;const char *value=lv_textarea_get_text(password);size_t n=strlen(value);
-    if(selected_secure&&(n<8||n>63)){lv_label_set_text(sheet_note,"密码需要 8～63 位");return;}
-    for(size_t i=0;i<n;i++)if((unsigned char)value[i]<32||(unsigned char)value[i]>126){lv_label_set_text(sheet_note,"请使用英文、数字或符号");return;}
-    if(!actions.connect){lv_label_set_text(sheet_note,"离线预览，连接需在实板运行");return;}
+    if(selected_secure&&(n<8||n>63)){cached_text(sheet_note,"密码需要 8～63 位");return;}
+    for(size_t i=0;i<n;i++)if((unsigned char)value[i]<32||(unsigned char)value[i]>126){cached_text(sheet_note,"请使用英文、数字或符号");return;}
+    if(!actions.connect){cached_text(sheet_note,"离线预览，连接需在实板运行");return;}
     char copy[64];memcpy(copy,value,n+1);
     badge_ui_wifi_message("正在连接…");
     actions.connect(selected,selected_secure?copy:"");
@@ -115,11 +120,13 @@ static void key_pressed(lv_event_t *e){
     else badge_ui_wifi_text(!strcmp(value,"Space")?" ":value);
 }
 static void select_network(lv_event_t *e){
+    ui_transition_cache_invalidate(panel);
     int index=(int)(intptr_t)lv_event_get_user_data(e);if(index<0||index>=network_count)return;
     if(networks[index].security==2){badge_ui_wifi_message("此网络需企业账号认证，暂不支持");return;}
+    if(networks[index].saved&&actions.connect){actions.connect(networks[index].ssid,"");return;}
     snprintf(selected,sizeof(selected),"%s",networks[index].ssid);selected_secure=networks[index].security!=0;
-    lv_label_set_text(lv_obj_get_child(sheet,0),selected);
-    lv_label_set_text(sheet_note,selected_secure?"输入密码":"开放网络，无需密码");
+    cached_text(lv_obj_get_child(sheet,0),selected);
+    cached_text(sheet_note,selected_secure?"输入密码":"开放网络，无需密码");
     lv_textarea_set_text(password,"");lv_buttonmatrix_set_map(keyboard,lower);
     if(selected_secure){lv_obj_remove_flag(password,LV_OBJ_FLAG_HIDDEN);lv_obj_remove_flag(keyboard,LV_OBJ_FLAG_HIDDEN);}
     else {lv_obj_add_flag(password,LV_OBJ_FLAG_HIDDEN);lv_obj_add_flag(keyboard,LV_OBJ_FLAG_HIDDEN);}
@@ -127,7 +134,14 @@ static void select_network(lv_event_t *e){
 }
 void badge_ui_wifi_results(const badge_wifi_ap_t *aps,int count){
     if(!panel)return;
-    network_count=count<0?0:count>12?12:count;
+    int next_count=count<0?0:count>12?12:count;
+    static int old_connected=-99;static char old_ssid[33];
+    bool same=next_count==network_count&&old_connected==state->wifi_connected&&!strcmp(old_ssid,state->wifi_ssid);
+    for(int i=0;same&&i<next_count;i++)same=!strncmp(networks[i].ssid,aps[i].ssid,32)&&networks[i].rssi==aps[i].rssi&&networks[i].security==aps[i].security&&networks[i].saved==aps[i].saved;
+    if(same){badge_ui_wifi_message(network_count?"附近的网络":"没有发现网络，点刷新重试");return;}
+    old_connected=state->wifi_connected;snprintf(old_ssid,sizeof(old_ssid),"%s",state->wifi_ssid);
+    ui_transition_cache_invalidate_reason(panel,"WIFI_LIST");
+    network_count=next_count;
     if(network_count)memcpy(networks,aps,network_count*sizeof(*aps));
     lv_obj_clean(network_list);
     for(int i=0;i<network_count;i++){
@@ -140,14 +154,15 @@ void badge_ui_wifi_results(const badge_wifi_ap_t *aps,int count){
         if(connected)lv_obj_set_style_bg_color(row,lv_color_hex(UI_SELECTED),0);
         label(row,networks[i].ssid,14,9,228,&font18,UI_TEXT);
         char detail[72];
-        snprintf(detail,sizeof(detail),"%s · %d dBm",connected?"已连接":networks[i].security==2?"企业认证":networks[i].security?"需要密码":"开放网络",networks[i].rssi);
+        snprintf(detail,sizeof(detail),"%s · %d dBm",connected?"已连接":networks[i].saved?"已保存":networks[i].security==2?"企业认证":networks[i].security?"需要密码":"开放网络",networks[i].rssi);
         label(row,detail,14,34,228,&font14,UI_MUTED);
     }
     lv_obj_scroll_to_y(network_list,0,LV_ANIM_OFF);
     badge_ui_wifi_message(network_count?"附近的网络":"没有发现网络，点刷新重试");
 }
-void badge_ui_wifi_message(const char *message){if(note)lv_label_set_text(note,message);}
+void badge_ui_wifi_message(const char *message){if(note&&strcmp(lv_label_get_text(note),message)){cached_text(note,message);}}
 void badge_ui_wifi_bind(const badge_wifi_actions_t *value){actions=value?*value:(badge_wifi_actions_t){0};}
+static void cache_scrolled(lv_event_t *e){ui_transition_cache_invalidate(lv_event_get_target_obj(e));}
 static void scan(lv_event_t *e){
     (void)e;
     if(!state->wifi_enabled){badge_ui_wifi_message("Wi-Fi 已关闭");return;}
@@ -167,8 +182,8 @@ static void enabled(lv_event_t *e){
 void badge_wifi_request_enable(bool on){if(actions.enable)actions.enable(on);else if(!state->live){state->wifi_enabled=on;badge_ui_refresh();}else badge_ui_notice("请先连接设备");}
 static void close_panel(lv_event_t *e){(void)e;cancel(NULL);badge_ui_external_panel(panel,false);}
 void badge_wifi_open(void){badge_ble_hide();badge_wallpaper_hide();badge_ui_external_panel(panel,true);badge_wifi_refresh();scan(NULL);}
-void badge_wifi_hide(void){if(panel)lv_obj_add_flag(panel,LV_OBJ_FLAG_HIDDEN);if(sheet)cancel(NULL);}
-bool badge_ui_wifi_visible(void){return panel&&!lv_obj_has_flag(panel,LV_OBJ_FLAG_HIDDEN);}
+void badge_wifi_hide(void){badge_panel_cancel(panel);if(sheet)cancel(NULL);}
+bool badge_ui_wifi_visible(void){return ui_transition_cache_visible(panel);}
 void badge_wifi_refresh(void){
     if(!toggle)return;
     badge_liquid_set(toggle,state->wifi_enabled,state->reduced_motion);
@@ -179,7 +194,7 @@ void badge_wifi_create(lv_obj_t *parent,badge_state_t *value){
     toggle=badge_liquid_create(panel,228,48,enabled);
     note=label(panel,"",52,78,256,&font14,UI_MUTED);
     network_list=surface(panel,52,106,256,186,UI_BG,0);lv_obj_add_flag(network_list,LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_remove_flag(network_list,LV_OBJ_FLAG_SCROLL_CHAIN);lv_obj_set_scroll_dir(network_list,LV_DIR_VER);lv_obj_set_scrollbar_mode(network_list,LV_SCROLLBAR_MODE_OFF);
+    lv_obj_remove_flag(network_list,LV_OBJ_FLAG_SCROLL_CHAIN);lv_obj_set_scroll_dir(network_list,LV_DIR_VER);lv_obj_set_scrollbar_mode(network_list,LV_SCROLLBAR_MODE_OFF);lv_obj_add_event_cb(network_list,cache_scrolled,LV_EVENT_SCROLL,NULL);
     button(panel,"刷新列表",123,300,114,44,scan);
     sheet=surface(panel,0,0,360,360,UI_BG,180);lv_obj_set_style_clip_corner(sheet,true,0);
     lv_obj_t *title=label(sheet,"",90,27,180,&font18,UI_TEXT);
@@ -198,7 +213,7 @@ void badge_wifi_create(lv_obj_t *parent,badge_state_t *value){
     lv_obj_set_style_bg_color(keyboard,lv_color_hex(UI_ACCENT),LV_PART_ITEMS|LV_STATE_PRESSED);
     lv_obj_set_style_radius(keyboard,5,LV_PART_ITEMS);lv_obj_set_style_pad_column(keyboard,3,0);lv_obj_set_style_pad_row(keyboard,4,0);
     lv_buttonmatrix_set_map(keyboard,lower);lv_obj_add_event_cb(keyboard,key_pressed,LV_EVENT_VALUE_CHANGED,NULL);
-    lv_obj_add_flag(sheet,LV_OBJ_FLAG_HIDDEN);lv_obj_add_flag(panel,LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(sheet,LV_OBJ_FLAG_HIDDEN);lv_obj_add_flag(panel,LV_OBJ_FLAG_HIDDEN);ui_transition_cache_register(panel,false);ui_transition_cache_identify(panel,30);
 }
 
 /* The Bluetooth settings page shares the same round-screen list controls. */
@@ -213,7 +228,7 @@ const char *badge_ble_summary(void){
 static lv_obj_t *ble_panel,*ble_toggle,*ble_note,*ble_list,*ble_scan_button;
 static void ble_render(void);
 void badge_ui_ble_bind(const badge_ble_actions_t *value){ble_actions=value?*value:(badge_ble_actions_t){0};}
-void badge_ui_ble_message(const char *value){if(ble_note)lv_label_set_text(ble_note,value);}
+void badge_ui_ble_message(const char *value){if(ble_note&&strcmp(lv_label_get_text(ble_note),value)){cached_text(ble_note,value);}}
 static void ble_close(lv_event_t *e){(void)e;badge_ui_external_panel(ble_panel,false);}
 void badge_ble_request_toggle(void){if(ble_actions.enable)ble_actions.enable(!ble_info.enabled);else if(!state->live){ble_info.enabled=!ble_info.enabled;ble_info.advertising=ble_info.enabled;ble_render();badge_ui_refresh();}else badge_ui_notice("请先连接设备");}
 static void ble_enable(lv_event_t *e){
@@ -246,12 +261,22 @@ static void ble_disconnect(lv_event_t *e){
     if(ble_actions.disconnect)ble_actions.disconnect((bool)(intptr_t)lv_event_get_user_data(e));
     else badge_ui_ble_message("离线预览，断开需在实板运行");
 }
+static bool ble_visual_equal(const badge_ble_info_t *a,const badge_ble_info_t *b){
+    if(a->enabled!=b->enabled||a->advertising!=b->advertising||a->scanning!=b->scanning||a->connecting!=b->connecting||a->inbound!=b->inbound||a->outbound!=b->outbound||a->error!=b->error||a->count!=b->count)return false;
+    if(strcmp(a->inbound_address,b->inbound_address)||strcmp(a->outbound_address,b->outbound_address)||strcmp(a->outbound_name,b->outbound_name))return false;
+    for(int i=0;i<a->count;i++)if(strcmp(a->devices[i].name,b->devices[i].name)||a->devices[i].rssi!=b->devices[i].rssi||a->devices[i].connectable!=b->devices[i].connectable)return false;
+    return true;
+}
 static void ble_render(void){
     if(!ble_panel)return;
+    static badge_ble_info_t rendered;static bool have_rendered;
+    if(have_rendered&&ble_visual_equal(&rendered,&ble_info))return;
+    rendered=ble_info;have_rendered=true;
+    ui_transition_cache_invalidate_reason(ble_panel,"BLE_CONTENT");
     badge_liquid_set(ble_toggle,ble_info.enabled,state->reduced_motion);
     bool busy=!ble_info.enabled||ble_info.scanning||ble_info.connecting;
     if(busy)lv_obj_add_state(ble_scan_button,LV_STATE_DISABLED);else lv_obj_remove_state(ble_scan_button,LV_STATE_DISABLED);
-    lv_label_set_text(lv_obj_get_child(ble_scan_button,0),ble_info.scanning?"扫描中…":"扫描附近设备");
+    cached_text(lv_obj_get_child(ble_scan_button,0),ble_info.scanning?"扫描中…":"扫描附近设备");
     const char *status=ble_info.error?"操作失败，请重试或重启蓝牙":!ble_info.enabled?"蓝牙已关闭":ble_info.connecting?"正在连接设备…":ble_info.scanning?"正在扫描附近 BLE 设备…":ble_info.advertising?"手机可发现 CABadge":ble_info.inbound?"对方已连接本机":"蓝牙已打开";
     badge_ui_ble_message(status);
     lv_obj_clean(ble_list);int y=0;
@@ -288,14 +313,14 @@ void badge_ui_ble_update(const badge_ble_info_t *value){
     ble_info=*value;if(ble_info.count<0)ble_info.count=0;if(ble_info.count>BADGE_BLE_DEVICES)ble_info.count=BADGE_BLE_DEVICES;
     ble_info.inbound_address[17]=ble_info.outbound_address[17]=ble_info.outbound_name[32]=0;
     for(int i=0;i<ble_info.count;i++)ble_info.devices[i].name[32]=0;
-    if(badge_ui_ble_visible())ble_render();
+    ble_render();
 }
 void badge_ble_open(void){
     badge_wifi_hide();badge_wallpaper_hide();badge_ui_external_panel(ble_panel,true);ble_render();lv_obj_scroll_to_y(ble_list,0,LV_ANIM_OFF);
     if(!ble_actions.scan&&!state->live)badge_ui_ble_message("离线预览 · 需烧录后使用蓝牙");
 }
-void badge_ble_hide(void){if(ble_panel)lv_obj_add_flag(ble_panel,LV_OBJ_FLAG_HIDDEN);}
-bool badge_ui_ble_visible(void){return ble_panel&&!lv_obj_has_flag(ble_panel,LV_OBJ_FLAG_HIDDEN);}
+void badge_ble_hide(void){badge_panel_cancel(ble_panel);}
+bool badge_ui_ble_visible(void){return ui_transition_cache_visible(ble_panel);}
 void badge_ble_create(lv_obj_t *parent,badge_state_t *value){
     state=value;ble_info.enabled=true;ble_info.advertising=!state->live;
     ble_panel=surface(parent,0,0,360,360,UI_BG,180);lv_obj_set_style_clip_corner(ble_panel,true,0);
@@ -303,21 +328,51 @@ void badge_ble_create(lv_obj_t *parent,badge_state_t *value){
     ble_toggle=badge_liquid_create(ble_panel,228,48,ble_enable);
     ble_note=label(ble_panel,"",52,78,256,&font14,UI_MUTED);
     ble_list=surface(ble_panel,52,108,256,186,UI_BG,0);lv_obj_add_flag(ble_list,LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_remove_flag(ble_list,LV_OBJ_FLAG_SCROLL_CHAIN);lv_obj_set_scroll_dir(ble_list,LV_DIR_VER);lv_obj_set_scrollbar_mode(ble_list,LV_SCROLLBAR_MODE_OFF);
+    lv_obj_remove_flag(ble_list,LV_OBJ_FLAG_SCROLL_CHAIN);lv_obj_set_scroll_dir(ble_list,LV_DIR_VER);lv_obj_set_scrollbar_mode(ble_list,LV_SCROLLBAR_MODE_OFF);lv_obj_add_event_cb(ble_list,cache_scrolled,LV_EVENT_SCROLL,NULL);
     ble_scan_button=button(ble_panel,"扫描附近设备",114,298,132,44,ble_scan);
-    lv_obj_add_flag(ble_panel,LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ble_panel,LV_OBJ_FLAG_HIDDEN);ui_transition_cache_register(ble_panel,false);ui_transition_cache_identify(ble_panel,31);
 }
 
-static void panel_x(void *obj,int32_t x){lv_obj_set_x(obj,x);}
-static void panel_closed(lv_anim_t *a){lv_obj_add_flag(a->var,LV_OBJ_FLAG_HIDDEN);}
+static void panel_x(void *obj,int32_t x){
+    direct_panel_x=x;
+    if(!direct_panel_rejected&&badge_ui_direct_panel(obj,x))return;
+    direct_panel_rejected=true;lv_obj_set_x(obj,x);ui_transition_cache_position(obj);
+}
+static void panel_finished(lv_anim_t *a){badge_ui_direct_panel_end();direct_panel=NULL;lv_obj_set_x(a->var,a->end_value);ui_transition_cache_end(a->var);if(a->end_value>=360)lv_obj_add_flag(a->var,LV_OBJ_FLAG_HIDDEN);}
 void badge_panel_slide(lv_obj_t *p,bool open,bool reduced){
-    bool hidden=lv_obj_has_flag(p,LV_OBJ_FLAG_HIDDEN);int start=hidden?360:lv_obj_get_x(p);
+    bool hidden=!ui_transition_cache_visible(p);int start=hidden?360:direct_panel==p?direct_panel_x:lv_obj_get_x(p);
+    badge_ui_direct_panel_end();direct_panel=p;direct_panel_rejected=false;
+#ifdef ESP_PLATFORM
+    int id=p==panel?20:p==ble_panel?21:p==wall_panel?22:23;
+    if(open||!hidden)display_perf_transition_begin(open?badge_ui_current_page():id,open?id:badge_ui_current_page(),reduced);
+#endif
     lv_anim_delete(p,panel_x);
-    if(reduced){lv_obj_set_x(p,0);if(open){lv_obj_remove_flag(p,LV_OBJ_FLAG_HIDDEN);lv_obj_move_foreground(p);}else lv_obj_add_flag(p,LV_OBJ_FLAG_HIDDEN);return;}
+    if(reduced){direct_panel=NULL;ui_transition_cache_end(p);lv_obj_set_x(p,0);if(open){lv_obj_remove_flag(p,LV_OBJ_FLAG_HIDDEN);lv_obj_move_foreground(p);}else lv_obj_add_flag(p,LV_OBJ_FLAG_HIDDEN);return;}
     if(!open&&hidden)return;
-    lv_obj_remove_flag(p,LV_OBJ_FLAG_HIDDEN);lv_obj_move_foreground(p);
+    ui_transition_cache_show(p,true);lv_obj_move_foreground(p);ui_transition_cache_begin(p);
     lv_anim_t a;lv_anim_init(&a);lv_anim_set_var(&a,p);lv_anim_set_exec_cb(&a,panel_x);
     lv_anim_set_values(&a,start,open?0:360);lv_anim_set_duration(&a,220);lv_anim_set_path_cb(&a,lv_anim_path_ease_out);
-    if(!open)lv_anim_set_completed_cb(&a,panel_closed);
+    lv_anim_set_completed_cb(&a,panel_finished);
     lv_anim_start(&a);
+}
+
+void badge_panels_settle(lv_obj_t *root){
+    for(uint32_t i=0;i<lv_obj_get_child_count(root);i++){
+        lv_obj_t *p=lv_obj_get_child(root,i);lv_anim_t *a=lv_anim_get(p,panel_x);if(!a)continue;
+        badge_ui_direct_panel_end();direct_panel=NULL;
+        int end=a->end_value;lv_anim_delete(p,panel_x);ui_transition_cache_end(p);lv_obj_set_x(p,end);
+        if(end>=360)lv_obj_add_flag(p,LV_OBJ_FLAG_HIDDEN);
+    }
+}
+
+void badge_ui_probe_panel(int which,bool open){
+    lv_obj_t *p=which==0?panel:which==1?ble_panel:wall_panel;
+    badge_ui_external_panel(p,open);
+}
+
+int badge_panels_cache_page(void){
+    if(ui_transition_cache_visible(panel))return 30;
+    if(ui_transition_cache_visible(ble_panel))return 31;
+    if(ui_transition_cache_visible(wall_panel))return 32;
+    return -1;
 }

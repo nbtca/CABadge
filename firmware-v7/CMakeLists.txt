@@ -29,7 +29,7 @@ add_executable(management_test usb_screen/management_test.c)
 add_test(NAME management_protocol COMMAND management_test)
 # Compile the production service logic against host I/O substitutes, not a copied implementation.
 set(MOCK_ESP "${CMAKE_CURRENT_BINARY_DIR}/service_test_include")
-foreach(header esp_err.h esp_timer.h esp_random.h esp_partition.h esp_heap_caps.h esp_http_server.h wallpaper_html.h freertos/FreeRTOS.h freertos/semphr.h freertos/queue.h freertos/task.h ui/badge_ui.h src/misc/cache/lv_cache.h)
+foreach(header esp_flash.h esp_err.h esp_timer.h esp_random.h esp_partition.h esp_heap_caps.h esp_http_server.h wallpaper_html.h freertos/FreeRTOS.h freertos/semphr.h freertos/queue.h freertos/task.h ui/badge_ui.h src/misc/cache/lv_cache.h)
     get_filename_component(dir "${MOCK_ESP}/${header}" DIRECTORY)
     file(MAKE_DIRECTORY "${dir}")
     file(WRITE "${MOCK_ESP}/${header}" "/* Types supplied by service_test_shim.h. */\n")

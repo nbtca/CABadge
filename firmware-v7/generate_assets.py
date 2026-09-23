@@ -7,9 +7,15 @@ ROOT=Path(__file__).resolve().parent
 chars=set(chr(c) for c in range(32,127))
 for path in [ROOT/'simulator.c', ROOT/'bridge.c', ROOT/'ui/badge_ui.c', ROOT/'ui/wifi_panel.c', ROOT/'usb_screen/device/src/wifi_service.c', ROOT/'usb_screen/device/src/ble_service.c', ROOT/'usb_screen/device/src/wallpaper_service.c']:
     chars.update(c for c in path.read_text(encoding='utf-8') if 127<ord(c)<65535)
+chars.update(c for c in (ROOT/'ui/apps.c').read_text(encoding='utf-8') if 127<ord(c)<65535)
+base_chars=set(chars)
+grok_chars=set()
+for path in [ROOT/'ui/grok.c', ROOT/'ui/grok_data.h']:
+    grok_chars.update(c for c in path.read_text(encoding='utf-8') if 127<ord(c)<65535)
 chars=sorted(chars,key=ord)
 out=['#include "badge_ui.h"\n']
 for size in [14,18,24,36,56]:
+    chars=sorted(base_chars | (grok_chars if size==18 else set()),key=ord)
     font=ImageFont.truetype(str(ROOT/'vendor/fonts/NotoSansSC.ttf'),size)
     font.set_variation_by_axes([700 if size>=56 else 600 if size>=24 else 500])
     bounds=[font.getbbox(ch,anchor='ls') for ch in chars]

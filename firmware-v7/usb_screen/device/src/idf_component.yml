@@ -1,0 +1,7 @@
+dependencies:
+  espressif/cjson: "1.7.19"
+  espressif/esp_lvgl_adapter: "0.7.1"
+  espressif/esp_lcd_st77916: "2.0.2"
+  lvgl/lvgl:
+    version: "9.4.0"
+    override_path: "../components/lvgl"

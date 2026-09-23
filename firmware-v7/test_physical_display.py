@@ -1,51 +1,59 @@
-"""Exercise production LCD rectangle/byte order/error handling and touch boundaries on host."""
+"""Host contract checks for adapter DMA completion/error draining and physical touch.
+Does not claim physical LCD visibility or scan synchronization.
+"""
 from pathlib import Path
 import os,re,subprocess
 root=Path(__file__).resolve().parent
 source=(root/'usb_screen/device/src/physical_display.c').read_text(encoding='utf-8')
-names=('lcd_window','lcd_copy','backlight_duty','touch_decode','physical_display_flush','collect_dma','dma_start','dma_finish','physical_touch_read')
-functions='\n'.join(re.search(r'(?:static )?(?:void|bool|unsigned)(?: IRAM_ATTR)? '+n+r'\(.*?\n}',source,re.S).group() for n in names)
-unit=root/'build/physical_display_check.c'
-unit.write_text(r"""#include <stdint.h>
+source+='\n'+(root/'usb_screen/device/src/backlight_curve.h').read_text(encoding='utf-8').replace('static inline','static')
+names=('owned_refresh','backlight_duty','touch_decode','physical_touch_read','color_done','physical_display_draw','physical_display_complete','physical_display_wait')
+functions='\n'.join(re.search(r'(?:static )?(?:void|bool|unsigned|esp_err_t)(?: IRAM_ATTR)? '+n+r'\(.*?\n}',source,re.S).group() for n in names)
+unit=Path('F:/CABadgeBuild/temp/adapter_contract.c')
+unit.write_text(r'''
+#include <stdint.h>
 #include <stdbool.h>
+#include <stdatomic.h>
 #include <stddef.h>
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
-#define LCD_ROWS 32
-#define ESP_OK 0
-#define portMAX_DELAY 0
-#define SPI_TRANS_MODE_QIO 1
-#define SPI_TRANS_VARIABLE_CMD 2
-#define SPI_TRANS_VARIABLE_ADDR 4
-#define SPI_TRANS_VARIABLE_DUMMY 8
-#define SPI_TRANS_CS_KEEP_ACTIVE 16
-#define ESP_ERROR_CHECK(e) assert((e)==0)
-typedef int esp_err_t;
-typedef struct {int x1,y1,x2,y2;} lv_area_t;
-typedef struct {int cmd,addr,flags;size_t length;const void *tx_buffer;void *user;} spi_transaction_t;
-typedef struct {spi_transaction_t base;unsigned command_bits,address_bits,dummy_bits;} spi_transaction_ext_t;
-static uint8_t storage[2][360*LCD_ROWS*2],*dma[2]={storage[0],storage[1]};
-static spi_transaction_ext_t transfers[2];
-static int lcd,display_error;
-static uint32_t flush_us,copy_us;
-static bool profiling;
-typedef struct {uint32_t queue_us,wire_us,wait_us;} lcd_profile_t;
-static lcd_profile_t profile;
-typedef struct {int64_t queued,started,finished;} dma_stamp_t;
-static dma_stamp_t stamps[2];
-static void collect_dma(spi_transaction_t *tx);
-static void dma_start(spi_transaction_t *tx);
-static void dma_finish(spi_transaction_t *tx);
+#define frame_trace(code,value) ((void)0)
 #define IRAM_ATTR
-static bool display_ok=true,painted,off,acquired;
-static int commands,fail_command,queues,fail_queue,queued,finished,ended;
-static size_t consumed;
-static uint8_t captured[360*360*2];
-static spi_transaction_t *pending[32];
-static struct {uint8_t command,data[4];} windows[4];
-static int64_t fake_time;
+#define ESP_OK 0
+#define ESP_ERR_INVALID_STATE 99
+#define ESP_ERR_INVALID_ARG 98
+#define PHYSICAL_STAGING_ROWS 16
+#define ESP_ERROR_CHECK(x) assert((x)==0)
+typedef int esp_err_t;
+typedef void *esp_lcd_panel_io_handle_t;
+typedef int esp_lcd_panel_io_event_data_t;
+static void *panel,*panel_io,*display;
+static atomic_bool painted,completed,transition_owner,notify_flush;
+static uint8_t block_a[11520],block_b[11520],reference[259200];
+static uint8_t *staging[2]={block_a,block_b};
+static const uint8_t *inflight;static int inflight_y,inflight_rows;
+static bool color_done(esp_lcd_panel_io_handle_t,esp_lcd_panel_io_event_data_t*,void*);
+typedef struct {bool paused;} lv_timer_t;
+static int refresh_calls;
+static void fake_refresh(lv_timer_t *t){(void)t;refresh_calls++;}
+static void (*adapter_refresh)(lv_timer_t*)=fake_refresh;
+static bool physical_display_transition_active(void){return atomic_load(&transition_owner);}
+static void lv_timer_pause(lv_timer_t *t){t->paused=true;}
+
+static _Atomic esp_err_t display_error;
+static int64_t transfer_start,fake_time;
+static uint32_t transfer_us;
+static int submitted,notified,drained,draw_error;
 static int64_t esp_timer_get_time(void){return fake_time+=10;}
+static bool esp_lv_adapter_display_notify_color_trans_done_from_isr(void *d){(void)d;assert(painted);notified++;return false;}
+static esp_err_t esp_lcd_panel_draw_bitmap(void *p,int x1,int y1,int x2,int y2,const void *pixels){
+ (void)p;assert(x1==0&&x2==360&&y1>=0&&y2<=360&&y2-y1<=16&&pixels);
+ assert(!inflight);submitted++;if(!draw_error){inflight=pixels;inflight_y=y1;inflight_rows=y2-y1;}return draw_error;
+}
+static esp_err_t esp_lcd_panel_io_tx_param(void *p,int cmd,const void *data,size_t n){
+ (void)p;assert(cmd==-1&&!data&&!n);drained++;
+ if(inflight){assert(!memcmp(inflight,reference+inflight_y*720,inflight_rows*720));inflight=NULL;color_done(NULL,NULL,NULL);}return 0;
+}
 typedef struct {int dummy;} lv_indev_t;
 typedef struct {struct {int x,y;} point;int state;} lv_indev_data_t;
 #define LV_INDEV_STATE_PRESSED 1
@@ -56,51 +64,27 @@ static int i2c_master_transmit_receive(int handle,const void *reg,size_t rn,void
 }
 static void lv_indev_reset(lv_indev_t *i,void *obj){(void)i;(void)obj;resets++;}
 static void lv_indev_wait_release(lv_indev_t *i){(void)i;waits++;}
-static esp_err_t spi_device_acquire_bus(int handle,int wait){(void)handle;(void)wait;assert(!acquired);acquired=true;return 0;}
-static void spi_device_release_bus(int handle){(void)handle;assert(acquired&&finished==queued);acquired=false;}
-static esp_err_t lcd_tx(uint8_t command,const void *data,size_t bytes,bool color){
- (void)color;assert(acquired&&commands<2&&bytes==4);windows[commands].command=command;
- memcpy(windows[commands].data,data,bytes);return ++commands==fail_command?7:0;
-}
-static esp_err_t spi_device_queue_trans(int handle,spi_transaction_t *tx,int wait){
- (void)handle;(void)wait;assert(acquired&&queued-finished<2);
- if(++queues==fail_queue)return 7;
- if(!queued)assert(tx->cmd==0x32&&tx->addr==0x2c00&&!(tx->flags&SPI_TRANS_VARIABLE_CMD));
- else assert((tx->flags&14)==14&&((spi_transaction_ext_t*)tx)->command_bits==0&&((spi_transaction_ext_t*)tx)->address_bits==0);
- pending[queued++]=tx;dma_start(tx);return 0;
-}
-static esp_err_t spi_device_get_trans_result(int handle,spi_transaction_t **done,int wait){
- (void)handle;(void)wait;assert(acquired&&finished<queued);
- spi_transaction_t *tx=pending[finished++];size_t size=tx->length/8;
- assert(size<=360*LCD_ROWS*2&&consumed+size<=sizeof(captured));
- memcpy(captured+consumed,tx->tx_buffer,size);consumed+=size;
- if(!(tx->flags&SPI_TRANS_CS_KEEP_ACTIVE))ended++;
- dma_finish(tx);*done=tx;return 0;
-}
-static esp_err_t spi_device_polling_transmit(int handle,spi_transaction_t *tx){(void)handle;assert(acquired&&finished==queued&&!tx->length);ended++;return 0;}
-static void physical_display_backlight(int brightness,bool asleep){off=asleep&&brightness==0;}
-static void reset(void){commands=queues=queued=finished=ended=0;consumed=0;fail_command=fail_queue=0;display_error=0;display_ok=true;painted=off=false;}
-"""+functions+r"""
+'''+functions+r'''
 int main(void){
- static uint8_t pixels[360*360*2],original[sizeof(pixels)];
- for(unsigned i=0;i<sizeof(pixels);i++)pixels[i]=(i*31+i/97)&255;
- memcpy(original,pixels,sizeof(pixels));
- physical_display_flush(&(lv_area_t){0,0,359,359},pixels);
- assert(painted&&display_ok&&!acquired&&commands==2&&queued==12&&finished==12&&ended==1&&consumed==sizeof(pixels));
- assert(windows[0].command==0x2a&&windows[1].command==0x2b);
- assert(!memcmp(windows[0].data,(uint8_t[]){0,0,1,103},4));
- for(unsigned i=0;i<sizeof(pixels);i+=2){assert(captured[i]==pixels[i+1]);assert(captured[i+1]==pixels[i]);}
- assert(!memcmp(pixels,original,sizeof(pixels))&&flush_us>0&&copy_us>0);
- reset();profiling=true;physical_display_flush(&(lv_area_t){358,327,359,359},pixels);
- assert(commands==2&&queued==2&&consumed==132&&ended==1);assert(profile.queue_us>0&&profile.wire_us>0&&profile.wait_us>0);
- assert(!memcmp(windows[0].data,(uint8_t[]){1,102,1,103},4));
- assert(!memcmp(windows[1].data,(uint8_t[]){1,71,1,103},4));
- reset();physical_display_flush(&(lv_area_t){0,0,360,359},pixels);assert(commands==0&&queues==0);
- reset();fail_queue=3;physical_display_flush(&(lv_area_t){0,0,359,359},pixels);
- assert(!painted&&!display_ok&&display_error==7&&!display_ok&&finished==queued&&ended==1&&!acquired);
- int before=queues;physical_display_flush(&(lv_area_t){0,0,359,359},pixels);assert(queues==before);
- reset();fail_command=2;physical_display_flush(&(lv_area_t){0,0,359,359},pixels);assert(!display_ok&&!queued&&!acquired);
- assert(backlight_duty(100,false)==51&&backlight_duty(200,false)==51&&backlight_duty(70,true)==0&&backlight_duty(-1,false)==0);
+ uint8_t *pixels=reference;for(int i=0;i<259200;i++)pixels[i]=(uint8_t)(i*13);uint32_t us=0;
+ assert(physical_display_draw(0,0,360,360,pixels)==0);
+ assert(submitted==23&&!painted&&!completed&&!notified);
+ assert(!physical_display_complete(&us));
+ physical_display_wait();
+ assert(painted&&notified==1&&physical_display_complete(&us)&&us>0);
+ assert(!physical_display_complete(&us));
+ lv_timer_t timer={0};owned_refresh(&timer);assert(refresh_calls==1);
+ atomic_store(&transition_owner,true);
+ owned_refresh(&timer);assert(timer.paused&&refresh_calls==1);
+ assert(physical_display_draw(0,0,360,360,pixels)==ESP_ERR_INVALID_STATE);
+ color_done(NULL,NULL,NULL);assert(notified==1&&!physical_display_complete(&us));
+ atomic_store(&transition_owner,false);
+ int before=drained;draw_error=7;assert(physical_display_draw(0,0,360,360,pixels)==7);
+ assert(drained==before+2&&display_error==7&&notified==1);
+ physical_display_wait();assert(drained==before+3);
+ assert(backlight_duty(100,false)==1023&&backlight_duty(200,false)==1023&&backlight_duty(70,true)==0&&backlight_duty(-1,false)==0);
+ assert(backlight_duty(10,false)==10&&backlight_duty(50,false)==256);
+ for(int i=10;i<=100;i++){assert(backlight_duty(i,true)==0);if(i>10)assert(backlight_duty(i,false)>backlight_duty(i-1,false));}
  int x=12,y=13;uint8_t raw[]={0,1,1,103,1,103};assert(touch_decode(raw,&x,&y)&&x==359&&y==359);
  raw[3]=104;assert(!touch_decode(raw,&x,&y)&&x==359);raw[3]=0;raw[1]=0;assert(!touch_decode(raw,&x,&y));
  lv_indev_t indev={0};lv_indev_data_t input={0};
@@ -109,11 +93,11 @@ int main(void){
  touch_error=7;fake_time+=20000;physical_touch_read(&indev,&input);assert(input.state==0&&resets==1&&waits==1);
  touch_error=0;touch_raw[1]=0;fake_time+=20000;physical_touch_read(&indev,&input);assert(input.state==0&&resets==1);
  touch_raw[1]=1;touch_raw[2]=1;touch_raw[3]=104;fake_time+=20000;physical_touch_read(&indev,&input);assert(input.state==0&&resets==2&&waits==2);
- puts("Production LCD: whole frame, continuous CS, DMA lifetime/byte order, error drain/blackout, bounds PASS");
-}
-""",encoding='utf-8')
 
+ puts("Shared staging bytes/lifetime, single final completion, ownership, error drain, touch cancellation, brightness PASS");
+}
+''',encoding='utf-8')
 env=os.environ.copy();env.update(TEMP='F:/CABadgeBuild/temp',TMP='F:/CABadgeBuild/temp',ZIG_GLOBAL_CACHE_DIR='F:/CABadgeBuild/zig-cache',ZIG_LOCAL_CACHE_DIR='F:/CABadgeBuild/zig-local-v7')
-exe=root/'build/physical_display_check.exe'
+exe=Path('F:/CABadgeBuild/temp/adapter_contract.exe')
 subprocess.run([str(root/'.venv/Lib/site-packages/ziglang/zig.exe'),'cc',str(unit),'-o',str(exe)],env=env,check=True)
 subprocess.run([str(exe)],check=True)

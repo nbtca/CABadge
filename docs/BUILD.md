@@ -1,3 +1,13 @@
+# 当前版本 v1.1.0 / 7.9.2-memory
+
+安装见 [当前发布说明](RELEASE-v1.1.0.md)。构建入口仍为 firmware-v7/usb_screen/build.ps1；当前 PlatformIO 固定 espressif32 7.1.3 / framework-espidf 4.60100.0 (ESP-IDF 6.1)，LVGL 9.4.0、Adapter 0.7.1。源依赖由 setup_deps.py 与 IDF Component Manager 获取，已提交 dependencies.lock。
+
+构建工具 Python 路径仍为 firmware/bringup/.venv/Scripts/python.exe（仅需创建环境并安装 PlatformIO），暂存为 F:/CABadgeBuild/staging/usb-screen-v7-idf61，核心目录 F:/CABadgeBuild/platformio/idf61，TEMP/TMP 在 F:/CABadgeBuild/temp。
+
+发布配置：CABADGE_DISPLAY_PERF=0、CABADGE_TRANSITION_CACHE_DEBUG=1。运行 build.ps1 导出 outputs/cabadge-v7.9.2-memory；构建会覆盖该目录，先备份发布附件。未验证全新机器重建。以下为历史 v1.0 环境说明，不作为当前版本配置。
+
+---
+
 # v1.0 安装与构建
 
 ## 使用发布固件

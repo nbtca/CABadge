@@ -1,5 +1,8 @@
+#include "ui/ui_transition_compositor.h"
 #include "runtime_monitor.h"
+#include "physical_display.h"
 #include "ui/badge_ui.h"
+#include "ui/apps.h"
 #include "esp_timer.h"
 #include "esp_heap_caps.h"
 #include "freertos/FreeRTOS.h"
@@ -69,13 +72,18 @@ bool runtime_snapshot(char *out,size_t capacity){
         multi_heap_info_t h;heap_caps_get_info(&h,caps[i]);
         ADD("%s{\"free\":%u,\"allocated\":%u,\"minimum_free\":%u,\"largest\":%u}",i?",":"",(unsigned)h.total_free_bytes,(unsigned)h.total_allocated_bytes,(unsigned)h.minimum_free_bytes,(unsigned)h.largest_free_block);
     }
-    ADD("],\"work_us\":[");for(unsigned i=0;i<MON_GROUPS;i++)ADD("%s%llu",i?",":"",(unsigned long long)work_us[i]);
+    ADD("],\"panel\":%s,\"work_us\":[",physical_display_readback());for(unsigned i=0;i<MON_GROUPS;i++)ADD("%s%llu",i?",":"",(unsigned long long)work_us[i]);
     ADD("],\"tasks\":[");
     for(unsigned i=0;i<count;i++){
         TaskStatus_t *t=&tasks[i];
         ADD("%s{\"id\":%u,\"name\":\"%.15s\",\"core\":%d,\"priority\":%u,\"state\":%d,\"cpu_us\":%llu,\"stack_free_min\":%u}",i?",":"",(unsigned)t->xTaskNumber,t->pcTaskName,(int)t->xCoreID,(unsigned)t->uxCurrentPriority,t->eCurrentState,(unsigned long long)t->ulRunTimeCounter,(unsigned)t->usStackHighWaterMark*(unsigned)sizeof(StackType_t));
     }
-    free(tasks);ADD("],\"query_us\":%llu}",(unsigned long long)(esp_timer_get_time()-started));
+    int app,loading,error,tiles,players;badge_apps_status(&app,&loading,&error,&tiles,&players);
+    ADD("],\"apps\":{\"page\":%d,\"loading\":%d,\"error\":%d,\"tiles\":%d,\"players\":%d}",app,loading,error,tiles,players);
+    ADD(",\"backlight_pwm\":%u",physical_display_backlight_duty());
+    char compositor[1024];ui_transition_compositor_stats(compositor,sizeof(compositor));ADD(",\"compositor\":%s",compositor);
+    char cache[512];badge_ui_connection_cache_stats(cache,sizeof(cache));ADD(",\"transition_cache\":%s,\"connection_cache\":%s",cache,cache);
+    free(tasks);ADD(",\"query_us\":%llu}",(unsigned long long)(esp_timer_get_time()-started));
 #undef ADD
     return ok;
 }

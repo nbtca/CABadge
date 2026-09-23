@@ -19,7 +19,7 @@ static inline bool br_command_valid(const uint8_t *p,size_t n){
     p+=4;n-=4;
     if(mg_valid_command(p,n))return true;
     if(n<2||p[0]!=MG_VERSION)return false;
-    if(p[1]==BR_APPLY)return n==3&&p[2]<=2;
+    if(p[1]==BR_APPLY)return n==3&&p[2]<33;
     return n==2&&(p[1]==BR_MANAGEMENT||p[1]==BR_HOTSPOT||p[1]==BR_SHAKE);
 }
 #endif

@@ -4,16 +4,11 @@
 #include "ui/badge_ui.h"
 void management_init(badge_state_t *state);
 void management_poll(void);
-void management_toggle(void); /* physical/USB UI only; never remotely callable */
 void management_close(void);
-bool management_active(void);
-unsigned management_remaining(void);
-void management_key(char out[33]); /* local UI only */
-bool management_http_auth(const char *key,uint32_t *generation);
+bool management_begin_request(uint32_t *generation);
 bool management_generation_valid(uint32_t generation);
 int management_submit(const uint8_t *data,size_t n,uint32_t generation,uint16_t ble_handle,uint32_t *id);
 bool management_json(char *out,size_t n);
-int management_ble_authorize(uint16_t handle,const uint8_t *data,size_t n);
 bool management_ble_allowed(uint16_t handle,uint32_t *generation);
 void management_ble_disconnect(uint16_t handle);
 bool management_ble_status(uint16_t handle,uint8_t out[MG_STATUS_BYTES]);

@@ -16,22 +16,26 @@ static uint8_t pixels[WALL_BYTES],reloaded[WALL_BYTES];static char access_key[33
 static httpd_req_t request(const char *uri,size_t size){return (httpd_req_t){.uri=uri,.content_len=size,.body=pixels,.key=access_key,.crc=crc_text,.type="application/octet-stream",.host="192.168.1.2",.fail_after=-1};}
 int main(void){
     memset(mock_flash,255,sizeof(mock_flash));badge_state_t board={.brightness=70,.battery_mv=4032,.wifi_enabled=true};
-    management_init(&board);wallpaper_service_init();CHECK(registered_count==6);CHECK(!management_active());
+    allocation_failure=true;management_init(&board);char unavailable[32];
+    CHECK(!management_json(unavailable,sizeof(unavailable)));allocation_failure=false;
+    management_init(&board);wallpaper_service_init();CHECK(registered_count==6);management_poll();
+    CHECK(shown_storage_total==16u*1024*1024);CHECK(shown_storage_free==shown_storage_slots*WALL_BYTES);
     for(int i=0;i<registered_count;i++)CHECK(strcmp(registered[i].uri,"/firmware"));
-    httpd_req_t r=request("/status",0);web_status(&r);CHECK(!strcmp(r.status,"403 Forbidden"));
-    management_toggle();management_key(access_key);CHECK(strlen(access_key)==32);uint32_t generation;
-    CHECK(management_http_auth(access_key,&generation));management_poll();r=request("/status",0);CHECK(web_status(&r)==0);CHECK(strstr(r.response,"CABadge")&&r.security_headers>=4);
+    uint32_t generation;CHECK(management_begin_request(&generation));
+    httpd_req_t r=request("/status",0);CHECK(web_status(&r)==0);CHECK(strstr(r.response,"CABadge")&&r.security_headers>=4);
+    cJSON *parsed=cJSON_Parse(r.response);CHECK(parsed);cJSON_Delete(parsed);
+    allocation_failure=true;r=request("/status",0);web_status(&r);CHECK(!strcmp(r.status,"500 Internal Server Error"));allocation_failure=false;
+    CHECK(!management_json(unavailable,1));
     r=request("/status",0);r.origin="http://evil.invalid";web_status(&r);CHECK(!strcmp(r.status,"403 Forbidden"));
-    uint8_t session_write[17]={1};CHECK(mg_parse_key(access_key,session_write+1));uint8_t status_bytes[20];
-    CHECK(!management_ble_status(7,status_bytes));CHECK(management_ble_authorize(7,session_write,17)==0);CHECK(management_ble_status(7,status_bytes));
+    uint8_t status_bytes[20];CHECK(management_ble_status(7,status_bytes));
     CHECK(status_bytes[18]==7&&status_bytes[19]==1);
     uint8_t command[]={1,MG_SLEEP,1};uint32_t id;
     CHECK(management_submit(command,3,generation,7,&id)==MG_ACCEPTED);
     CHECK(management_submit(command,3,generation,7,&id)==MG_BUSY);
-    management_ble_disconnect(7);management_poll();CHECK(!asleep);CHECK(!management_ble_status(7,status_bytes));
+    management_ble_disconnect(7);management_poll();CHECK(!asleep);
     CHECK(management_submit(command,3,generation,UINT16_MAX,&id)==MG_ACCEPTED);management_poll();CHECK(asleep);
     command[2]=0;CHECK(management_submit(command,3,generation,UINT16_MAX,&id)==MG_ACCEPTED);
-    management_close();management_poll();CHECK(asleep);management_toggle();management_key(access_key);CHECK(management_http_auth(access_key,&generation));
+    management_close();management_poll();CHECK(asleep);CHECK(management_begin_request(&generation));
     command[1]=MG_BRIGHTNESS;command[2]=101;CHECK(management_submit(command,3,generation,UINT16_MAX,&id)==MG_INVALID);
     memset(pixels,0x73,sizeof(pixels));snprintf(crc_text,sizeof(crc_text),"%08x",wall_crc(pixels,sizeof(pixels)));
     r=request("/upload",12);web_upload(&r);CHECK(!strcmp(r.status,"400 Bad Request"));
@@ -43,32 +47,42 @@ int main(void){
     r=request("/upload",WALL_BYTES);web_upload(&r);CHECK(!strcmp(r.status,"409 Conflict"));wallpaper_cancel(1,usb);
     r=request("/upload",WALL_BYTES);CHECK(web_upload(&r)==0&&queued_task);CHECK(wallpaper_begin(1,WALL_BYTES,0,&usb)==1);
     run_task();CHECK(!strcmp(r.status,"200 OK"));wallpaper_service_poll();CHECK(phase==4&&shown==&picture&&shown->data[0]==0x73);
-    wall_record_t disk;CHECK(wall_load(&disk,reloaded)&&!memcmp(reloaded,pixels,WALL_BYTES));
+    wall_record_t disk=library[0];CHECK(wall_library_read(&disk,reloaded)&&!memcmp(reloaded,pixels,WALL_BYTES));
     uint32_t original_generation=disk.generation;
-    uint32_t resource_generation,resource_size,resource_crc;uint8_t readback[4096];
+    uint32_t resource_generation,resource_size,resource_crc;
     CHECK(wallpaper_resource_info(&resource_generation,&resource_size,&resource_crc));
     CHECK(resource_generation==disk.generation&&resource_size==WALL_BYTES&&resource_crc==wall_crc(pixels,WALL_BYTES));
-    CHECK(wallpaper_read_resource(resource_generation,0,readback,sizeof(readback))&&!memcmp(readback,pixels,sizeof(readback)));
-    CHECK(!wallpaper_read_resource(resource_generation+1,0,readback,sizeof(readback)));
-    CHECK(!wallpaper_read_resource(resource_generation,WALL_BYTES-1,readback,2));
+
+    /* Consecutive uploads, with a UI/status read briefly owning the image mutex. */
+    for(int i=0;i<3;i++){
+        memset(pixels,0x74+i,sizeof(pixels));snprintf(crc_text,sizeof(crc_text),"%08x",wall_crc(pixels,sizeof(pixels)));
+        r=request("/upload",WALL_BYTES);CHECK(web_upload(&r)==0);
+        receive_lock=lock;contend_offset=8192;run_task();CHECK(!strcmp(r.status,"200 OK"));
+        wallpaper_service_poll();CHECK(!wallpaper_busy());
+        CHECK(wall_library_read(&library[i+1],reloaded)&&!memcmp(reloaded,pixels,WALL_BYTES));
+        CHECK(wall_library_read(&disk,reloaded)&&reloaded[0]==0x73);
+    }
+    memset(pixels,0x73,sizeof(pixels));snprintf(crc_text,sizeof(crc_text),"%08x",wall_crc(pixels,sizeof(pixels)));
 
     r=request("/upload",WALL_BYTES);r.crc="00000000";web_upload(&r);run_task();CHECK(!strcmp(r.status,"400 Bad Request"));
-    CHECK(wall_load(&disk,reloaded)&&disk.generation==original_generation);
+    CHECK(wall_library_read(&disk,reloaded)&&disk.generation==original_generation);
     r=request("/upload",WALL_BYTES);r.fail_after=4096;web_upload(&r);run_task();CHECK(!strcmp(r.status,"408 Request Timeout"));CHECK(!wallpaper_busy());
-    r=request("/upload",WALL_BYTES);web_upload(&r);management_close();run_task();CHECK(!strcmp(r.status,"403 Forbidden"));CHECK(wall_load(&disk,reloaded)&&disk.generation==original_generation);
-    management_toggle();management_key(access_key);CHECK(!management_generation_valid(generation));
-    CHECK(management_ble_authorize(7,session_write,17)==MG_UNAUTHORIZED);
+    r=request("/upload",WALL_BYTES);web_upload(&r);management_close();run_task();CHECK(!strcmp(r.status,"403 Forbidden"));CHECK(wall_library_read(&disk,reloaded)&&disk.generation==original_generation);
+    CHECK(!management_generation_valid(generation));
     r=request("/upload",WALL_BYTES);web_upload(&r);httpd_req_t cancel=request("/cancel",0);web_cancel(&cancel);CHECK(!strcmp(cancel.status,"200 OK"));run_task();CHECK(!wallpaper_busy());
     CHECK(wallpaper_begin(1,WALL_BYTES,0,&usb)==0);CHECK(wallpaper_chunk(1,usb,5,pixels,10)==4);CHECK(!wallpaper_busy());
     CHECK(wallpaper_begin(1,WALL_BYTES,0,&usb)==0);CHECK(wallpaper_chunk(1,usb,0,pixels,10)==0);CHECK(wallpaper_chunk(1,usb,0,pixels,10)==4);CHECK(!wallpaper_busy());
     CHECK(wallpaper_begin(1,WALL_BYTES,0,&usb)==0);clock_us+=31000000;CHECK(wallpaper_chunk(1,usb,0,pixels,10)==4);CHECK(!wallpaper_busy());
     allocation_failure=true;CHECK(wallpaper_begin(1,WALL_BYTES,0,&usb)==3);allocation_failure=false;
     flash_failure=true;r=request("/upload",WALL_BYTES);web_upload(&r);run_task();CHECK(!strcmp(r.status,"500 Internal Server Error"));flash_failure=false;
-    CHECK(wall_load(&disk,reloaded)&&disk.generation==original_generation);
+    CHECK(wall_library_read(&disk,reloaded)&&disk.generation==original_generation);
     task_failure=true;r=request("/upload",WALL_BYTES);web_upload(&r);CHECK(!wallpaper_busy());task_failure=false;
     CHECK(wallpaper_begin(1,0,0,&usb)==0);CHECK(wallpaper_finish_async(usb)==0);run_task();uint32_t finished;int result;
     CHECK(!wallpaper_finish_result(&finished,&result));wallpaper_service_poll();CHECK(wallpaper_finish_result(&finished,&result)&&result==0&&finished==usb);
-    CHECK(wall_load(&disk,reloaded)&&disk.size==0);
-    clock_us+=300000000;management_poll();CHECK(!management_active());r=request("/status",0);web_status(&r);CHECK(!strcmp(r.status,"403 Forbidden"));
-    puts("production services: HTTP auth/origin/type/CRC/busy/cancel/expiry; BLE authorization; command queue; upload timeout/failures; atomic reload PASS");
+    CHECK(selected_wallpaper==0&&wall_library_read(&library[0],reloaded));
+    clock_us+=86400000000;management_poll();r=request("/status",0);web_status(&r);CHECK(!strcmp(r.status,"")||!strcmp(r.status,"200 OK"));
+    CHECK(wallpaper_select(2,false)==MG_OK);run_task();wallpaper_service_poll();CHECK(selected_wallpaper==2&&shown->data[0]==0x73);
+    CHECK(wallpaper_select(2,true)==MG_OK);run_task();wallpaper_service_poll();CHECK(selected_wallpaper==0&&library[0].slot<0);
+    management_close();r=request("/status",0);CHECK(web_status(&r)==0);
+    puts("production services: HTTP direct access/origin/type/CRC/busy/cancel; BLE direct access; command queue; upload timeout/failures; atomic reload PASS");
 }

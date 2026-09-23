@@ -62,7 +62,7 @@ class WallpaperTests(unittest.TestCase):
             self.assertEqual(app.transfer['session'], 124)
             app.cancel_wallpaper()
             app.wallpaper.set_info({'ip': '192.168.1.4', 'key': '0123456789abcdef', 'http': True, 'hotspot': False})
-            self.assertEqual(app.wallpaper.url.get(), 'http://192.168.1.4/#key=0123456789abcdef')
+            self.assertEqual(app.wallpaper.url.get(), 'http://192.168.1.4/')
             app.tabs.select(app.wallpaper)
             root.update()
             self.assertEqual(root.title(), 'NBTCA Badge TOOL')

@@ -15,7 +15,6 @@ class WebUploadTest(unittest.TestCase):
         html = (Path(__file__).parent/'device/src/wallpaper.html').read_bytes()
         requests = []
         hold_upload=threading.Event(); release_upload=threading.Event()
-        key='0123456789abcdef0123456789abcdef'
         state={'protocol':1,'product':'CABadge','firmware':'7.1.0-preview','remaining':280,'battery_mv':4032,'brightness':70,'asleep':False,'reduced_motion':False,
                'command_id':0,'command_op':0,'command_result':0,'wallpaper':{'phase':0,'error':0,'received':0,'generation':1},
                'wifi':{'enabled':True,'connected':True,'scanning':False,'connecting':False,'ssid':'<img src=x onerror=alert(1)>','rssi':-40,'ip':'192.168.1.5','error':0,
@@ -26,11 +25,11 @@ class WebUploadTest(unittest.TestCase):
             def log_message(self, *args): pass
             def do_GET(self):
                 if self.path=='/status':
-                    self.send_response(200 if self.headers.get('X-JX-Key')==key else 403);self.end_headers();self.wfile.write(json.dumps(state).encode());return
+                    self.send_response(200);self.end_headers();self.wfile.write(json.dumps(state).encode());return
                 self.send_response(200); self.send_header('Content-Type','text/html; charset=utf-8');self.end_headers();self.wfile.write(html)
             def do_POST(self):
                 body=self.rfile.read(int(self.headers.get('Content-Length',0)))
-                ok=self.headers.get('X-JX-Key')==key
+                ok=self.headers.get('X-JX-Key') is None
                 if self.path in ('/upload','/reset'):ok=ok and self.headers.get('X-JX-CRC')==f'{zlib.crc32(body):08x}'
                 requests.append((self.path,body,ok))
                 if ok and self.path=='/control':
@@ -50,9 +49,11 @@ class WebUploadTest(unittest.TestCase):
             with sync_playwright() as pw:
                 browser=pw.chromium.launch(channel='msedge',headless=True)
                 page=browser.new_page(viewport={'width':390,'height':844},device_scale_factor=1,is_mobile=True,has_touch=True)
+                page.add_init_script("Object.defineProperty(AbortSignal, 'timeout', {value: undefined, configurable: true});")
+                page.set_default_timeout(5000)
                 errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-                page.goto(f'http://127.0.0.1:{server.server_port}/#key={key}')
-                self.assertEqual(page.locator('#key').input_value(),key)
+                page.goto(f'http://127.0.0.1:{server.server_port}/')
+                self.assertEqual(page.locator('#key, #authorize').count(),0)
                 self.assertNotIn('key=',page.url)
                 data=io.BytesIO();Image.new('RGB',(720,360),'red').save(data,format='PNG')
                 page.locator('#file').set_input_files({'name':'test.png','mimeType':'image/png','buffer':data.getvalue()})
@@ -64,6 +65,17 @@ class WebUploadTest(unittest.TestCase):
                 page.wait_for_function("document.getElementById('status').textContent==='已保存并应用'")
                 self.assertEqual(page.locator('#send').inner_text(),'已应用')
                 self.assertEqual(requests[-1],('/upload',b'\0\xf8'*(360*360),True))
+                # Same page, no reload or reset between successful uploads.
+                for colour,pixel in [('lime',b'\xe0\x07'),('blue',b'\x1f\x00')]:
+                    page.wait_for_function("!document.getElementById('file').disabled")
+                    data=io.BytesIO();Image.new('RGB',(360,360),colour).save(data,format='PNG')
+                    page.locator('#file').set_input_files({'name':colour+'.png','mimeType':'image/png','buffer':data.getvalue()})
+                    page.wait_for_function("document.getElementById('status').textContent===''")
+                    page.locator('#send').click()
+                    page.wait_for_function("document.getElementById('send').textContent==='正在应用…'")
+                    state['wallpaper']['phase']=4
+                    page.wait_for_function("document.getElementById('status').textContent==='已保存并应用'")
+                    self.assertEqual(requests[-1],('/upload',pixel*(360*360),True))
                 page.screenshot(path=str(Path(__file__).parents[1]/'build/wallpaper-mobile-v7.png'),full_page=True)
                 page.wait_for_function("!document.getElementById('reset').disabled")
                 count=len(requests);page.locator('#reset').click()
@@ -91,15 +103,11 @@ class WebUploadTest(unittest.TestCase):
                 self.assertEqual(requests[-1][1],b'\x01\x03\x14\x0b<script>bad</script>password123')
                 self.assertEqual(page.locator('#password').input_value(),'')
                 page.screenshot(path=str(Path(__file__).parents[1]/'build/management-mobile-v7.png'),full_page=True)
-                page.locator('#access summary').click();page.locator('#key').fill('0'*32);page.locator('#authorize').click()
-                page.wait_for_function("document.getElementById('sessionState').textContent.includes('授权已失效')")
-                self.assertTrue(page.locator('#sleep').is_disabled())
                 self.assertFalse(errors,errors)
                 self.assertLessEqual(page.evaluate('document.documentElement.scrollWidth'),390)
-                page.locator('#wallTab').click();page.locator('#key').fill(key);page.locator('#authorize').click()
+                page.locator('#wallTab').click()
                 page.locator('#file').set_input_files(str(Path(__file__).parents[1]/'ui/wallpaper.png'))
                 page.wait_for_function("document.getElementById('status').textContent===''")
-                page.locator('#access summary').click()
                 page.screenshot(path=str(Path(__file__).parents[1]/'build/wallpaper-mobile-v7.png'),full_page=True)
                 page.wait_for_function("!document.getElementById('send').disabled")
                 hold_upload.set();page.locator('#send').click();page.locator('#cancelUpload').click()

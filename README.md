@@ -6,9 +6,9 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 
 这里收录硬件设计、固件源码、配套电脑工具和实板测试记录，供复刻、改进和协作开发使用。
 
-**当前版本：v1.0 / 固件 7.3.7-mem。已上板使用，基本功能可正常使用，但仍存在较多 Bug，后续持续修复和完善。** 首次复刻建议使用 v1.0 的配套硬件与固件，不混用其他实验版本。
+**当前正式版本：v1.1.0 / 内部固件 7.9.2-memory。** 包含统一缓存位图转场、Direct Compositor 和内存优化。已完成编译、烧录及基本功能检查；长期稳定性与完整人工验收仍在完善。
 
-[下载 v1.0](https://github.com/Egger0/CABadge/releases/tag/v1.0) · [发布说明](docs/RELEASE-v1.0.md) · [已知问题](docs/KNOWN_ISSUES.md) · [实板测试记录](首板测试记录.md)
+[下载 v1.1.0](https://github.com/nbtca/CABadge/releases/tag/v1.1.0) · [发布与升级说明](docs/RELEASE-v1.1.0.md) · [已知问题](docs/KNOWN_ISSUES.md) · [实板测试记录](首板测试记录.md)
 
 ## 可以做什么
 
@@ -44,7 +44,9 @@ GIF、BLE 传图和 OTA 尚未作为本版功能提供。完整的异常场景�
 
 **流程：下载配套资料 → 核对采购 → PCB 打样 → 分阶段焊接与上电 → 烧录 → 功能检查。** 已有装配完成的同版硬件，可以从第 5 步开始。
 
-### 1. 下载同一版本的资料
+### 1. 下载固件与配套硬件
+
+**最新固件请下载 [v1.1.0](https://github.com/nbtca/CABadge/releases/tag/v1.1.0)**，升级方法见[当前发布说明](docs/RELEASE-v1.1.0.md)。下面 v1.0 附件表保留为硬件制造包与历史基线索引，不是最新固件。
 
 打开 [v1.0 Release](https://github.com/Egger0/CABadge/releases/tag/v1.0)，按用途下载：
 

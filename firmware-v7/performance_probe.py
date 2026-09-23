@@ -31,7 +31,7 @@ def summarize(rows, lcd=False):
     if count not in (1,3,6) or len(rows) != count or [r.get('scene') for r in rows] != list(range(count)):
         raise ValueError('采样场景不完整，未更新校准')
     for row in rows:
-        if row.get('schema') != 1 or row.get('pcb') != 'c7c59dff' or row.get('firmware') not in ('7.1.0-preview', '7.1.1-lcd', '7.1.2-lcd', '7.1.3-lcd', '7.1.4-profile', '7.1.5-usb', '7.1.6-memory', '7.1.7-ram', '7.1.8-partial', '7.1.9-async', '7.2.0-monitor', '7.2.1-monitor', '7.2.2-monitor', '7.2.3-monitor','7.3.3-fluid','7.3.4-async','7.3.5-refresh16','7.3.6-anim16','7.3.7-mem') or row.get('lcd_transfer', False) is not lcd:
+        if row.get('schema') != 1 or row.get('pcb') != 'c7c59dff' or row.get('firmware') not in ('7.1.0-preview', '7.1.1-lcd', '7.1.2-lcd', '7.1.3-lcd', '7.1.4-profile', '7.1.5-usb', '7.1.6-memory', '7.1.7-ram', '7.1.8-partial', '7.1.9-async', '7.2.0-monitor', '7.2.1-monitor', '7.2.2-monitor', '7.2.3-monitor','7.3.3-fluid','7.3.4-async','7.3.5-refresh16','7.3.6-anim16','7.3.7-mem','7.3.8-mem','7.3.9-mem','7.3.10-mem','7.4.0-idf61','7.4.1-idf61','7.4.2-idf61','7.4.3-idf61','7.5.0-library','7.5.1-direct','7.5.2-web','7.5.3-http','7.5.4-upload','7.6.0-apps','7.9.0-direct') or row.get('lcd_transfer', False) is not lcd:
             raise ValueError('采样版本不匹配')
         if row['firmware'] == '7.1.0-preview':
             if row.get('lcd_connected') is not False:
@@ -44,7 +44,7 @@ def summarize(rows, lcd=False):
         if not (0 if audit else 10) <= row['frames'] == row['samples'] <= 256 or not 3900 <= row['elapsed_ms'] <= (35000 if row.get('manual') else 20000) or row['render_us_p50'] > row['render_us_p95'] or row['render_us_p95'] > 500000 or row['flush_bytes_p95'] > 259200*32:
             raise ValueError('有效帧不足、缓冲已满或数据超界，未更新校准')
         if lcd:
-            if row.get('firmware') not in ('7.1.2-lcd', '7.1.3-lcd', '7.1.4-profile', '7.1.5-usb', '7.1.6-memory', '7.1.7-ram', '7.1.8-partial', '7.1.9-async', '7.2.0-monitor', '7.2.1-monitor', '7.2.2-monitor', '7.2.3-monitor','7.3.3-fluid','7.3.4-async','7.3.5-refresh16','7.3.6-anim16','7.3.7-mem') or row.get('lcd_transfer') is not True or row.get('lcd_qspi_hz') != 40000000:
+            if row.get('firmware') not in ('7.1.2-lcd', '7.1.3-lcd', '7.1.4-profile', '7.1.5-usb', '7.1.6-memory', '7.1.7-ram', '7.1.8-partial', '7.1.9-async', '7.2.0-monitor', '7.2.1-monitor', '7.2.2-monitor', '7.2.3-monitor','7.3.3-fluid','7.3.4-async','7.3.5-refresh16','7.3.6-anim16','7.3.7-mem','7.3.8-mem','7.3.9-mem','7.3.10-mem','7.4.0-idf61','7.4.1-idf61','7.4.2-idf61','7.4.3-idf61','7.5.0-library','7.5.1-direct','7.5.2-web','7.5.3-http','7.5.4-upload','7.6.0-apps','7.9.0-direct') or row.get('lcd_transfer') is not True or row.get('lcd_qspi_hz') != 40000000:
                 raise ValueError('缺少实体输出测量')
             for key in ('flush_us_p95', 'copy_us_p95', 'frame_us_p95', 'frame_gap_ms_max'):
                 if type(row.get(key)) is not int or row[key] < 0:
@@ -64,7 +64,7 @@ def summarize(rows, lcd=False):
             row['estimated_qspi40_p95_frame_ms'] = round(max(1000 / 30, row['render_us_p95'] / 1000 + row['flush_bytes_p95'] / 20000), 3)
     return {'schema': 1, 'lcd_transfer': lcd, 'firmware': rows[0]['firmware'], 'pcb': 'c7c59dff',
             'captured_at': datetime.datetime.now().astimezone().isoformat(),
-            'measurement': 'Detailed probe fences each frame; render excludes GUI wait only; worker transfer overlaps rendering; use runtime_probe for normal pipeline FPS' if lcd and rows[0]['firmware'] in ('7.3.4-async','7.3.5-refresh16','7.3.6-anim16','7.3.7-mem') else 'ESP32 render excludes LCD flush; completed SPI frame rate is not panel scan rate' if lcd else 'ESP32 LVGL render wall-time, no LCD transfer; radio state unchanged; not a radio load test',
+            'measurement': 'Detailed probe fences each frame; render excludes GUI wait only; worker transfer overlaps rendering; use runtime_probe for normal pipeline FPS' if lcd and rows[0]['firmware'] in ('7.3.4-async','7.3.5-refresh16','7.3.6-anim16','7.3.7-mem','7.3.8-mem','7.3.9-mem','7.3.10-mem','7.4.0-idf61','7.4.1-idf61','7.4.2-idf61','7.4.3-idf61','7.5.0-library','7.5.1-direct','7.5.2-web','7.5.3-http','7.5.4-upload','7.6.0-apps','7.9.0-direct') else 'ESP32 render excludes LCD flush; completed SPI frame rate is not panel scan rate' if lcd else 'ESP32 LVGL render wall-time, no LCD transfer; radio state unchanged; not a radio load test',
             'calibration': 'Physical measurement only; PC calibration unchanged' if lcd else 'Worst scene render P95 + current PC dirty bytes / ideal QSPI bandwidth; 30 FPS cap; not LCD FPS',
             'render_ms': max(r['render_us_p95'] for r in rows) / 1000, 'scenes': rows}
 

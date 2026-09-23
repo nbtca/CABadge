@@ -19,6 +19,23 @@ static unsigned retries;
 static int last_error;
 static bool manual_disconnect,hotspot_started_wifi;
 static char pending_ssid[33],pending_password[64];
+/* Eight successful personal/open networks, most recently used first. */
+typedef struct {char ssid[33],password[64];} saved_network_t;
+static saved_network_t history[8];
+static int64_t reconnect_at;
+static int remembered(const char *ssid){
+    for(int i=0;i<8;i++)if(*history[i].ssid&&!strcmp(history[i].ssid,ssid))return i;
+    return -1;
+}
+static bool remember(void){
+    if(!storage)return false;
+    if(!strcmp(history[0].ssid,pending_ssid)&&!strcmp(history[0].password,pending_password))return true;
+    int at=remembered(pending_ssid);if(at<0)at=7;
+    memmove(history+1,history,at*sizeof(*history));
+    snprintf(history[0].ssid,sizeof(history[0].ssid),"%s",pending_ssid);
+    snprintf(history[0].password,sizeof(history[0].password),"%s",pending_password);
+    return nvs_set_blob(storage,"history",history,sizeof(history))==ESP_OK&&nvs_commit(storage)==ESP_OK;
+}
 static badge_wifi_ap_t visible[12];
 static int visible_count;
 static esp_netif_t *station,*access_point;
@@ -33,14 +50,14 @@ void wifi_wallpaper_address(char *ip,size_t n){
         snprintf(ip,n,IPSTR,IP2STR(&info.ip));
 }
 esp_err_t wifi_wallpaper_hotspot(bool on,const char *name,const char *password){
+    (void)password;
     if(!initialized)return ESP_ERR_INVALID_STATE;
     if(on){
         if(!access_point)access_point=esp_netif_create_default_wifi_ap();
         if(!access_point)return ESP_ERR_NO_MEM;
         esp_err_t rc=esp_wifi_set_mode(WIFI_MODE_APSTA);if(rc!=ESP_OK)return rc;
         wifi_config_t config={0};snprintf((char*)config.ap.ssid,sizeof(config.ap.ssid),"%s",name);
-        snprintf((char*)config.ap.password,sizeof(config.ap.password),"%s",password);
-        config.ap.ssid_len=strlen(name);config.ap.channel=6;config.ap.max_connection=2;config.ap.authmode=WIFI_AUTH_WPA2_PSK;
+        config.ap.ssid_len=strlen(name);config.ap.channel=6;config.ap.max_connection=2;config.ap.authmode=WIFI_AUTH_OPEN;
         rc=esp_wifi_set_config(WIFI_IF_AP,&config);if(rc!=ESP_OK){esp_wifi_set_mode(WIFI_MODE_STA);return rc;}
         if(!state->wifi_enabled){rc=esp_wifi_start();if(rc!=ESP_OK){esp_wifi_set_mode(WIFI_MODE_STA);return rc;}hotspot_started_wifi=true;state->wifi_enabled=true;badge_ui_refresh();}
         return ESP_OK;
@@ -70,12 +87,14 @@ static void scan(void){
     if(!scanning)badge_ui_wifi_message("扫描失败，点刷新重试");
 }
 static void connect_network(const char *ssid,const char *password){
+    int saved=remembered(ssid);
+    if(!*password&&saved>=0)password=history[saved].password;
     size_t length=strlen(ssid),pass_length=strlen(password);
     if(!initialized||!state->wifi_enabled||!length||length>32||pass_length>63||(pass_length&&pass_length<8)){
         badge_ui_wifi_message("网络名称或密码无效");return;
     }
     if(scanning){esp_wifi_scan_stop();scanning=false;}
-    manual_disconnect=false;
+    manual_disconnect=false;reconnect_at=esp_timer_get_time()+15000000;
     wifi_ap_record_t current;
     ignore_disconnect=esp_wifi_sta_get_ap_info(&current)==ESP_OK;
     esp_wifi_disconnect();
@@ -94,6 +113,7 @@ static void enable(bool on){
     if(!initialized){state->wifi_enabled=false;badge_ui_refresh();return;}
     state->wifi_enabled=on;connecting=false;scanning=false;ignore_disconnect=false;hotspot_started_wifi=false;manual_disconnect=!on;
     if(on){
+        reconnect_at=0;
         last_error=esp_wifi_start();if(last_error!=ESP_OK){state->wifi_enabled=false;badge_ui_wifi_message("Wi-Fi 启动失败");}
     }else{
         management_close();
@@ -118,15 +138,17 @@ void wifi_service_init(badge_state_t *value){
     initialized=true;
     if(nvs_open("badge_wifi",NVS_READWRITE,&storage)==ESP_OK){
         uint8_t on=1;nvs_get_u8(storage,"enabled",&on);state->wifi_enabled=on!=0;
+        size_t bytes=sizeof(history);
+        if(nvs_get_blob(storage,"history",history,&bytes)!=ESP_OK||bytes!=sizeof(history)){
+            memset(history,0,sizeof(history));
+            size_t a=sizeof(history[0].ssid),b=sizeof(history[0].password);
+            if(nvs_get_str(storage,"ssid",history[0].ssid,&a)!=ESP_OK||nvs_get_str(storage,"password",history[0].password,&b)!=ESP_OK)memset(history,0,sizeof(history));
+        }
+        for(int i=0;i<8;i++){history[i].ssid[32]=0;history[i].password[63]=0;}
     }
     if(!state->wifi_enabled)return;
     last_error=esp_wifi_start();if(last_error!=ESP_OK){state->wifi_enabled=false;return;}
-    if(storage){
-        char ssid[33]={0},password[64]={0};size_t ssid_size=sizeof(ssid),pass_size=sizeof(password);
-        if(nvs_get_str(storage,"ssid",ssid,&ssid_size)==ESP_OK&&nvs_get_str(storage,"password",password,&pass_size)==ESP_OK)
-            connect_network(ssid,password);
-        memset(password,0,sizeof(password));
-    }
+    if(*history[0].ssid)connect_network(history[0].ssid,history[0].password);
 }
 void wifi_service_poll(void){
     if(!initialized)return;
@@ -137,6 +159,11 @@ void wifi_service_poll(void){
             if(!state->wifi_enabled||connecting){esp_wifi_clear_ap_list();continue;}
             wifi_ap_record_t found[24];uint16_t count=24;visible_count=0;
             if(esp_wifi_scan_get_ap_records(&count,found)!=ESP_OK){badge_ui_wifi_message("扫描失败，请重试");continue;}
+            int best=-1,best_rssi=-128;
+            for(int i=0;i<count;i++){
+                char name[33];memcpy(name,found[i].ssid,32);name[32]=0;int saved=remembered(name);
+                if(saved>=0&&found[i].rssi>best_rssi){best=saved;best_rssi=found[i].rssi;}
+            }
             for(int i=0;i<count&&visible_count<12;i++){
                 char ssid[33];memcpy(ssid,found[i].ssid,32);ssid[32]=0;if(!*ssid)continue;
                 bool duplicate=false;for(int j=0;j<visible_count;j++)if(!strcmp(visible[j].ssid,ssid))duplicate=true;
@@ -145,17 +172,18 @@ void wifi_service_poll(void){
                 wifi_auth_mode_t mode=found[i].authmode;
                 bool enterprise=mode==WIFI_AUTH_WPA2_ENTERPRISE||mode==WIFI_AUTH_WPA3_ENT_192||
                     mode==WIFI_AUTH_WPA3_ENTERPRISE||mode==WIFI_AUTH_WPA2_WPA3_ENTERPRISE||mode==WIFI_AUTH_WPA_ENTERPRISE;
-                ap->security=mode==WIFI_AUTH_OPEN?0:enterprise?2:1;
+                ap->security=mode==WIFI_AUTH_OPEN?0:enterprise?2:1;ap->saved=remembered(ssid)>=0;
             }
             badge_ui_wifi_results(visible,visible_count);
+            if(best>=0&&!manual_disconnect&&state->wifi_connected!=1)connect_network(history[best].ssid,history[best].password);
         }else if(value==CONNECTED){
             wifi_ap_record_t ap;if(esp_wifi_sta_get_ap_info(&ap)!=ESP_OK)continue;
             last_error=0;state->wifi_connected=1;state->wifi_rssi=ap.rssi;
             memcpy(state->wifi_ssid,ap.ssid,32);state->wifi_ssid[32]=0;connecting=false;retries=0;
             bool saved=false;
             if(storage&&!strcmp(state->wifi_ssid,pending_ssid)){
-                saved=nvs_set_str(storage,"ssid",pending_ssid)==ESP_OK&&
-                      nvs_set_str(storage,"password",pending_password)==ESP_OK&&nvs_commit(storage)==ESP_OK;
+                saved=remember();
+                for(int i=0;i<visible_count;i++)visible[i].saved=remembered(visible[i].ssid)>=0;
             }
             badge_ui_refresh();badge_ui_wifi_results(visible,visible_count);
             badge_ui_wifi_message(saved?"已连接，已记住此网络":"已连接；网络信息未保存");
@@ -166,12 +194,15 @@ void wifi_service_poll(void){
             if(state->wifi_enabled&&*pending_ssid&&retries++<2){
                 connecting=true;esp_wifi_connect();badge_ui_wifi_message("连接中，请稍候…");
             }else{
-                connecting=false;last_error=state->wifi_enabled?ESP_FAIL:0;badge_ui_wifi_message(state->wifi_enabled?"连接失败，请检查密码或信号":"Wi-Fi 已关闭");
+                reconnect_at=esp_timer_get_time()+15000000;connecting=false;last_error=state->wifi_enabled?ESP_FAIL:0;badge_ui_wifi_message(state->wifi_enabled?"连接失败，请检查密码或信号":"Wi-Fi 已关闭");
             }
         }
     }
     static int64_t last_rssi;
     int64_t now=esp_timer_get_time();
+    if(state->wifi_enabled&&!manual_disconnect&&state->wifi_connected!=1&&!connecting&&!scanning&&*history[0].ssid&&now>=reconnect_at){
+        reconnect_at=now+15000000;scan();
+    }
     if(state->wifi_connected==1&&now-last_rssi>=2000000){
         wifi_ap_record_t ap;last_rssi=now;
         if(esp_wifi_sta_get_ap_info(&ap)==ESP_OK&&state->wifi_rssi!=ap.rssi){state->wifi_rssi=ap.rssi;badge_ui_refresh();}

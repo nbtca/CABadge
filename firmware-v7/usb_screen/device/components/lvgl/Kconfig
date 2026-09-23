@@ -1,0 +1,4 @@
+config LV_DRAW_SW_DRAW_UNIT_CNT
+    int "CABadge software draw worker count"
+    range 1 2
+    default 1

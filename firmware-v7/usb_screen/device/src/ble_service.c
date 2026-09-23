@@ -29,7 +29,6 @@ static bool subscribed;
 static const ble_uuid128_t service_uuid=BLE_UUID128_INIT(1,0,0,0,0,0,0,0x80,0,0x40,0x42,0x41,0x43,0x54,0x42,0x4e);
 static const ble_uuid128_t status_uuid=BLE_UUID128_INIT(2,0,0,0,0,0,0,0x80,0,0x40,0x42,0x41,0x43,0x54,0x42,0x4e);
 static const ble_uuid128_t control_uuid=BLE_UUID128_INIT(3,0,0,0,0,0,0,0x80,0,0x40,0x42,0x41,0x43,0x54,0x42,0x4e);
-static const ble_uuid128_t session_uuid=BLE_UUID128_INIT(4,0,0,0,0,0,0,0x80,0,0x40,0x42,0x41,0x43,0x54,0x42,0x4e);
 static int gatt_access(uint16_t conn,uint16_t attr,struct ble_gatt_access_ctxt *ctx,void *arg){
     (void)attr;int kind=(int)(intptr_t)arg;
     if(conn!=incoming)return BLE_ATT_ERR_INSUFFICIENT_AUTHOR;
@@ -41,8 +40,7 @@ static int gatt_access(uint16_t conn,uint16_t attr,struct ble_gatt_access_ctxt *
     uint8_t data[MG_MAX_COMMAND];uint16_t length=OS_MBUF_PKTLEN(ctx->om),copied=0;
     if(length>sizeof(data)||ble_hs_mbuf_to_flat(ctx->om,data,sizeof(data),&copied)||copied!=length)return BLE_ATT_ERR_INVALID_ATTR_VALUE_LEN;
     int result;uint32_t generation,id;
-    if(kind==3)result=management_ble_authorize(conn,data,length);
-    else if(!management_ble_allowed(conn,&generation))result=MG_UNAUTHORIZED;
+    if(!management_ble_allowed(conn,&generation))result=MG_UNAUTHORIZED;
     else result=management_submit(data,length,generation,conn,&id);
     memset(data,0,sizeof(data));
     return result==MG_OK||result==MG_ACCEPTED?0:result==MG_UNAUTHORIZED?BLE_ATT_ERR_INSUFFICIENT_AUTHOR:result==MG_INVALID?BLE_ATT_ERR_VALUE_NOT_ALLOWED:0x80+result;
@@ -50,7 +48,6 @@ static int gatt_access(uint16_t conn,uint16_t attr,struct ble_gatt_access_ctxt *
 static const struct ble_gatt_chr_def characteristics[]={
     {.uuid=&status_uuid.u,.access_cb=gatt_access,.arg=(void*)1,.flags=BLE_GATT_CHR_F_READ|BLE_GATT_CHR_F_NOTIFY,.val_handle=&status_value},
     {.uuid=&control_uuid.u,.access_cb=gatt_access,.arg=(void*)2,.flags=BLE_GATT_CHR_F_WRITE},
-    {.uuid=&session_uuid.u,.access_cb=gatt_access,.arg=(void*)3,.flags=BLE_GATT_CHR_F_WRITE},
     {0}
 };
 static const struct ble_gatt_svc_def services[]={
