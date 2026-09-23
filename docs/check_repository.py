@@ -40,7 +40,21 @@ for item in json.loads(manifest.read_text(encoding='utf-8-sig'))['files']:
     data = p.read_bytes()
     if len(data) != item['bytes'] or hashlib.sha256(data).hexdigest() != item['sha256']:
         errors.append(f'Manufacturing manifest mismatch: {p}')
+# Check the staged firmware source mapping used by usb_screen/build.ps1.
+source_dir = root / 'firmware-v7/usb_screen/device/src'
+cmake = (source_dir / 'CMakeLists.txt').read_text(encoding='utf-8')
+source_list = re.search(r'SRCS (.*?)INCLUDE_DIRS', cmake, re.S)[1]
+for name in re.findall(r'"([^"]+)"', source_list):
+    candidates = [source_dir / name, root / 'firmware-v7' / name,
+                  root / 'firmware-v7/usb_screen' / name]
+    if not any(p.is_file() for p in candidates):
+        errors.append(f'Missing firmware source: {name}')
+for p in [root / 'hardware/JXBadge_V1.kicad_pcb',
+          *(root / 'hardware/JXBadge.pretty').glob('*.kicad_mod')]:
+    for name in re.findall(r'\(model "\$\{KIPRJMOD\}/([^"\n]+)"', p.read_text(encoding='utf-8')):
+        if not (root / 'hardware' / name).is_file():
+            errors.append(f'Missing local 3D model: {name}')
 print(json.dumps(counts, ensure_ascii=False))
 if errors:
     raise SystemExit('\n'.join(errors))
-print('PASS: syntax, tracked local Markdown targets, ZIP CRC, manufacturing hashes.')
+print('PASS: syntax, tracked local Markdown targets, ZIP CRC, manufacturing hashes, firmware sources and local models.')

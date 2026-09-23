@@ -4,14 +4,14 @@
 
 ## Windows 工作台
 
-系统 Python 需含 Tkinter、pyserial、Pillow、esptool；运行 `firmware-v7/run.cmd`，使用固件安装或壁纸管理。当前没有 USB 实板画面镜像；直接看 LCD。`tools/flasher/app.py` 的校验/烧录逻辑仍被复用，但旧独立窗口的诊断预设不是当前安装入口。
+系统 Python 需含 Tkinter、pyserial、esptool；运行 `firmware-v7/run.cmd`，使用当前固件安装与诊断入口。壁纸管理使用设备本地网页。当前没有 USB 实板画面镜像；直接看 LCD。`tools/flasher/app.py` 的校验/烧录逻辑仍被复用，但旧独立窗口的诊断预设不是当前安装入口。
 
 ## 板端构建
 
 现有环境使用 Windows、F 盘与 PlatformIO。未验证全新机器一键构建或字节级复现；下面是实际脚本约定。
 
 1. 用 Python 3.10 创建 `firmware/bringup/.venv` 并安装 PlatformIO 6.2.0；只需这个虚拟环境，不需要旧 firmware 源码。构建脚本固定调用其中的 Python。
-2. 用支持 tarfile 安全解包的 Python 运行 `firmware-v7/setup_deps.py`，获取 LVGL 9.4.0 等依赖到 vendor。脚本也下载 SDL2/字体；现有生成资源已入库，板端构建不必重新生成图片/字库。
+2. 用支持 tarfile 安全解包的 Python 运行 `firmware-v7/setup_deps.py`，获取 LVGL 9.4.0 与字体到 vendor。不再下载已删除模拟器使用的 SDL2；现有生成资源已入库，板端构建不必重新生成图片/字库。
 3. 在仓库根目录运行：
 
 ```powershell
@@ -29,6 +29,6 @@ powershell -NoProfile -ExecutionPolicy Bypass -File firmware-v7/usb_screen/build
 
 可单独运行 `python firmware-v7/test_physical_display.py`、`python firmware-v7/test_transition_compositor.py`、`python firmware-v7/test_map_stream.py`；这些宿主检查依赖脚本所示的本地 Zig 工具，不启动 UI 模拟器。首次恢复环境需按各脚本路径安装工具。
 
-`firmware-v7/CMakeLists.txt` 是历史桌面目标，仍缺少当前 App/cache 模块接线，不能据此承诺最新版桌面构建通过。旧测试针对旧内部实现，未逐一迁移；不要直接把旧全套 CTest/probe 当成当前验收。实体画面检查以实际烧录版本为准。
+旧桌面 CMake、模拟器、像素投屏和过时测试已删除，板端唯一构建入口是 `firmware-v7/usb_screen/build.ps1`。现有工作台使用 `usb_screen/framing.py` 的 USB 编解码；`python firmware-v7/usb_screen/framing.py` 可运行无设备自检。实体画面验收仍需要实际烧录版本。
 
 项目源码/附件放 F:/计协吧唧，工具缓存与 TEMP/TMP 放 F:/CABadgeBuild。未上传的 outputs、vendor、虚拟环境不会随 GitHub 源码 ZIP 提供。

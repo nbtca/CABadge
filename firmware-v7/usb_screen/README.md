@@ -23,7 +23,7 @@
 |device/src/wallpaper.html|手机本地管理页面|
 |device/src/app_service.c / map_png.c|BlueMap 网络与流式解码|
 |../ui/ui_transition_cache.c / ui_transition_compositor.c|缓存、预热及 Direct 转场|
-|../workbench.py / wallpaper.py|当前原生工作台及上传工具|
-|viewer.py / WIRELESS_P0.md|早期像素镜像工具与协议历史，不是当前产品入口|
+|../workbench.py / framing.py|当前原生工作台与 USB 编解码|
+
 
 构建入口 `build.ps1`，实际环境见 [构建说明](../../docs/BUILD.md)。当前有真实背光 PWM 和 LCD/触摸驱动，不再采用早期“只在电脑显示”的接法。不要按旧说明拔屏或烧录 v4/v5 预览包。

@@ -26,6 +26,6 @@ BlueMap 使用 16 KiB HTTP + Pngle 流式采样，不创建整张 RGBA；用户�
 
 最小检查：`test_map_stream.py`、`test_physical_display.py`、`test_transition_compositor.py`。实板检查记录见 [R63/R64](../首板测试记录.md)，软件检查不能替代目视验收。
 
-根 `CMakeLists.txt`、`build.ps1`、`simulator.c`、`usb_screen/viewer.py` 及若干早期测试保留作历史开发工具；桌面 CMake 尚未接入全部新 App/cache 模块，不作为本版可运行预览或验收入口。不自动执行历史 probe，它们可能烧录或改变板端状态。
+旧桌面模拟器、像素投屏与废弃测试已移出当前树。保留三个当前内存/DMA/compositor 最小检查和工作台 USB framing 自检；历史工具可从 Git 旧提交恢复。板端构建仍使用 `usb_screen/build.ps1`。
 
 [当前交接与历史演进](HANDOFF.md) · [文档索引](../docs/INDEX.md) · [已知限制](../docs/KNOWN_ISSUES.md)

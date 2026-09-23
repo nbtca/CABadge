@@ -5,7 +5,7 @@ from PIL import Image, ImageFont, ImageDraw
 
 ROOT=Path(__file__).resolve().parent
 chars=set(chr(c) for c in range(32,127))
-for path in [ROOT/'simulator.c', ROOT/'bridge.c', ROOT/'ui/badge_ui.c', ROOT/'ui/wifi_panel.c', ROOT/'usb_screen/device/src/wifi_service.c', ROOT/'usb_screen/device/src/ble_service.c', ROOT/'usb_screen/device/src/wallpaper_service.c']:
+for path in [ROOT/'ui/badge_ui.c', ROOT/'ui/wifi_panel.c', ROOT/'usb_screen/device/src/wifi_service.c', ROOT/'usb_screen/device/src/ble_service.c', ROOT/'usb_screen/device/src/wallpaper_service.c']:
     chars.update(c for c in path.read_text(encoding='utf-8') if 127<ord(c)<65535)
 chars.update(c for c in (ROOT/'ui/apps.c').read_text(encoding='utf-8') if 127<ord(c)<65535)
 base_chars=set(chars)

@@ -74,6 +74,6 @@ BlueMap：16 KiB HTTP 输入 → Pngle 增量解码 → 128×128 RGB565 tile（�
 
 正常使用直接观察实体屏；旧 SDL2/USB 像素镜像不是当前验收路径。详细性能统计由 CABADGE_DISPLAY_PERF 控制，正式包为关闭；轻量 cache debug 开启。无 TE，DMA 完成不等于面板扫描完成。
 
-当前实板证据见首板记录 R63，构建/安装见 [BUILD](docs/BUILD.md)。尚未逐一迁移的桌面测试、长期稳定性和人工目视范围见 [仓库检查](docs/REPOSITORY_CHECK.md)。本架构说明不引入新的 API、参数或功能。
+当前实板证据见首板记录 R63，构建/安装见 [BUILD](docs/BUILD.md)。旧桌面实验工具已删除；长期稳定性和人工目视范围见 [仓库检查（历史）](https://github.com/nbtca/CABadge/blob/d1fe9716b383dcb6fd292d683265beacd92fde64/docs/REPOSITORY_CHECK.md)。本架构说明不引入新的 API、参数或功能。
 
 [重写前 PC 预览架构（历史固定快照）](https://github.com/nbtca/CABadge/blob/107f518cade6b85d44fc918d985363973a5d8b22/UI_ARCHITECTURE_V7.md)

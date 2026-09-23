@@ -1,4 +1,4 @@
-# Only reviewed project sections are included in this first release.
+# Reproduction sources and required documentation only; local artifacts stay ignored.
 /*
 !/.gitignore
 !/README.md
@@ -12,11 +12,6 @@
 !/焊接与分阶段上电检查_首板.md
 !/DESIGN.md
 !/UI_ARCHITECTURE_V7.md
-!/MOTION_RESEARCH_V7.md
-!/用户端设计准则.md
-!/计协电子吧唧开发计划书.md
-!/esp32r8布线规则.md
-!/usb2.0布线规则.txt
 
 **/.venv/
 **/vendor/

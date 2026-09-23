@@ -11,7 +11,7 @@ import serial
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / 'usb_screen'))
-from viewer import packet, Decoder
+from framing import packet, Decoder
 
 LATEST = ROOT / 'build' / 'probe-latest.json'
 SCENES = ('Carousel', '抽屉', '蓝色名片', '静态壁纸', '菜单切换', 'Wi-Fi 扫描期间 Carousel')

@@ -1,25 +1,22 @@
-# 仓库文档索引
+# 复刻资料索引
 
-当前项目发布 v1.1.0，内部固件 7.9.2-memory。两套编号分别表示 GitHub 发布与开发固件，不应批量把历史版本替换成当前版本。
+当前项目版本 v1.1.0，内部固件 7.9.2-memory，硬件 c7c59dff。主分支保留硬件复刻、板端构建、安装使用和必要维护资料。
 
-|用途|入口|
+|任务|入口|
 |---|---|
-|项目与复刻|[README](../README.md)|
-|当前安装/分区升级|[v1.1.0](RELEASE-v1.1.0.md)|
-|构建与工具边界|[BUILD](BUILD.md)|
-|产品规范与架构|[DESIGN](../DESIGN.md)、[UI 架构](../UI_ARCHITECTURE_V7.md)|
-|当前固件与交接|[firmware-v7](../firmware-v7/README.md)、[HANDOFF](../firmware-v7/HANDOFF.md)|
-|手机/USB/无线|[服务说明](../firmware-v7/usb_screen/README.md)|
-|应用与表情|[APPS](../firmware-v7/APPS.md)、[GROK](../firmware-v7/GROK.md)|
-|验证与限制|[首板记录](../首板测试记录.md)、[KNOWN_ISSUES](KNOWN_ISSUES.md)|
-|硬件与采购|[hardware](../hardware/README.md)、[J1 更正](J1-CONNECTOR.md)|
-|第三方来源|[THIRD_PARTY](THIRD_PARTY.md)|
-|仓库检查范围与遗留项|[维护检查](REPOSITORY_CHECK.md)|
+|从哪里开始|[项目说明](../README.md)|
+|下载和烧录|[发布与升级](RELEASE-v1.1.0.md)|
+|自行编译|[BUILD](BUILD.md)|
+|采购、PCB 与装配|[硬件](../hardware/README.md)、[J1 更正](J1-CONNECTOR.md)、[焊接检查](../焊接与分阶段上电检查_首板.md)|
+|使用无线与壁纸|[板端服务](../firmware-v7/usb_screen/README.md)|
+|使用应用|[APPS](../firmware-v7/APPS.md)、[GROK](../firmware-v7/GROK.md)|
+|界面维护|[DESIGN](../DESIGN.md)、[架构](../UI_ARCHITECTURE_V7.md)、[交接](../firmware-v7/HANDOFF.md)|
+|验证、限制及许可|[首板记录](../首板测试记录.md)、[已知问题](KNOWN_ISSUES.md)、[第三方来源](THIRD_PARTY.md)|
 
-## 历史资料
+旧模拟器、像素投屏、阶段报告和废弃测试已从当前树删除。首板测试历史与已发布标签保留；需要旧文件时从下方快照或 v1.0/v1.1.0 标签获取，不将旧工具混入当前构建。
 
-DESIGN、UI_ARCHITECTURE_V7 和 HANDOFF 已重写为当前入口，原文通过各自末尾固定提交链接保留。MOTION_RESEARCH_V7、各阶段 REPORT/REVIEW、WIRELESS_P0、BASELINE.json 和 v1.0 验证清单保存当时的方案/配置/证据，不能当作当前配置。早期 Carousel、USB 像素镜像、授权码、单图存储等说明不覆盖现固件。
+[精简前完整仓库](https://github.com/nbtca/CABadge/tree/d1fe9716b383dcb6fd292d683265beacd92fde64)
 
-GitHub 不包含 outputs 原始日志、旧 firmware 工程、vendor 与虚拟环境。指向这些内容的旧链接已改成明确的本地路径说明；不代表补做过历史测试。制造文件、素材、源哈希与历史 verification.json 不随文档更新改写。
+生产目录是冻结校验集合，包含 MANIFEST 引用的制造、验证及导出源快照，整组保留。硬件库、模型、素材源与许可证均为完整复刻或维护依赖，不按文件名相似判断重复。
 
-正式发布标签与附件保持冻结；本次文档维护在 main 上继续，不移动 v1.1.0 标签。
+仓库自检：`python docs/check_repository.py`；只做结构/语法/链接/制造哈希检查，不连接设备。
