@@ -54,3 +54,7 @@ simulator-settings.json
 !/hardware/fabrication/JXBadge_EVT_20260909_c7c59dff/
 /tools/*
 !/tools/flasher/
+!/tools/map_perf_monitor.py
+!/tools/install_wallpapers.py
+!/tools/upload_eaf.py
+!/tools/eaf_timing.py

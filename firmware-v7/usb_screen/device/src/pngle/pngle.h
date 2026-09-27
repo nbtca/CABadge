@@ -56,6 +56,8 @@ const uint8_t *pngle_get_background_color(pngle_t *pngle);
 
 void pngle_set_init_callback(pngle_t *png, pngle_init_callback_t callback);
 void pngle_set_draw_callback(pngle_t *png, pngle_draw_callback_t callback);
+/* BlueMap's 500x500 crop; each lookup maps a source coordinate or 255 to skip. */
+void pngle_set_sample_map(pngle_t *png, const uint8_t *x, const uint8_t *y);
 void pngle_set_done_callback(pngle_t *png, pngle_done_callback_t callback);
 
 void pngle_set_display_gamma(pngle_t *pngle, double display_gamma); // enables gamma correction by specifying display gamma, typically 2.2. No effect when gAMA chunk is missing

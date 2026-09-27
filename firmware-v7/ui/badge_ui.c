@@ -1,6 +1,8 @@
 #include "badge_ui.h"
+#include "battery_policy.h"
 #include "apps.h"
 #include "ui_transition_cache.h"
+#include "ui_transition_compositor.h"
 #include "src/misc/cache/lv_cache.h"
 #include "src/core/lv_obj_draw_private.h"
 #include <math.h>
@@ -12,16 +14,17 @@
 #include "esp_heap_caps.h"
 #include "esp_timer.h"
 #include "display_perf.h"
+#include "eaf_wallpaper.h"
 #endif
 
 /* 0 display, 1 functions, 2 wallpapers, 3 settings, 4 connections,
  * 5 appearance, 6 about, 7 member card, 8 control centre. */
 static badge_state_t *s;
 static void (*save_settings)(void),(*control)(int,int);
-static lv_obj_t *root,*home[2],*photo,*drawers[2],*details[5];
+static lv_obj_t *root,*home[2],*photo,*menu_photo,*drawers[2],*details[5];
 static lv_obj_t *gallery,*drawer_content[2];
 static lv_obj_t *tiles[3],*tile_images[3],*wall_title,*apply_button,*delete_button,*toast,*status;
-static lv_obj_t *wifi_text,*ble_text,*voltage,*sliders[2],*brightness_text[2],*reduced;
+static lv_obj_t *wifi_text,*ble_text,*battery_body,*battery_fill,*battery_tip,*battery_unknown,*sliders[2],*brightness_text[2],*reduced;
 static lv_obj_t *dimmer,*sleep_cover,*transition_input_layer;
 static int transition_input_owner;
 static void transition_input(bool active,int owner);
@@ -42,20 +45,17 @@ bool badge_ui_perf_covers(const lv_area_t *area){
     return area->x1>=meter.x1&&area->x2<=meter.x2&&area->y1>=meter.y1&&area->y2<=meter.y2;
 }
 static const lv_image_dsc_t *uploaded;
+static bool eaf_active;
+static void wallpaper_playback(void);
+static unsigned eaf_prewarm;
+static void wallpaper_freeze(void);
 static int uploaded_id=2,library_count,library_ids[31];
 static const lv_image_dsc_t *library_thumbs[31];
+static const char *library_names[31];
 static bool gallery_rebinding;
 static int delete_confirm=-1;
-static int item_id(int ordinal){return ordinal<2?ordinal:library_ids[ordinal-2];}
-static int item_ordinal(int id){for(int i=0;i<library_count;i++)if(library_ids[i]==id)return i+2;return id<2&&id>=0?id:0;}
-static lv_image_dsc_t thumbnail_cache[2];
-static void *image_memory(size_t bytes){
-#ifdef ESP_PLATFORM
-    return heap_caps_aligned_alloc(64,bytes,MALLOC_CAP_SPIRAM|MALLOC_CAP_8BIT);
-#else
-    return malloc(bytes);
-#endif
-}
+static int item_id(int ordinal){return ordinal>=0&&ordinal<library_count?library_ids[ordinal]:0;}
+static int item_ordinal(int id){for(int i=0;i<library_count;i++)if(library_ids[i]==id)return i;return 0;}
 static int current,selection,return_drawer=1,display_index;
 #ifdef ESP_PLATFORM
 static int cleanup_page=-1;
@@ -63,6 +63,8 @@ static bool cleanup_animate;
 extern bool app_service_map_busy(void);
 #endif
 static bool sleeping,connected,wall_pending,applying;
+static badge_battery_t battery={.level=-1};
+static int battery_drawn=-2;
 static uint32_t toast_until,status_until,applied_until;
 static lv_obj_t *slider_tail[2];
 static float tail_value[2],tail_from[2],tail_target[2];
@@ -187,6 +189,9 @@ static void connection_cache_poll(void){
     }
     if(idle)navigation_prewarm();
     ui_transition_cache_poll(idle&&!s->reduced_motion&&lv_tick_get()-tail_at[0]>=80&&lv_tick_get()-tail_at[1]>=80);
+    /* One existing idle build per turn before first playback, never at gesture
+     * start. The EAF homepage itself remains suspended (no snapshot copy). */
+    if(eaf_prewarm&&idle&&!ui_transition_compositor_active()&&lv_tick_get()-tail_at[0]>=80&&lv_tick_get()-tail_at[1]>=80)eaf_prewarm--;
 }
 void badge_ui_connection_cache_stats(char *out,size_t size){ui_transition_cache_stats(out,size);}
 static lv_obj_t *text(lv_obj_t *p,const char *value,int x,int y,int w,const lv_font_t *font,uint32_t color){
@@ -243,17 +248,9 @@ static void notify_label(lv_obj_t *label,const char *value){
     lv_anim_set_values(&a,100,255);lv_anim_set_duration(&a,180);lv_anim_start(&a);
 }
 static void primary(lv_obj_t *o){lv_obj_set_style_bg_color(o,lv_color_hex(UI_ACCENT),0);lv_obj_set_style_bg_color(o,lv_color_hex(0x25496F),LV_STATE_PRESSED);lv_obj_set_style_text_color(lv_obj_get_child(o,0),lv_color_white(),0);}
-static const lv_image_dsc_t *wallpaper(int i){
-    if(i==uploaded_id&&uploaded)return uploaded;
-    i=i==1?1:0;
-    return i?&badge_ribbons:&badge_wallpaper;
-}
-static void set_tile_source(int i,const lv_image_dsc_t *src){
-    uint16_t *data=image_memory(180u*180u*2u);if(!data)return;
-    for(int y=0;y<180;y++)for(int x=0;x<180;x++)data[y*180+x]=((const uint16_t*)(src->data+y*2*src->header.stride))[x*2];
-    thumbnail_cache[i]=(lv_image_dsc_t){.header={.magic=LV_IMAGE_HEADER_MAGIC,.cf=LV_COLOR_FORMAT_RGB565,.w=180,.h=180,.stride=360},.data_size=64800,.data=(const uint8_t*)data};
-}
-static int count(void){return library_count+2;}
+static const lv_image_dsc_t *wallpaper(int i){return i==uploaded_id?uploaded:NULL;}
+/* One empty carousel position prevents modulo-by-zero; it is not a wallpaper. */
+static int count(void){return library_count?library_count:1;}
 static void target(motion_t *m,float value,bool animate){m->target=value;m->moving=animate&&!s->reduced_motion;if(!m->moving){m->value=value;m->velocity=0;}}
 static void step(motion_t *m,float dt){
     if(!m->moving)return;
@@ -267,9 +264,11 @@ static void preview_label(void){
     static uint64_t old=UINT64_MAX;
     uint64_t key=(unsigned)id|((uint64_t)(unsigned)s->wallpaper_index<<8)|((uint64_t)applying<<16)|((uint64_t)wall_pending<<17)|((uint64_t)(unsigned)(delete_confirm+1)<<24);
     if(key!=old){ui_transition_cache_invalidate(details[0]);old=key;}
-    if(id>=2)lv_label_set_text_fmt(wall_title,"壁纸 %02d",id-1);else lv_label_set_text(wall_title,id==1?"流光":"晴日");
+    if(!library_count)lv_label_set_text(wall_title,"暂无壁纸，请上传");
+    else if(library_names[selection])lv_label_set_text(wall_title,library_names[selection]);
+    else lv_label_set_text_fmt(wall_title,"壁纸 %02d",id-1);
     notify_label(lv_obj_get_child(apply_button,0),applying?"正在应用…":id==s->wallpaper_index?"已应用":"应用");
-    if(applying||wall_pending||id==s->wallpaper_index)lv_obj_add_state(apply_button,LV_STATE_DISABLED);else lv_obj_remove_state(apply_button,LV_STATE_DISABLED);
+    if(!library_count||applying||wall_pending||id==s->wallpaper_index)lv_obj_add_state(apply_button,LV_STATE_DISABLED);else lv_obj_remove_state(apply_button,LV_STATE_DISABLED);
     if(delete_button){
         lv_label_set_text(lv_obj_get_child(delete_button,0),delete_confirm==id?"确认删除":"删除");
         if(id<2||applying||wall_pending)lv_obj_add_state(delete_button,LV_STATE_DISABLED);else lv_obj_remove_state(delete_button,LV_STATE_DISABLED);
@@ -281,11 +280,11 @@ static void gallery_layout(void){
     gallery_rebinding=true;
     for(int i=0;i<3;i++){
         int ordinal=(selection+i-1+count())%count();
-        const lv_image_dsc_t *src=ordinal<2?&thumbnail_cache[ordinal]:library_thumbs[ordinal-2];
+        const lv_image_dsc_t *src=library_count?library_thumbs[ordinal]:NULL;
         if(src&&!src->data)src=NULL;
-        const void *image=src?src:wallpaper(0);
+        const void *image=src;
         if(lv_image_get_src(tile_images[i])!=image)ui_transition_cache_invalidate(details[0]);
-        lv_image_set_src(tile_images[i],image);lv_image_set_scale(tile_images[i],src?256:128);
+        lv_image_set_src(tile_images[i],image);lv_image_set_scale(tile_images[i],256);shown(tile_images[i],src!=NULL);
     }
     lv_obj_update_layout(gallery);lv_obj_scroll_to_x(gallery,240,LV_ANIM_OFF);gallery_rebinding=false;
 }
@@ -306,9 +305,9 @@ void badge_ui_thumbnails_changed(void){
     if(!tile_images[2])return;
     for(int i=0;i<3;i++){
         int ordinal=(selection+i-1+count())%count();
-        const lv_image_dsc_t *src=ordinal<2?&thumbnail_cache[ordinal]:library_thumbs[ordinal-2];
+        const lv_image_dsc_t *src=library_count?library_thumbs[ordinal]:NULL;
         if(src&&!src->data)src=NULL;
-        lv_image_set_src(tile_images[i],src?src:wallpaper(0));lv_image_set_scale(tile_images[i],src?256:128);
+        lv_image_set_src(tile_images[i],src);lv_image_set_scale(tile_images[i],256);shown(tile_images[i],src!=NULL);
     }
     ui_transition_cache_invalidate(details[0]);
 }
@@ -327,6 +326,9 @@ static unsigned direct_base(lv_obj_t **objects,int *xy){
     return n;
 }
 bool badge_ui_direct_panel(lv_obj_t *panel,int x){
+#ifdef ESP_PLATFORM
+    wallpaper_freeze();
+#endif
     if(sleeping)return false;
     lv_obj_t *objects[4];int xy[8];unsigned n=direct_base(objects,xy);
     objects[n]=panel;xy[n*2]=x;xy[n*2+1]=0;n++;
@@ -363,6 +365,7 @@ static bool direct_layout(void){
     direct_rejected=true;return false;
 }
 static void layout(void){
+    wallpaper_playback();
     if(direct_layout()){
         int owner=direct_external||detail_motion.moving?99:drawer_motion.value||drawer_motion.target?(drawer_motion.value<0||drawer_motion.target<0?-1:1):0;
         transition_input(true,owner);return;
@@ -388,7 +391,7 @@ static void tick(lv_timer_t *t){
         int page=cleanup_page;cleanup_page=-1;badge_ui_page(page,cleanup_animate);
     }
 #endif
-    (void)t;uint32_t now=lv_tick_get();float dt=clamp((now-last_tick)/1000.f,0,.2f);last_tick=now;if(sleeping)return;
+    (void)t;wallpaper_playback();uint32_t now=lv_tick_get();float dt=clamp((now-last_tick)/1000.f,0,.2f);last_tick=now;if(sleeping)return;
     bool move=display_motion.moving||drawer_motion.moving||detail_motion.moving;
     step(&display_motion,dt);step(&drawer_motion,dt);step(&detail_motion,detail_fast?dt*1.5f:dt);if(move)layout();
     for(int i=0;i<2;i++){
@@ -401,10 +404,13 @@ static void tick(lv_timer_t *t){
     }
     if(applied_until&&(int32_t)(now-applied_until)>=0){applied_until=0;if(current==2)badge_ui_page(0,true);}
     if(toast_until&&(int32_t)(now-toast_until)>=0){toast_until=0;shown(toast,false);}
+    if(battery.pending&&!toast_until&&!badge_ui_transition_active()&&!ui_transition_cache_direct_active()){
+        badge_ui_notice("电量低，请充电");toast_until=now+5000;battery.pending=false;
+    }
     if(status_until&&(int32_t)(now-status_until)>=0&&!drag.down){status_until=0;shown(status,false);}
     connection_cache_poll();
 }
-void badge_ui_notice(const char *m){if(!toast)return;lv_label_set_text(lv_obj_get_child(toast,0),m);shown(toast,true);lv_obj_move_foreground(toast);toast_until=lv_tick_get()+2200;}
+void badge_ui_notice(const char *m){if(!toast)return;lv_label_set_text(lv_obj_get_child(toast,0),m);shown(toast,true);lv_obj_move_foreground(toast);toast_until=lv_tick_get()+2200;wallpaper_playback();}
 static void commit_gallery(int to){
     applied_until=0;int direction=to>selection?1:to<selection?-1:0;
     if(!direction)return;
@@ -425,6 +431,9 @@ static void drag_event(lv_event_t *e){
     if(owner==99)return;
     lv_event_code_t code=lv_event_get_code(e);uint32_t now=lv_tick_get();
     if(code==LV_EVENT_PRESSED){
+#ifdef ESP_PLATFORM
+        /* Keep playback until navigation is recognized; a tap uses normal LVGL handoff. */
+#endif
         drag=(drag_t){.down=true,.owner=owner,.x=p.x,.y=p.y,.last_x=p.x,.last_y=p.y,.time=now};
         if(owner==1||owner==-1){drawer_motion.moving=false;drag.base=drawer_motion.value;}
         else {display_motion.moving=false;drawer_motion.moving=false;drag.base=display_motion.value;}
@@ -472,7 +481,7 @@ static void delete_clicked(lv_event_t *e){
     if(delete_confirm!=id){delete_confirm=id;preview_label();return;}
     delete_confirm=-1;badge_ui_request(BADGE_DELETE,id);
 }
-static void apply(lv_event_t *e){(void)e;if(wall_pending)return;applied_until=0;applying=true;preview_label();badge_ui_request(BADGE_APPLY,item_id(selection));}
+static void apply(lv_event_t *e){(void)e;if(wall_pending||!library_count)return;applied_until=0;applying=true;preview_label();badge_ui_request(BADGE_APPLY,item_id(selection));}
 static void wifi(lv_event_t *e){(void)e;badge_wifi_open();}
 static void ble(lv_event_t *e){(void)e;badge_ble_open();}
 static void apps(lv_event_t *e){(void)e;badge_apps_open();}
@@ -513,7 +522,7 @@ void badge_ui_create(lv_obj_t *parent,badge_state_t *state,void (*save)(void)){
     lv_obj_set_style_radius(root,180,0);lv_obj_set_style_clip_corner(root,true,0); /* Physical round glass already masks invisible corners. */
 #endif
     for(int i=0;i<2;i++){home[i]=box(root,i*360,0,360,360,0xE7EDF5,0);draggable(home[i],0);}
-    photo=lv_image_create(home[0]);lv_image_set_src(photo,wallpaper(selection));lv_obj_remove_flag(photo,LV_OBJ_FLAG_CLICKABLE);
+    photo=lv_image_create(home[0]);lv_image_set_src(photo,NULL);shown(photo,false);lv_obj_remove_flag(photo,LV_OBJ_FLAG_CLICKABLE);
     center(home[1],"NBTCA",116,43,128,&font18,UI_ACCENT);
     lv_obj_t *card=box(home[1],31,96,298,181,0x124689,25);lv_obj_set_style_clip_corner(card,true,0);
     for(int i=0;i<3;i++){lv_obj_t *arc=box(card,183+i*17,-33+i*8,180,235,0x124689,110);lv_obj_set_style_bg_opa(arc,0,0);lv_obj_set_style_border_color(arc,lv_color_hex(0x5685C3),0);lv_obj_set_style_border_width(arc,1,0);}
@@ -523,13 +532,17 @@ void badge_ui_create(lv_obj_t *parent,badge_state_t *state,void (*save)(void)){
     /* Keep real widgets: the shared transition cache owns the only raster copy. */
     status=box(root,80,246,200,80,UI_SURFACE,24);button(status,"控制",10,18,85,44,go,8);button(status,"功能",105,18,85,44,go,1);shown(status,false);
     for(int i=0;i<2;i++){drawers[i]=box(root,0,i?360:-360,360,360,UI_BG,0);draggable(drawers[i],i?1:-1);shown(drawers[i],false);}
-    lv_obj_t *p=drawers[0];center(p,"控制中心",104,32,152,&font24,UI_TEXT);voltage=center(p,"-- V",109,69,142,&font14,UI_MUTED);
+    lv_obj_t *p=drawers[0];center(p,"控制中心",104,32,152,&font24,UI_TEXT);battery_body=box(p,157,70,42,22,UI_BG,5);
+    lv_obj_set_style_border_width(battery_body,2,0);lv_obj_set_style_border_color(battery_body,lv_color_hex(UI_MUTED),0);
+    battery_tip=box(p,201,77,3,8,UI_MUTED,1);
+    battery_fill=box(battery_body,3,3,1,12,UI_ACCENT,2);shown(battery_fill,false);
+    battery_unknown=center(battery_body,"?",0,0,38,&font14,UI_MUTED);
     lv_obj_t *w=button(p,"Wi-Fi",48,102,127,76,wifi_toggle,0);wifi_text=lv_obj_get_child(w,0);primary(w);lv_obj_add_event_cb(w,wifi_long,LV_EVENT_LONG_PRESSED,NULL);
     lv_obj_t *b=button(p,"蓝牙",185,102,127,76,ble_toggle,0);ble_text=lv_obj_get_child(b,0);primary(b);lv_obj_add_event_cb(b,ble_long,LV_EVENT_LONG_PRESSED,NULL);
     sliders[0]=slider(p,0,236);button(p,"手机管理",64,267,112,44,manage,0);button(p,"息屏",184,267,112,44,sleep_clicked,0);box(p,154,331,52,4,0xAAB6C3,2);
     p=drawers[1];box(p,154,23,52,4,0xAAB6C3,2);center(p,"功能",82,46,196,&font36,UI_TEXT);
     lv_obj_t *f=button(p,"",47,113,266,91,go,2),*thumb=box(f,12,12,67,67,UI_BG,16);lv_obj_set_style_clip_corner(thumb,true,0);
-    lv_obj_t *im=lv_image_create(thumb);lv_image_set_src(im,&badge_wallpaper);lv_image_set_pivot(im,0,0);lv_image_set_scale(im,48);
+    menu_photo=lv_image_create(thumb);lv_image_set_pivot(menu_photo,0,0);lv_image_set_scale(menu_photo,48);shown(menu_photo,false);
     text(f,"壁纸",98,14,137,&font24,UI_TEXT);text(f,"选一张喜欢的",98,52,151,&font14,UI_MUTED);
     button(p,"连接",56,212,119,48,go,4);button(p,"设置",185,212,119,48,go,3);button(p,"应用",75,271,210,48,apps,0);
     for(int i=0;i<5;i++){details[i]=box(root,0,0,360,360,UI_BG,0);shown(details[i],false);}
@@ -543,7 +556,6 @@ void badge_ui_create(lv_obj_t *parent,badge_state_t *state,void (*save)(void)){
     for(int i=0;i<3;i++){
         tiles[i]=box(gallery,i*240,0,240,180,UI_BG,0);lv_obj_add_flag(tiles[i],LV_OBJ_FLAG_SNAPPABLE);
         tile_images[i]=lv_image_create(tiles[i]);lv_obj_set_pos(tile_images[i],30,0);lv_image_set_pivot(tile_images[i],0,0);
-        if(i<2)set_tile_source(i,wallpaper(i));
     }
     wall_title=center(p,"",77,258,206,&font14,UI_MUTED);
     apply_button=button(p,"应用",78,281,96,44,apply,0);primary(apply_button);
@@ -585,6 +597,9 @@ int badge_ui_current_page(void){return current;}
 int badge_ui_selected_wallpaper(void){return s->wallpaper_index;}
 bool badge_ui_transition_active(void){return detail_motion.moving||drawer_motion.moving||display_motion.moving||ui_transition_cache_active();}
 void badge_ui_page(int i,bool animate){
+#ifdef ESP_PLATFORM
+    if(i!=current)wallpaper_freeze();
+#endif
 #ifdef ESP_PLATFORM
     if(i>=0&&i<=12&&app_service_map_busy()){
         badge_apps_hide();cleanup_page=i;cleanup_animate=animate;return;
@@ -669,8 +684,16 @@ void badge_ui_refresh(void){
         if(changed&0xfff)ui_transition_cache_invalidate_reason(drawer_content[0],"CONTROL_SETTING");
         cache_state=state;
     }
-    static int cache_battery=-2;if(cache_battery!=s->battery_mv){cache_battery=s->battery_mv;ui_transition_cache_invalidate(drawer_content[0]);}
-    if(s->battery_mv>=0)lv_label_set_text_fmt(voltage,"%d.%02d V",s->battery_mv/1000,(s->battery_mv%1000)/10);else lv_label_set_text(voltage,"-- V");
+    if(battery_drawn!=battery.level){
+        battery_drawn=battery.level;
+        ui_transition_cache_invalidate_reason(drawer_content[0],"BATTERY_LEVEL");
+        uint32_t color=battery.level<0?UI_MUTED:battery.level==0?0xD64545:UI_TEXT;
+        lv_obj_set_style_border_color(battery_body,lv_color_hex(color),0);
+        lv_obj_set_style_bg_color(battery_tip,lv_color_hex(color),0);
+        lv_obj_set_style_bg_color(battery_fill,lv_color_hex(color),0);
+        lv_obj_set_width(battery_fill,battery.level<=0?4:battery.level*8);
+        shown(battery_fill,battery.level>=0);shown(battery_unknown,battery.level<0);
+    }
     lv_label_set_text(wifi_text,s->wifi_enabled?"Wi-Fi  开":"Wi-Fi  关");
     extern bool badge_ble_enabled(void);bool ble_on=badge_ble_enabled();
     lv_label_set_text(ble_text,ble_on?"蓝牙  开":"蓝牙  关");
@@ -683,7 +706,13 @@ void badge_ui_refresh(void){
     if(!adjusting)for(int i=0;i<2;i++){lv_label_set_text_fmt(brightness_text[i],"%d%%",s->brightness);if(!lv_obj_has_state(sliders[i],LV_STATE_PRESSED))lv_slider_set_value(sliders[i],s->brightness,LV_ANIM_OFF);}
     badge_liquid_set(reduced,s->reduced_motion,s->reduced_motion);
     if(!adjusting)lv_obj_set_style_bg_opa(dimmer,155-s->brightness*155/100,0);
-    badge_wifi_refresh();if(lv_image_get_src(photo)!=wallpaper(s->wallpaper_index)){ui_transition_cache_invalidate(home[0]);lv_image_set_src(photo,wallpaper(s->wallpaper_index));}shown(photo,!(wall_pending&&s->wallpaper_index>=2));preview_label();
+    badge_wifi_refresh();if(lv_image_get_src(photo)!=wallpaper(s->wallpaper_index)){ui_transition_cache_invalidate(home[0]);lv_image_set_src(photo,wallpaper(s->wallpaper_index));}shown(photo,wallpaper(s->wallpaper_index)&&!wall_pending);
+    if(lv_image_get_src(menu_photo)!=wallpaper(s->wallpaper_index)){ui_transition_cache_invalidate(drawer_content[1]);lv_image_set_src(menu_photo,wallpaper(s->wallpaper_index));}
+    shown(menu_photo,wallpaper(s->wallpaper_index)!=NULL);preview_label();
+}
+void badge_ui_battery_sample(int mv){
+    badge_battery_sample(&battery,mv,lv_tick_get());
+    if(battery_drawn!=battery.level)badge_ui_refresh();
 }
 void badge_ui_control_bind(void (*cb)(int,int)){control=cb;}
 void badge_ui_request(int op,int value){
@@ -692,26 +721,61 @@ void badge_ui_request(int op,int value){
     if(op==BADGE_APPLY){badge_ui_select_wallpaper(value);badge_ui_apply_result(true);}else if(op==BADGE_SLEEP)badge_ui_sleep(value);
     else if(op==BADGE_BRIGHTNESS)badge_ui_settings(value,s->reduced_motion);else if(op==BADGE_REDUCED)badge_ui_settings(s->brightness,value);
 }
-bool badge_ui_select_wallpaper(int i){if(i<0||(i>=2&&(item_id(item_ordinal(i))!=i||uploaded_id!=i||!uploaded)))return false;s->wallpaper_index=i;applying=false;badge_ui_refresh();if(save_settings)save_settings();return true;}
+bool badge_ui_select_wallpaper(int i){if(i<0||i==1||(i>=2&&(item_id(item_ordinal(i))!=i||uploaded_id!=i||(!uploaded&&!eaf_active))))return false;s->wallpaper_index=i;applying=false;badge_ui_refresh();if(save_settings)save_settings();return true;}
 void badge_ui_connected(bool on){connected=on;if(!on){applying=false;badge_ui_refresh();}}
-void badge_ui_wall_pending(bool pending){ui_transition_cache_invalidate(home[0]);wall_pending=pending;shown(photo,!(pending&&s->wallpaper_index>=2));if(!pending)applying=false;gallery_layout();preview_label();}
+void badge_ui_wall_pending(bool pending){ui_transition_cache_invalidate(home[0]);wall_pending=pending;shown(photo,wallpaper(s->wallpaper_index)&&!pending);if(!pending)applying=false;gallery_layout();preview_label();}
 void badge_ui_settings(int v,bool r){brightness_preview=-1;s->brightness=v;s->reduced_motion=r;badge_ui_refresh();if(save_settings)save_settings();}
 void badge_ui_motion(void){if(sleeping)badge_ui_sleep(false);}
-void badge_ui_sleep(bool asleep){if(asleep){ui_transition_cache_direct_end();direct_external=false;transition_input(false,99);}if(asleep)brightness_preview=-1;if(asleep&&current==8)badge_ui_page(display_index?7:0,false);sleeping=asleep;badge_ui_perf_enable(perf_enabled);shown(sleep_cover,asleep);if(asleep){lv_obj_move_foreground(sleep_cover);shown(toast,false);shown(status,false);}last_tick=lv_tick_get();}
+void badge_ui_sleep(bool asleep){if(asleep){ui_transition_cache_direct_end();direct_external=false;transition_input(false,99);}if(asleep)brightness_preview=-1;if(asleep&&current==8)badge_ui_page(display_index?7:0,false);sleeping=asleep;wallpaper_playback();badge_ui_perf_enable(perf_enabled);shown(sleep_cover,asleep);if(asleep){lv_obj_move_foreground(sleep_cover);shown(toast,false);shown(status,false);}last_tick=lv_tick_get();}
 bool badge_ui_is_asleep(void){return sleeping;}
 bool badge_ui_gallery_clean(void){return current==0&&lv_obj_has_flag(status,LV_OBJ_FLAG_HIDDEN);}
-void badge_ui_library(const int *ids,const lv_image_dsc_t *const *thumbs,int n){
+void badge_ui_library(const int *ids,const lv_image_dsc_t *const *thumbs,const char *const *names,int n){
     ui_transition_cache_invalidate(details[0]); /* Thumbnail pixels may change at the same address. */
     int previous=item_id(selection);library_count=n>31?31:n;
-    for(int i=0;i<library_count;i++){library_ids[i]=ids[i];library_thumbs[i]=thumbs[i];}
+    for(int i=0;i<library_count;i++){library_ids[i]=ids[i];library_thumbs[i]=thumbs[i];library_names[i]=names[i];}
     selection=item_ordinal(previous);delete_confirm=-1;lv_obj_stop_scroll_anim(gallery);gallery_layout();preview_label();
 }
+static void wallpaper_freeze(void){
+#ifdef ESP_PLATFORM
+    if(eaf_active)ui_transition_cache_borrow(home[0],eaf_wallpaper_frame());
+#endif
+}
+static void wallpaper_playback(void){
+#ifdef ESP_PLATFORM
+    extern int badge_panels_cache_page(void);
+    bool visible=eaf_active&&!sleeping&&current==0&&display_motion.value==0&&drawer_motion.value==0&&drawer_motion.target==0
+        &&!display_motion.moving&&!detail_motion.moving&&!drawer_motion.moving&&!(drag.down&&drag.moved)&&!perf_enabled&&lv_obj_has_flag(status,LV_OBJ_FLAG_HIDDEN)&&lv_obj_has_flag(toast,LV_OBJ_FLAG_HIDDEN)
+        &&!direct_external&&badge_panels_cache_page()<0;
+    bool moving=display_motion.moving||drawer_motion.moving||detail_motion.moving||(drag.down&&drag.moved&&drag.owner);
+    if(eaf_active&&moving){wallpaper_freeze();return;}
+    if(visible&&!ui_transition_cache_direct_active()&&!eaf_prewarm){
+        ui_transition_cache_borrow(NULL,NULL);eaf_wallpaper_visible(true);
+    }else eaf_wallpaper_visible(false);
+#endif
+}
+bool badge_ui_loaded_eaf(const void *data,size_t size,int id){
+#ifdef ESP_PLATFORM
+    ui_transition_cache_borrow(NULL,NULL);
+    if(!eaf_wallpaper_set(home[0],data,size))return false;
+    ui_transition_cache_direct_end();ui_transition_cache_invalidate(home[0]);
+    ui_transition_cache_suspend(home[0],true,false);
+    ui_transition_cache_forget(home[0]);
+    eaf_active=true;eaf_prewarm=3;uploaded=NULL;uploaded_id=id;wall_pending=false;
+    bool ok=badge_ui_select_wallpaper(id);badge_ui_apply_result(ok);wallpaper_playback();return ok;
+#else
+    (void)data;(void)size;(void)id;return false;
+#endif
+}
 void badge_ui_loaded_photo(const lv_image_dsc_t *src,int id,bool apply_now){
+#ifdef ESP_PLATFORM
+    ui_transition_cache_borrow(NULL,NULL);eaf_wallpaper_clear();
+#endif
+    eaf_active=false;ui_transition_cache_suspend(home[0],false,false);ui_transition_cache_invalidate(home[0]);
     uploaded=src;uploaded_id=id;wall_pending=false;
     if(apply_now){badge_ui_select_wallpaper(id);badge_ui_apply_result(true);}
     else badge_ui_refresh();
 }
-void badge_ui_restore_photo(const lv_image_dsc_t *src){uploaded=src==&badge_wallpaper?NULL:src;uploaded_id=2;badge_ui_refresh();}
+void badge_ui_restore_photo(const lv_image_dsc_t *src){uploaded=src;uploaded_id=2;badge_ui_refresh();}
 void badge_ui_set_photo(const lv_image_dsc_t *src){badge_ui_restore_photo(src);badge_ui_select_wallpaper(uploaded?2:0);}
 void badge_ui_test_state(int *page,int *drawer,int *selected,float *turn){if(page)*page=current;if(drawer)*drawer=(int)lroundf(drawer_motion.value*1000);if(selected)*selected=selection;if(turn)*turn=lv_obj_get_scroll_x(gallery)/240.f;}
 

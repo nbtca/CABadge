@@ -8,6 +8,8 @@ chars=set(chr(c) for c in range(32,127))
 for path in [ROOT/'ui/badge_ui.c', ROOT/'ui/wifi_panel.c', ROOT/'usb_screen/device/src/wifi_service.c', ROOT/'usb_screen/device/src/ble_service.c', ROOT/'usb_screen/device/src/wallpaper_service.c']:
     chars.update(c for c in path.read_text(encoding='utf-8') if 127<ord(c)<65535)
 chars.update(c for c in (ROOT/'ui/apps.c').read_text(encoding='utf-8') if 127<ord(c)<65535)
+# Retain existing status/error glyphs used by runtime messages.
+chars.update('串估写占参合同处安导忙执果样核步求状结绘缓联致装调超采限验')
 base_chars=set(chars)
 grok_chars=set()
 for path in [ROOT/'ui/grok.c', ROOT/'ui/grok_data.h']:
@@ -58,8 +60,10 @@ for name,asset in [('badge_ribbons',ribbons),('badge_wallpaper',wallpaper)]:
     for r,g,b in zip(rgb[0::3],rgb[1::3],rgb[2::3]):
         value=((r>>3)<<11)|((g>>2)<<5)|(b>>3)
         raw.extend((value&255,value>>8))
-    out.append(f'static const uint8_t {name}_data[]={{'+','.join(map(str,raw))+'};\n')
-    out.append(f'const lv_image_dsc_t {name}={{.header={{.magic=LV_IMAGE_HEADER_MAGIC,.cf=LV_COLOR_FORMAT_RGB565,.w=360,.h=360,.stride=720}},.data_size=sizeof({name}_data),.data={name}_data}};\n')
+    resources=ROOT/'resources/wallpapers'
+    resources.mkdir(parents=True,exist_ok=True)
+    (resources/(name+'.rgb565')).write_bytes(raw)
+
 target=ROOT/'ui/assets.c'
 content=''.join(out)
 if not target.exists() or target.read_text(encoding='utf-8')!=content:

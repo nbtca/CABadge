@@ -1,4 +1,7 @@
 #include "apps.h"
+#ifdef ESP_PLATFORM
+#include "esp_heap_caps.h"
+#endif
 #include "ui_transition_cache.h"
 extern void badge_panel_cancel(lv_obj_t*);
 #include "grok.h"
@@ -13,6 +16,7 @@ static lv_obj_t *panel,*parent,*map_image,*map_note,*map_position,*players[12];
 static lv_obj_t *score_label,*time_label,*game_items[32],*chain,*hook,*actor,*overlay,*overlay_title,*overlay_button;
 static lv_point_precise_t rope[2];
 static lv_image_dsc_t map_picture;
+static map_view_t displayed_view;
 static map_view_t view={.world=0,.zoom=1,.x=48,.z=96};
 static bool (*request_map)(const map_view_t*);
 static void (*save_game)(uint64_t,int);
@@ -112,16 +116,46 @@ static void show_map(void){
     button(panel,"−",81,301,48,44,map_control,-1);button(panel,"出生点",133,301,94,44,map_control,2);button(panel,"+",231,301,48,44,map_control,1);
     request_view();
 }
-void badge_apps_map_result(map_result_t *result){
-    if(!visible||screen!=APP_MAP||result->view.serial!=view.serial){free(result->pixels);return;}
-    map_loading=false;map_at=lv_tick_get();
-    if(dragging){free(result->pixels);return;}
-    map_error=result->error;map_tiles=result->tiles;map_players=result->players;
-    if(result->pixels){
-        const uint8_t *old=map_picture.data;lv_image_cache_drop(&map_picture);
-        map_picture=(lv_image_dsc_t){.header={.magic=LV_IMAGE_HEADER_MAGIC,.cf=LV_COLOR_FORMAT_RGB565,.w=360,.h=360,.stride=720},.data_size=259200,.data=(uint8_t*)result->pixels};
-        lv_image_set_src(map_image,&map_picture);lv_obj_set_pos(map_image,0,0);free((void*)old);
+bool badge_apps_map_accepting(void){return !dragging;}
+bool badge_apps_map_result(map_result_t *result){
+    if(!visible||screen!=APP_MAP||result->view.serial!=view.serial){free(result->pixels);return false;}
+    if(dragging){free(result->pixels);return false;}
+    map_at=lv_tick_get();map_loading=result->partial;
+    map_error=result->error;map_tiles=result->tiles;
+    if(result->reset){
+        bool clear=!map_picture.data||displayed_view.world!=result->view.world||displayed_view.zoom!=result->view.zoom||displayed_view.x!=result->view.x||displayed_view.z!=result->view.z;
+        displayed_view=result->view;
+        if(!map_picture.data){
+#ifdef ESP_PLATFORM
+            uint16_t *pixels=heap_caps_malloc(360*360*2,MALLOC_CAP_SPIRAM|MALLOC_CAP_8BIT);
+#else
+            uint16_t *pixels=malloc(360*360*2);
+#endif
+            if(pixels){
+                map_picture=(lv_image_dsc_t){.header={.magic=LV_IMAGE_HEADER_MAGIC,.cf=LV_COLOR_FORMAT_RGB565,.w=360,.h=360,.stride=720},.data_size=259200,.data=(uint8_t*)pixels};
+                lv_image_set_src(map_image,&map_picture);
+            }
+        }
+        if(clear&&map_picture.data){
+            lv_image_cache_drop(&map_picture);uint16_t *pixels=(uint16_t*)map_picture.data;
+            for(int i=0;i<360*360;i++)pixels[i]=0x1082;
+            lv_obj_set_pos(map_image,0,0);lv_obj_invalidate(map_image);
+        }
+        for(int i=0;i<12;i++)lv_obj_add_flag(players[i],LV_OBJ_FLAG_HIDDEN);
     }
+    if(result->pixels){
+        if(map_picture.data&&result->x>=0&&result->y>=0&&result->w>0&&result->h>0&&result->x+result->w<=360&&result->y+result->h<=360){
+            lv_image_cache_drop(&map_picture);uint16_t *pixels=(uint16_t*)map_picture.data;
+            for(int y=0;y<result->h;y++)memcpy(pixels+(result->y+y)*360+result->x,result->pixels+y*result->w,result->w*2);
+            lv_area_t area;lv_obj_get_coords(map_image,&area);
+            area.x1+=result->x;area.y1+=result->y;area.x2=area.x1+result->w-1;area.y2=area.y1+result->h-1;
+            lv_obj_invalidate_area(map_image,&area);
+        }
+        free(result->pixels);
+    }
+    if(!map_picture.data&&!result->error){map_error=5;lv_label_set_text(map_note,"内存不足，退出后重试");return false;}
+    if(result->partial)return true;
+    map_players=result->players;
     const char *error=result->error==1?"先连接可上网的 Wi-Fi":result->error==2?"校时失败，点刷新重试":result->error==5?"内存不足，退出后重试":"部分地图未加载，点刷新";
     if(result->error)lv_label_set_text(map_note,error);
     else if(result->players<0)lv_label_set_text(map_note,"地形已更新 · 玩家数据暂不可用");
@@ -131,6 +165,7 @@ void badge_apps_map_result(map_result_t *result){
         int x=180+(result->player[i].x-view.x)/map_scale[view.zoom],y=180+(result->player[i].z-view.z)/map_scale[view.zoom];
         if(x>=5&&x<355&&y>=5&&y<355){lv_obj_set_pos(players[i],x-4,y-4);lv_obj_remove_flag(players[i],LV_OBJ_FLAG_HIDDEN);}
     }
+    return true;
 }
 static void start(lv_event_t *e){int difficulty=(int)(intptr_t)lv_event_get_user_data(e);miner_start(&game,1,difficulty,lv_tick_get());show_game();}
 static void dex(lv_event_t *e){(void)e;dex_page=0;show_dex();}

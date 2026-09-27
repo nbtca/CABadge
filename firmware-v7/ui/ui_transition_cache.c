@@ -8,6 +8,7 @@
 #ifdef ESP_PLATFORM
 #include "esp_heap_caps.h"
 #include "esp_timer.h"
+#include "physical_display.h"
 #endif
 
 /* Bounded metadata; pixels are lazy, PSRAM-only, and evictable. */
@@ -36,6 +37,8 @@ static bool planned;
 static bool enabled=true,direct_enabled=true;
 static surface_t *direct_sources[UI_COMPOSITOR_LAYERS];
 static unsigned direct_count;
+static lv_obj_t *borrowed_object;
+static const lv_image_dsc_t *borrowed_image;
 static unsigned direct_hits,direct_misses,invalidations,rebuilds;
 #if CABADGE_TRANSITION_CACHE_DEBUG
 static struct cache_event {const char *event,*reason;unsigned page,slot,state,revision,cached,bytes,at,age;uint64_t us;} *events;
@@ -80,6 +83,7 @@ static void show(lv_obj_t *o,bool on){if(on)lv_obj_remove_flag(o,LV_OBJ_FLAG_HID
 static void release(surface_t *s){
     if(s->pinned)ui_transition_cache_direct_end();
     if(s->buffer.data){lv_image_cache_drop(&s->buffer);occupied-=s->buffer.data_size;free(s->buffer.data);memset(&s->buffer,0,sizeof(s->buffer));}
+    if(s->real==borrowed_object){borrowed_object=NULL;borrowed_image=NULL;}
     s->state=INVALID;
 }
 static void deleted(lv_event_t *e){
@@ -180,8 +184,11 @@ void ui_transition_cache_trim(void){
 }
 bool ui_transition_cache_active(void){for(int i=0;i<SURFACES;i++)if(surfaces[i].attempted)return true;return false;}
 void ui_transition_cache_poll(bool idle){
+#ifdef ESP_PLATFORM
+    if(physical_display_transition_active())return; /* Any direct backend owns the LCD. */
+#endif
     if(pressure!=UI_MEMORY_NORMAL){ui_memory_pressure_set(pressure);return;}
-    if(!enabled||paused||!idle||building||direct_count||ui_transition_cache_active()||lv_anim_count_running())return;
+    if(!enabled||paused||!idle||building||ui_transition_compositor_active()||ui_transition_cache_active()||lv_anim_count_running())return;
     for(lv_indev_t *in=lv_indev_get_next(NULL);in;in=lv_indev_get_next(in))if(lv_indev_get_state(in)==LV_INDEV_STATE_PRESSED)return;
     surface_t *s=NULL;
     for(int i=0;i<SURFACES;i++){surface_t *v=&surfaces[i];if(v->real&&!v->suspended&&v->wanted&&!v->deferred&&!valid_cache(v)&&!v->attempted&&(!s||v->priority<s->priority||(v->priority==s->priority&&v->rank<s->rank)))s=v;}
@@ -242,7 +249,7 @@ void ui_transition_cache_test_mode(unsigned mode){
 
 bool ui_transition_cache_direct_active(void){return direct_count&&ui_transition_compositor_active();}
 void ui_transition_cache_direct_end(void){
-    bool was_active=direct_count!=0;ui_transition_compositor_stop();
+    bool was_active=direct_count!=0;if(was_active)ui_transition_compositor_stop();
     for(unsigned i=0;i<direct_count;i++)direct_sources[i]->pinned=false;
     direct_count=0;if(was_active)planned=false;
 }
@@ -258,10 +265,11 @@ bool ui_transition_cache_direct(lv_obj_t *const *objects,const int *xy,unsigned 
     ui_compositor_frame_t f={.x=x,.y=y,.width=width,.height=height,.background=background,.count=count};
     for(unsigned i=0;i<count;i++){
         surface_t *s=sources[i];
-        if(!s||(!s->pinned&&!valid_cache(s))){ui_transition_cache_direct_end();if(s)ui_transition_cache_request(s->real);direct_misses++;trace(s,"TRANS_FALLBACK",!s?"UNREGISTERED":s->state==DIRTY?"VISUAL_STALE":"CACHE_MISS",0);return false;}
+        const lv_image_dsc_t *borrow=s&&s->real==borrowed_object?borrowed_image:NULL;
+        if(!s||(!borrow&&(s->suspended||(!s->pinned&&!valid_cache(s))))){ui_transition_cache_direct_end();if(s)ui_transition_cache_request(s->real);direct_misses++;trace(s,"TRANS_FALLBACK",!s?"UNREGISTERED":s->state==DIRTY?"VISUAL_STALE":"CACHE_MISS",0);return false;}
         s->used=++clock_id;
-        f.layers[i]=(ui_compositor_layer_t){.pixels=s->buffer.data,.stride=s->buffer.header.stride,
-            .width=s->buffer.header.w,.height=s->buffer.header.h,.x=xy[i*2],.y=xy[i*2+1],.radius=lv_obj_get_style_radius(s->real,0)};
+        f.layers[i]=(ui_compositor_layer_t){.pixels=borrow?borrow->data:s->buffer.data,.stride=borrow?borrow->header.stride:s->buffer.header.stride,
+            .width=borrow?borrow->header.w:s->buffer.header.w,.height=borrow?borrow->header.h:s->buffer.header.h,.x=xy[i*2],.y=xy[i*2+1],.radius=lv_obj_get_style_radius(s->real,0)};
     }
     if(direct_count){
         ui_transition_compositor_present(&f);
@@ -273,5 +281,11 @@ bool ui_transition_cache_direct(lv_obj_t *const *objects,const int *xy,unsigned 
     trace(sources[count-1],"TRANS_DIRECT","READY",0);direct_hits++;direct_count=count;for(unsigned i=0;i<count;i++)direct_sources[i]=sources[i];return true;
 }
 
+void ui_transition_cache_borrow(lv_obj_t *o,const lv_image_dsc_t *image){
+    if(image&&(!o||!find(o)||image->header.cf!=LV_COLOR_FORMAT_RGB565_SWAPPED||!image->data))return;
+    if(borrowed_object==o&&borrowed_image==image)return;
+    if(direct_count)ui_transition_cache_direct_end();
+    borrowed_object=image?o:NULL;borrowed_image=image;
+}
 bool ui_transition_cache_ready(lv_obj_t *o){surface_t *s=find(o);return valid_cache(s);}
 void ui_transition_cache_suspend(lv_obj_t *o,bool suspended,bool retain){surface_t *s=find(o);(void)retain;if(s&&s->suspended!=suspended){s->suspended=suspended;planned=false;}}

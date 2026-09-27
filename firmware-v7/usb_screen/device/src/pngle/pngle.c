@@ -111,6 +111,8 @@ struct _pngle_t {
 	// callbacks
 	pngle_init_callback_t init_callback;
 	pngle_draw_callback_t draw_callback;
+	const uint8_t *sample_x;
+	const uint8_t *sample_y;
 	pngle_done_callback_t done_callback;
 
 	// misc
@@ -355,6 +357,11 @@ static int pngle_draw_pixels(pngle_t *pngle, size_t scanline_ringbuf_xidx)
 		for (uint_fast8_t c = 0; c < pngle->channels; c++) {
 			v[c] = read_pixel_value(pngle->scanline_ringbuf, &scanline_ringbuf_xidx, &bitcount, pngle->hdr.depth, pngle->scanline_ringbuf_size);
 		}
+		if (pngle->sample_x && pngle->hdr.interlace == 0 && pngle->hdr.depth == 8
+			&& (pngle->hdr.color_type == 2 || pngle->hdr.color_type == 6)
+			&& (pngle->drawing_x >= 500 || pngle->drawing_y >= 500
+				|| pngle->sample_x[pngle->drawing_x] == 255
+				|| pngle->sample_y[pngle->drawing_y] == 255)) continue;
 
 		// color type: 0000 0111
 		//                     ^-- indexed color (palette)
@@ -907,6 +914,13 @@ void pngle_set_draw_callback(pngle_t *pngle, pngle_draw_callback_t callback)
 {
 	if (!pngle) return ;
 	pngle->draw_callback = callback;
+}
+
+void pngle_set_sample_map(pngle_t *pngle, const uint8_t *x, const uint8_t *y)
+{
+	if (!pngle) return ;
+	pngle->sample_x = x;
+	pngle->sample_y = y;
 }
 
 void pngle_set_done_callback(pngle_t *pngle, pngle_done_callback_t callback)

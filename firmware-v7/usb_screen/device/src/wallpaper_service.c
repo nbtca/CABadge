@@ -1,7 +1,9 @@
 #include "wallpaper_service.h"
 #include "wallpaper_store.h"
+#include "wallpaper_timing.h"
 #include "wallpaper_html.h"
 #include "management.h"
+#include "eaf_wallpaper.h"
 #include "ui/badge_ui.h"
 #include "ui/ui_transition_cache.h"
 #include "protocol.h"
@@ -33,28 +35,52 @@ static uint32_t thumb_result_generation;
 static uint8_t *pending_thumb;
 static int pending_thumb_slot=-1,pending_id;
 static bool apply_pending,operation;
-static uint8_t *thumbnail(const uint8_t *pixels){
+static const void *pending_eaf;
+static const uint8_t *pending_timing;
+const uint8_t *wallpaper_eaf_timing(const void *source){return source==pending_eaf?pending_timing:NULL;}
+static esp_partition_mmap_handle_t pending_map,display_map;
+static bool pending_mapped,display_mapped;
+static bool map_eaf(const wall_record_t *r){
+    const void *data=NULL;esp_partition_mmap_handle_t handle;
+    if(esp_partition_mmap(partition,WALL_LIBRARY_BASE+r->slot*WALL_LIBRARY_SLOT,WALL_DATA+r->size,ESP_PARTITION_MMAP_DATA,&data,&handle)!=ESP_OK)return false;
+    const uint8_t *timing=(const uint8_t*)data+WALL_TIMING_OFFSET;data=(const uint8_t*)data+WALL_DATA;
+    if(wall_crc(data,r->size)!=r->crc||!eaf_wallpaper_valid(data,r->size)){esp_partition_munmap(handle);return false;}
+    pending_timing=NULL;
+    if(r->timing_crc){
+        size_t bytes=jx_u32(timing+16);
+        if(bytes>WALL_TIMING_MAX-WALL_TIMING_HEADER||!wall_timing_valid(timing,WALL_TIMING_HEADER+bytes,jx_u32((const uint8_t*)data+4),r->crc)||jx_u32(timing+24)!=r->timing_crc){esp_partition_munmap(handle);return false;}
+        pending_timing=timing;
+    }
+    pending_eaf=data;pending_map=handle;pending_mapped=true;return true;
+}
+static uint8_t *thumbnail(const uint8_t *pixels,bool swapped){
     /* All image pixels stay in external PSRAM, including small previews. */
     uint16_t *out=heap_caps_malloc(180u*180u*2u,MALLOC_CAP_SPIRAM|MALLOC_CAP_8BIT);
-    if(out){const uint16_t *in=(const uint16_t*)pixels;for(int y=0;y<180;y++)for(int x=0;x<180;x++)out[y*180+x]=in[(y*2)*360+x*2];}
+    if(out){const uint16_t *in=(const uint16_t*)pixels;for(int y=0;y<180;y++)for(int x=0;x<180;x++)out[y*180+x]=swapped?__builtin_bswap16(in[(y*2)*360+x*2]):in[(y*2)*360+x*2];}
     return (uint8_t*)out;
 }
 static void set_thumb(int slot,uint8_t *pixels){
     thumbs[slot]=(lv_image_dsc_t){.header={.magic=LV_IMAGE_HEADER_MAGIC,.cf=LV_COLOR_FORMAT_RGB565,.w=180,.h=180,.stride=360},.data_size=64800,.data=pixels};
 }
+/* Names identify artwork only; every image uses the same slots/read/delete path. */
+static const char *wallpaper_name(uint32_t crc){
+    return crc==0x75298fc0u?"晴日":crc==0x2a4928beu?"流光":NULL;
+}
 static void publish_library(void){
-    int ids[WALL_LIBRARY_COUNT],n=0;const lv_image_dsc_t *images[WALL_LIBRARY_COUNT];
-    for(int i=0;i<WALL_LIBRARY_COUNT;i++)if(library[i].slot>=0){ids[n]=i+2;images[n++]=&thumbs[i];}
-    badge_ui_library(ids,images,n);
-    unsigned free_slots=0;for(int i=0;i<WALL_LIBRARY_COUNT;i++)free_slots+=library[i].slot<0;
+    int ids[WALL_LIBRARY_COUNT],n=0;const lv_image_dsc_t *images[WALL_LIBRARY_COUNT];const char *names[WALL_LIBRARY_COUNT];
+    for(int i=0;i<WALL_LIBRARY_COUNT;i++)if(library[i].slot>=0){ids[n]=i+2;names[n]=library[i].type==WALL_EAF?"动态壁纸":wallpaper_name(library[i].crc);images[n++]=&thumbs[i];}
+    badge_ui_library(ids,images,names,n);
+    unsigned free_slots=0;for(int i=0;i<WALL_LIBRARY_COUNT;i++)free_slots+=library[i].slot==-1;
     badge_ui_storage(flash_capacity,free_slots*WALL_BYTES,free_slots,true);
 }
-int wallpaper_catalog(int ids[31]){
+int wallpaper_catalog(int ids[31],const char *names[31],uint32_t crcs[31],uint8_t types[31],uint32_t timings[31]){
     if(!lock||xSemaphoreTake(lock,0)!=pdTRUE)return -1;
-    int n=0;for(int i=0;i<WALL_LIBRARY_COUNT;i++)if(library[i].slot>=0)ids[n++]=i+2;
+    int n=0;for(int i=0;i<WALL_LIBRARY_COUNT;i++)if(library[i].slot>=0){ids[n]=i+2;names[n]=library[i].type==WALL_EAF?"动态壁纸":wallpaper_name(library[i].crc);types[n]=(uint8_t)library[i].type;timings[n]=library[i].timing_crc;crcs[n++]=library[i].crc;}
     xSemaphoreGive(lock);return n;
 }
-static struct {int owner;uint32_t session,size,crc,offset,generation;int64_t touched;uint8_t *pixels;} upload;
+static wall_record_t upload_record={.slot=-1};
+static bool upload_reserved;
+static struct {int owner;uint32_t session,size,crc,offset,generation;int64_t touched;uint8_t *pixels;wall_type_t type;} upload;
 static uint8_t *pending,*display_pixels;
 static bool changed,storage_ok,http_ok,hotspot;
 static lv_image_dsc_t picture;
@@ -72,7 +98,10 @@ bool wallpaper_resource_info(uint32_t *generation,uint32_t *size,uint32_t *crc){
     if(!lock||xSemaphoreTake(lock,0)!=pdTRUE)return false;
     *generation=record.generation;*size=record.size;*crc=record.crc;xSemaphoreGive(lock);return true;
 }
-static void clear_upload(void){free(upload.pixels);memset(&upload,0,sizeof(upload));}
+static void clear_upload(void){
+    if(upload_reserved){wall_library_abort(library,&upload_record);upload_reserved=false;}
+    free(upload.pixels);memset(&upload,0,sizeof(upload));
+}
 bool wallpaper_busy(void){
     if(!lock)return false;
     if(xSemaphoreTake(lock,0)!=pdTRUE)return true;
@@ -83,19 +112,24 @@ void wallpaper_status(int *p,int *error,uint32_t *bytes){
     if(xSemaphoreTake(lock,0)!=pdTRUE){*p=-1;return;} /* Snapshot temporarily busy; do not invent a commit state. */
     *p=phase;*error=last_error;*bytes=received;xSemaphoreGive(lock);
 }
-int wallpaper_begin(int owner,uint32_t size,uint32_t crc,uint32_t *session){
+int wallpaper_begin(int owner,uint32_t size,uint32_t crc,uint32_t *session){return wallpaper_begin_timed(owner,size,crc,NULL,0,session);}
+int wallpaper_begin_timed(int owner,uint32_t size,uint32_t crc,const uint8_t *timing,size_t timing_size,uint32_t *session){
     if(!lock||!storage_ok)return 3;
-    if((size&&size!=WALL_BYTES)||(!size&&crc))return 2;
+    wall_type_t type=(size&0x80000000u)?WALL_EAF:WALL_STATIC;size&=0x7fffffffu;
+    if((type==WALL_EAF&&(!size||size>WALL_EAF_MAX))||(type==WALL_STATIC&&size&&size!=WALL_BYTES)||(!size&&crc))return 2;
+    if(timing_size&&(type!=WALL_EAF||!wall_timing_valid(timing,timing_size,0,crc)))return 2;
     if(xSemaphoreTake(lock,owner==2?pdMS_TO_TICKS(100):0)!=pdTRUE)return 1;
     if(upload.owner&&esp_timer_get_time()-upload.touched>30000000)clear_upload();
     int result=upload.owner||changed||finishing||operation?1:0;
-    if(!result&&size){bool free_slot=false;for(int i=0;i<WALL_LIBRARY_COUNT;i++)if(library[i].slot<0)free_slot=true;if(!free_slot)result=7;}
+    if(!result&&size&&wall_library_find(library,size)<0)result=7;
     if(!result){
-        uint8_t *data=size?heap_caps_malloc(size,MALLOC_CAP_SPIRAM|MALLOC_CAP_8BIT):NULL;
-        if(size&&!data)result=3;
+        uint8_t *data=size&&type==WALL_STATIC?heap_caps_malloc(size,MALLOC_CAP_SPIRAM|MALLOC_CAP_8BIT):NULL;
+        if(type==WALL_EAF){upload_reserved=wall_library_reserve(library,size,crc,&upload_record);if(!upload_reserved)result=3;
+            else if(timing_size&&!wall_library_write_timing(&upload_record,timing,timing_size)){clear_upload();result=3;}}
+        if(result||(size&&type==WALL_STATIC&&!data))result=3;
         else {
             uint32_t id;do{id=esp_random();}while(!id);
-            upload.owner=owner;upload.session=id;upload.size=size;upload.crc=crc;upload.pixels=data;upload.touched=esp_timer_get_time();*session=id;
+            upload.type=type;upload.owner=owner;upload.session=id;upload.size=size;upload.crc=crc;upload.pixels=data;upload.touched=esp_timer_get_time();*session=id;
             phase=1;last_error=0;received=0;
         }
     }
@@ -107,7 +141,8 @@ int wallpaper_chunk(int owner,uint32_t session,uint32_t offset,const uint8_t *da
     int result=4;
     if(upload.owner==owner&&upload.session==session&&upload.offset==offset&&offset<=upload.size&&n<=upload.size-offset&&n){
         if(esp_timer_get_time()-upload.touched>30000000){clear_upload();phase=7;last_error=4;}
-        else {memcpy(upload.pixels+offset,data,n);upload.offset+=n;received=upload.offset;upload.touched=esp_timer_get_time();result=0;}
+        else if(upload.type==WALL_EAF&&!wall_library_write_chunk(&upload_record,offset,data,n)){clear_upload();phase=5;last_error=3;result=3;}
+        else {if(upload.type==WALL_STATIC)memcpy(upload.pixels+offset,data,n);upload.offset+=n;received=upload.offset;upload.touched=esp_timer_get_time();result=0;}
     }else if(upload.owner==owner&&upload.session==session){
         clear_upload();phase=5;last_error=4;
     }
@@ -120,17 +155,28 @@ int wallpaper_finish(int owner,uint32_t session){
         phase=2;
         if(owner==2&&!management_generation_valid(upload.generation))result=6;
         else if(esp_timer_get_time()-upload.touched>30000000)result=4;
-        else if(upload.offset!=upload.size||wall_crc(upload.pixels,upload.size)!=upload.crc)result=2;
+        else if(upload.offset!=upload.size||(upload.type==WALL_STATIC&&wall_crc(upload.pixels,upload.size)!=upload.crc))result=2;
+        else if(upload.type==WALL_EAF){
+            /* Validate directly from Flash before publishing its final commit header. */
+            if(!map_eaf(&upload_record))result=2;
+            else if(!wall_library_publish(library,&upload_record)){
+                esp_partition_munmap(pending_map);pending_mapped=false;pending_eaf=NULL;result=3;
+            }else{
+                upload_reserved=false;int slot=upload_record.slot;
+                pending_thumb_slot=slot;pending_thumb=NULL;pending_id=slot+2;
+                pending=NULL;apply_pending=true;changed=true;record=upload_record;result=0;
+            }
+        }
         else {
             phase=3;
             /* ponytail: one upload owns this lock through commit; UI uses try-lock,
              * other writers get busy. A storage worker would be needed for parallel writes. */
-            int slot=-1;uint8_t *small=upload.size?thumbnail(upload.pixels):NULL;
-            if(upload.size&&(!small||!wall_library_add(library,upload.pixels,upload.crc,&slot))){free(small);result=3;}
+            int slot=-1;uint8_t *small=upload.size&&upload.type==WALL_STATIC?thumbnail(upload.pixels,false):NULL;
+            if(upload.size&&((upload.type==WALL_STATIC&&!small)||!wall_library_add_typed(library,upload.pixels,upload.size,upload.crc,upload.type,&slot))){free(small);result=3;}
             else {
                 pending_thumb=small;pending_thumb_slot=slot;pending_id=slot<0?0:slot+2;
-                pending=upload.pixels;upload.pixels=NULL;apply_pending=true;changed=true;result=0;
-                record=(wall_record_t){slot,record.generation+1,upload.size,upload.crc};
+                pending=upload.type==WALL_STATIC?upload.pixels:NULL;if(upload.type==WALL_STATIC)upload.pixels=NULL;apply_pending=true;changed=true;result=0;
+                record=(wall_record_t){slot,record.generation+1,upload.size,upload.crc,upload.type,0};
             }
         }
         if(result){phase=result==4?7:5;last_error=result;}
@@ -286,26 +332,34 @@ static void library_worker(void *arg){
     library_job_t job=*(library_job_t*)arg;free(arg);
     uint8_t *pixels=NULL;int result=0;
     xSemaphoreTake(lock,portMAX_DELAY);
-    if(job.remove){
+    if(job.id==0){apply_pending=true;pending_id=0;}
+    else if(job.remove){
         if(!wall_library_delete(library,job.id-2))result=3;
         else {pending_thumb_slot=job.id-2;pending_thumb=NULL;apply_pending=job.selected;pending_id=0;}
+    }else if(library[job.id-2].type==WALL_EAF){
+        if(!map_eaf(&library[job.id-2]))result=3;
+        else {apply_pending=true;pending_id=job.id;}
     }else {
         pixels=heap_caps_malloc(WALL_BYTES,MALLOC_CAP_SPIRAM|MALLOC_CAP_8BIT);
         if(!pixels||!wall_library_read(&library[job.id-2],pixels))result=3;
         else {apply_pending=true;pending_id=job.id;}
     }
-    if(!result){pending=pixels;changed=true;record.generation++;if(apply_pending){record.slot=pending_id-2;record.size=pixels?WALL_BYTES:0;record.crc=pixels?library[job.id-2].crc:0;}}
+    if(!result){pending=pixels;changed=true;record.generation++;if(apply_pending){record.slot=pending_id-2;record.size=pending_id>=2?library[pending_id-2].size:0;record.crc=pending_id>=2?library[pending_id-2].crc:0;record.type=pending_id>=2?library[pending_id-2].type:WALL_STATIC;}}
     else {free(pixels);phase=5;last_error=result;}
     operation=false;xSemaphoreGive(lock);vTaskDelete(NULL);
 }
 int wallpaper_select(int id,bool remove){
+    if(id==1)return MG_INVALID;
     if(id<0||id>=WALL_LIBRARY_COUNT+2||(remove&&id<2))return MG_INVALID;
     if(wallpaper_busy())return MG_BUSY;
-    if(id<2){bool ok=badge_ui_select_wallpaper(id);badge_ui_apply_result(ok);return ok?MG_OK:MG_FAILED;}
     if(!lock||xSemaphoreTake(lock,0)!=pdTRUE)return MG_BUSY;
-    if(library[id-2].slot<0){xSemaphoreGive(lock);return MG_INVALID;}
+    if(id>=2&&library[id-2].slot<0){xSemaphoreGive(lock);return MG_INVALID;}
     library_job_t *job=malloc(sizeof(*job));if(!job){xSemaphoreGive(lock);return MG_FAILED;}
-    *job=(library_job_t){id,remove,badge_ui_selected_wallpaper()==id};operation=true;phase=3;last_error=0;
+    *job=(library_job_t){id,remove,badge_ui_selected_wallpaper()==id};
+    /* GUI owns the player. Stop Flash reads before a worker erases a selected EAF;
+     * its decoded frame remains visible until apply_pending removes the player. */
+    if(job->remove&&job->selected&&library[id-2].type==WALL_EAF)eaf_wallpaper_hold(true);
+    operation=true;phase=3;last_error=0;
     xSemaphoreGive(lock);
     if(xTaskCreate(library_worker,"wall_library",4096,job,4,NULL)!=pdPASS){free(job);xSemaphoreTake(lock,portMAX_DELAY);operation=false;phase=5;last_error=3;xSemaphoreGive(lock);return MG_FAILED;}
     return MG_OK;
@@ -325,10 +379,15 @@ void wallpaper_service_init(void){
                     set_thumb(i,NULL);
                 }
                 publish_library();int id=badge_ui_selected_wallpaper();
-                if(id>=2&&id<WALL_LIBRARY_COUNT+2&&wall_library_read(&library[id-2],pixels)){
+                if(id<0||id==1||id>=WALL_LIBRARY_COUNT+2||(id>=2&&library[id-2].slot<0)){
+                    id=0;for(int i=0;i<WALL_LIBRARY_COUNT;i++)if(library[i].slot>=0){id=i+2;break;}
+                }
+                if(id>=2&&library[id-2].type==WALL_EAF&&map_eaf(&library[id-2])){
+                    pending_id=id;apply_pending=true;changed=true;record=library[id-2];
+                }else if(id>=2&&id<WALL_LIBRARY_COUNT+2&&library[id-2].type==WALL_STATIC&&wall_library_read(&library[id-2],pixels)){
                     pending=pixels;pixels=NULL;pending_id=id;apply_pending=true;changed=true;
                     record.size=WALL_BYTES;record.crc=library[id-2].crc;
-                }else if(id<0||id>=2)badge_ui_select_wallpaper(0);
+                }else badge_ui_select_wallpaper(0);
             }
             free(pixels);
         }
@@ -386,7 +445,7 @@ static void thumbnail_poll(void){
     bool idle=!badge_ui_transition_active()&&!lv_anim_count_running();
     for(lv_indev_t *in=lv_indev_get_next(NULL);in;in=lv_indev_get_next(in))if(lv_indev_get_state(in)==LV_INDEV_STATE_PRESSED)idle=false;
     if(idle&&!thumb_loading&&!operation&&!changed&&ui_memory_pressure_get()==UI_MEMORY_NORMAL&&heap_caps_get_free_size(MALLOC_CAP_SPIRAM)>2*1024*1024&&heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)>32*1024){
-        for(unsigned j=0;j<n;j++)if(!thumbs[ids[j]-2].data){
+        for(unsigned j=0;j<n;j++)if(!thumbs[ids[j]-2].data&&library[ids[j]-2].type==WALL_STATIC){
             thumb_loading=true;
             if(xTaskCreate(thumb_worker,"wall_thumb",4096,(void*)(intptr_t)(ids[j]-2),2,NULL)!=pdPASS)thumb_loading=false;
             break;
@@ -405,16 +464,35 @@ void wallpaper_service_poll(void){
                 set_thumb(slot,pending_thumb);pending_thumb=NULL;pending_thumb_slot=-1;
             }
             publish_library();free((void*)old_thumb);
+            bool loaded=true;
             if(apply_pending){
-                lv_image_cache_drop(&picture);uint8_t *old=display_pixels;display_pixels=pending;pending=NULL;
-                picture=(lv_image_dsc_t){.header={.magic=LV_IMAGE_HEADER_MAGIC,.cf=LV_COLOR_FORMAT_RGB565,.w=360,.h=360,.stride=720},.data_size=WALL_BYTES,.data=display_pixels};
-                badge_ui_loaded_photo(display_pixels?&picture:NULL,pending_id,true);free(old);
+                if(pending_mapped){
+                    loaded=badge_ui_loaded_eaf(pending_eaf,library[pending_id-2].size,pending_id);
+                    if(loaded){
+                        if(display_mapped)esp_partition_munmap(display_map);
+                        display_map=pending_map;display_mapped=true;
+                        free(display_pixels);display_pixels=NULL;memset(&picture,0,sizeof(picture));
+                        int slot=pending_id-2;const lv_image_dsc_t *frame=eaf_wallpaper_frame();
+                        uint8_t *small=thumbnail(frame->data,frame->header.cf==LV_COLOR_FORMAT_RGB565_SWAPPED);
+                        if(small){const void *old=thumbs[slot].data;lv_image_cache_drop(&thumbs[slot]);set_thumb(slot,small);badge_ui_thumbnails_changed();free((void*)old);}
+                    }else {
+                        esp_partition_munmap(pending_map);int old_id=badge_ui_selected_wallpaper();
+                        record=old_id>=2?library[old_id-2]:(wall_record_t){.slot=-1};
+                    }
+                    pending_mapped=false;pending_eaf=NULL;
+                }else{
+                    lv_image_cache_drop(&picture);uint8_t *old=display_pixels;display_pixels=pending;pending=NULL;
+                    picture=(lv_image_dsc_t){.header={.magic=LV_IMAGE_HEADER_MAGIC,.cf=LV_COLOR_FORMAT_RGB565,.w=360,.h=360,.stride=720},.data_size=WALL_BYTES,.data=display_pixels};
+                    badge_ui_loaded_photo(display_pixels?&picture:NULL,pending_id,true);free(old);
+                    if(display_mapped){esp_partition_munmap(display_map);display_mapped=false;}
+                }
                 badge_ui_sleep(false);
             }
-            apply_pending=false;changed=false;phase=4;last_error=0;
-            snprintf(notice,sizeof(notice),"壁纸已更新");
+            apply_pending=false;changed=false;phase=loaded?4:5;last_error=loaded?0:3;
+            snprintf(notice,sizeof(notice),"%s",loaded?"壁纸已更新":"壁纸加载失败");
         }
-        xSemaphoreGive(lock);
+        if(!operation)eaf_wallpaper_hold(false);
+    xSemaphoreGive(lock);
     }
     static int64_t last;int64_t now=esp_timer_get_time();
     if(now-last>1000000){

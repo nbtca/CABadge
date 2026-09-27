@@ -25,6 +25,9 @@ bool ui_transition_cache_direct(lv_obj_t *const *objects,const int *xy,unsigned 
 void ui_transition_cache_direct_end(void);
 bool ui_transition_cache_direct_active(void);
 
+/* Borrow immutable LCD-native pixels; never owns/frees them. Clear before the
+ * owner resumes writing or destroys the source. GUI-only, one dynamic homepage. */
+void ui_transition_cache_borrow(lv_obj_t *surface,const lv_image_dsc_t *image);
 bool ui_transition_cache_ready(lv_obj_t *surface);
 void ui_transition_cache_suspend(lv_obj_t *surface,bool suspended,bool retain);
 

@@ -14,13 +14,19 @@ static void *png_calloc(size_t n,size_t size){
 #ifdef ESP_PLATFORM
 #undef calloc
 #endif
-struct map_png {pngle_t *decoder;uint16_t *pixels;bool done,invalid;};
+struct map_png {pngle_t *decoder;uint16_t *pixels;bool done,invalid;uint8_t sample_x[500],sample_y[500];};
 static void init_image(pngle_t *p,uint32_t w,uint32_t h){
     map_png_t *m=pngle_get_user_data(p);m->invalid=w!=501||h!=1002;
 }
 static void draw_pixel(pngle_t *p,uint32_t x,uint32_t y,uint32_t w,uint32_t h,const uint8_t rgba[4]){
     map_png_t *m=pngle_get_user_data(p);
     if(m->invalid||x>=500||y>=500)return;
+    if(pngle_get_ihdr(p)->interlace==0){
+        unsigned dx=m->sample_x[x],dy=m->sample_y[y];
+        if(dx==255||dy==255)return;
+        m->pixels[dy*128+dx]=rgba[3]?((rgba[0]>>3)<<11)|((rgba[1]>>2)<<5)|(rgba[2]>>3):0x1082;
+        return;
+    }
     /* ceil(source*128/500), preserving the old floor(target*500/128) sampling.
      * Adam7 callbacks may cover several pixels; later passes overwrite them. */
     unsigned left=(x*128+499)/500,top=(y*128+499)/500;
@@ -40,12 +46,16 @@ map_png_t *map_png_create(uint16_t *pixels){
 #endif
     if(!m)return NULL;
     m->pixels=pixels;m->decoder=pngle_new();if(!m->decoder){free(m);return NULL;}
+    memset(m->sample_x,255,sizeof(m->sample_x));memset(m->sample_y,255,sizeof(m->sample_y));
+    for(unsigned i=0;i<128;i++){m->sample_x[i*500/128]=i;m->sample_y[i*500/128]=i;}
     for(unsigned i=0;i<128*128;i++)pixels[i]=0x1082;
     pngle_set_user_data(m->decoder,m);pngle_set_init_callback(m->decoder,init_image);
+    pngle_set_sample_map(m->decoder,m->sample_x,m->sample_y);
     pngle_set_draw_callback(m->decoder,draw_pixel);pngle_set_done_callback(m->decoder,done_image);return m;
 }
 int map_png_feed(map_png_t *m,const void *data,size_t size){
     int n=pngle_feed(m->decoder,data,size);return m->invalid?-1:n;
 }
 bool map_png_done(const map_png_t *m){return m->done&&!m->invalid;}
+const char *map_png_error(const map_png_t *m){return m->invalid?"unexpected image dimensions":pngle_error(m->decoder);}
 void map_png_destroy(map_png_t *m){if(m){pngle_destroy(m->decoder);free(m);}}

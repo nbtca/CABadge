@@ -1,4 +1,5 @@
 #include "management.h"
+#include "eaf_wallpaper.h"
 #include "wallpaper_service.h"
 #include "esp_timer.h"
 #include "esp_heap_caps.h"
@@ -98,8 +99,14 @@ static void make_snapshot(void){
     }
     cJSON *wall=cJSON_AddObjectToObject(root,"wallpaper");number(wall,"phase",phase);number(wall,"error",wall_error);number(wall,"received",received);
     number(wall,"selected",state->wallpaper_index);number(wall,"capacity",31);
-    int ids[31],n=wallpaper_catalog(ids);
-    if(n>=0){cJSON *items=cJSON_AddArrayToObject(wall,"items");for(int i=0;i<n;i++)cJSON_AddItemToArray(items,cJSON_CreateNumber(ids[i]));}
+    int ids[31];const char *names[31];uint32_t crcs[31],timings[31];uint8_t types[31];int n=wallpaper_catalog(ids,names,crcs,types,timings);
+    if(n>=0){
+        cJSON *items=cJSON_AddArrayToObject(wall,"items"),*titles=cJSON_AddObjectToObject(wall,"names"),*checks=cJSON_AddObjectToObject(wall,"crcs"),*kinds=cJSON_AddObjectToObject(wall,"types"),*timing_checks=cJSON_AddObjectToObject(wall,"timing_crcs");
+        for(int i=0;i<n;i++){char key[8];snprintf(key,sizeof(key),"%d",ids[i]);cJSON_AddItemToArray(items,cJSON_CreateNumber(ids[i]));
+            if(names[i])cJSON_AddStringToObject(titles,key,names[i]);
+            cJSON_AddNumberToObject(timing_checks,key,timings[i]);cJSON_AddNumberToObject(checks,key,crcs[i]);cJSON_AddStringToObject(kinds,key,types[i]?"EAF":"STATIC");}
+    }
+    char eaf[768];eaf_wallpaper_info(eaf,sizeof(eaf));cJSON_AddItemToObject(wall,"eaf",cJSON_Parse(eaf));
     uint32_t generation=0,size=0,crc=0;
     if(wallpaper_resource_info(&generation,&size,&crc)){cJSON_AddNumberToObject(wall,"generation",generation);cJSON_AddNumberToObject(wall,"size",size);cJSON_AddNumberToObject(wall,"crc",crc);}
     uint8_t bytes[MG_STATUS_BYTES]={MG_VERSION};

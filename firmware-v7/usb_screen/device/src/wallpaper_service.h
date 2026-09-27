@@ -6,9 +6,11 @@
 #include <stdbool.h>
 void wallpaper_service_init(void);
 int wallpaper_select(int id,bool remove);
-int wallpaper_catalog(int ids[31]);
+int wallpaper_catalog(int ids[31],const char *names[31],uint32_t crcs[31],uint8_t types[31],uint32_t timings[31]);
 void wallpaper_service_poll(void);
 /* 0=OK, 1=busy, 2=invalid, 3=storage failure, 4=session/offset error. */
+const uint8_t *wallpaper_eaf_timing(const void *source); /* GUI-only, borrowed from pending Flash mapping. */
+int wallpaper_begin_timed(int owner,uint32_t size,uint32_t crc,const uint8_t *timing,size_t timing_size,uint32_t *session);
 int wallpaper_begin(int owner,uint32_t size,uint32_t crc,uint32_t *session);
 int wallpaper_chunk(int owner,uint32_t session,uint32_t offset,const uint8_t *data,size_t n);
 int wallpaper_finish(int owner,uint32_t session);

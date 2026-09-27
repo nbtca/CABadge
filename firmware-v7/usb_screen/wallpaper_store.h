@@ -10,7 +10,8 @@
 bool wall_read(uint32_t offset,void *data,size_t size);
 bool wall_write(uint32_t offset,const void *data,size_t size);
 bool wall_erase(uint32_t offset,size_t size);
-typedef struct {int slot;uint32_t generation,size,crc;} wall_record_t;
+typedef enum { WALL_STATIC=0, WALL_EAF=1 } wall_type_t;
+typedef struct {int slot;uint32_t generation,size,crc;wall_type_t type;uint32_t timing_crc;} wall_record_t;
 uint32_t wall_crc(const void *data,size_t size);
 bool wall_load(wall_record_t *record,uint8_t *pixels);
 bool wall_commit(wall_record_t *record,const uint8_t *pixels,uint32_t size,uint32_t crc);
@@ -18,10 +19,19 @@ bool wall_commit(wall_record_t *record,const uint8_t *pixels,uint32_t size,uint3
 #define WALL_LIBRARY_BASE 0x100000u
 #define WALL_LIBRARY_SLOT 0x41000u
 #define WALL_LIBRARY_COUNT 31
+#define WALL_EAF_MAX (3u*1024u*1024u)
 #define WALL_LIBRARY_END (WALL_LIBRARY_BASE+WALL_LIBRARY_SLOT*WALL_LIBRARY_COUNT)
+/* slot=-1 is free, -2 is a continuation/reserved extent; only >=0 is visible. */
+int wall_library_find(const wall_record_t records[WALL_LIBRARY_COUNT],uint32_t size);
+bool wall_library_reserve(wall_record_t records[WALL_LIBRARY_COUNT],uint32_t size,uint32_t crc,wall_record_t *pending);
+bool wall_library_write_chunk(const wall_record_t *pending,uint32_t offset,const void *data,size_t n);
+bool wall_library_write_timing(wall_record_t *pending,const uint8_t *data,size_t n);
+bool wall_library_publish(wall_record_t records[WALL_LIBRARY_COUNT],const wall_record_t *pending);
+bool wall_library_abort(wall_record_t records[WALL_LIBRARY_COUNT],const wall_record_t *pending);
 bool wall_library_scan(wall_record_t records[WALL_LIBRARY_COUNT]);
 bool wall_library_read(const wall_record_t *record,uint8_t *pixels);
 bool wall_library_add(wall_record_t records[WALL_LIBRARY_COUNT],const uint8_t *pixels,uint32_t crc,int *slot);
+bool wall_library_add_typed(wall_record_t records[WALL_LIBRARY_COUNT],const uint8_t *data,uint32_t size,uint32_t crc,wall_type_t type,int *slot);
 bool wall_library_delete(wall_record_t records[WALL_LIBRARY_COUNT],int slot);
 bool wall_library_migrate(wall_record_t records[WALL_LIBRARY_COUNT],uint8_t *scratch);
 #endif

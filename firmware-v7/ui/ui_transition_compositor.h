@@ -23,3 +23,12 @@ bool ui_transition_compositor_active(void);
 void ui_transition_compositor_stats(char *out,size_t size);
 /* Pure stride/clip compositor, shared by production and the host pixel check. */
 size_t ui_transition_compositor_rows(const ui_compositor_frame_t *f,int first,int rows,uint8_t *out);
+
+/* GUI owns start/stop; prepare runs ONLY on the existing compositor worker.
+ * One mutable source is safe: prepare follows completion of the previous DMA.
+ * Callback/context lifetime extends through stop acknowledgement. */
+typedef bool (*ui_compositor_prepare_cb)(void *context,uint32_t *duration_us);
+bool ui_transition_compositor_stream_begin(const ui_compositor_frame_t *frame,ui_compositor_prepare_cb prepare,void *context,uint32_t period_us);
+bool ui_transition_compositor_stream_active(void);
+bool ui_transition_compositor_stream_failed(void);
+void ui_transition_compositor_stream_stats(char *out,size_t size);

@@ -10,6 +10,7 @@
 #define BR_CAP_PERF 4
 #define BR_CAP_LCD_PERF 8u
 #define BR_CAP_AUDIT 16u
+#define BR_CAP_MAP_PERF 32u
 enum { BR_HELLO=32, BR_READY, BR_STATE, BR_COMMAND, BR_ACK, BR_WALL_READ, BR_WALL_DATA, BR_PERF, BR_PERF_RESULT };
 enum { BR_APPLY=32, BR_MANAGEMENT, BR_HOTSPOT, BR_SHAKE };
 /* Commands carry a request id followed by MG_VERSION, operation and arguments.

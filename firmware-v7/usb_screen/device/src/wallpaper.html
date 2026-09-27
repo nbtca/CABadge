@@ -38,7 +38,7 @@ button span{display:inline-block}.reduce-motion *,.reduce-motion *::before{trans
 <div class="row"><label for="zoom">缩放</label><input id="zoom" type="range" min="1" max="4" value="1" step=".01" disabled></div>
 <button class="primary" id="send" disabled>上传并应用</button>
 <h2>已保存的壁纸</h2><p id="libraryCount" class="notice"></p><ul id="library"></ul>
-<button class="secondary" id="reset">恢复默认壁纸</button><button class="secondary" id="cancelUpload" hidden>取消上传</button>
+<button class="secondary" id="reset">使用空白背景</button><button class="secondary" id="cancelUpload" hidden>取消上传</button>
 <div id="confirm" class="confirm" inert aria-hidden="true"><div><p id="confirmText"></p><div class="row"><button id="confirmNo">继续保留</button><button id="confirmYes">确认</button></div></div></div>
 <progress id="progress" max="100" value="0" hidden></progress><p id="status" role="status" aria-live="polite"></p>
 </section>
@@ -68,7 +68,7 @@ function buttonText(button,value){
 }
 function notify(value,success=false){
  clearTimeout(notifyTimer);if(!notifyButton)return;buttonText(notifyButton,value);
- if(success)notifyTimer=setTimeout(()=>{buttonText(notifyButton,notifyButton.id==='send'?'上传并应用':'恢复默认壁纸');notifyButton=null;notifyTimer=0;controls(busy);},1200);
+ if(success)notifyTimer=setTimeout(()=>{buttonText(notifyButton,notifyButton.id==='send'?'上传并应用':'使用空白背景');notifyButton=null;notifyTimer=0;controls(busy);},1200);
 }
 function closeConfirm(){const origin=confirmOrigin;confirmAction=null;$('confirm').classList.remove('open');$('confirm').inert=true;$('confirm').setAttribute('aria-hidden','true');if(origin&&!origin.hidden&&!origin.disabled)origin.focus();}
 function askConfirm(origin,message,action){confirmOrigin=origin;confirmAction=action;$('confirmText').textContent=message;$('confirm').inert=false;$('confirm').setAttribute('aria-hidden','false');$('confirm').classList.add('open');$('confirmNo').focus();}
@@ -95,14 +95,14 @@ function controls(value){busy=value;drag=null;for(const id of ['file','center','
 function upload(reset){
  if(busy||awaitingApply||!connected||(!reset&&!picture))return;
  const bytes=reset?new Uint8Array():rgb565(ctx.getImageData(0,0,360,360).data);request=new XMLHttpRequest();$('cancelUpload').hidden=false;
- uploadGeneration=lastGeneration;notifyButton=reset?$('reset'):$('send');notify(reset?'正在恢复…':'正在上传…');controls(true);$('progress').hidden=false;$('progress').value=0;$('status').textContent=reset?'正在恢复…':'正在上传…';
+ uploadGeneration=lastGeneration;notifyButton=reset?$('reset'):$('send');notify(reset?'正在应用…':'正在上传…');controls(true);$('progress').hidden=false;$('progress').value=0;$('status').textContent=reset?'正在应用…':'正在上传…';
  request.open('POST',reset?'/reset':'/upload');request.timeout=45000;request.setRequestHeader('Content-Type','application/octet-stream');request.setRequestHeader('X-JX-CRC',crc32(bytes));
  request.upload.onprogress=e=>{if(e.lengthComputable)$('progress').value=e.loaded/e.total*100;};
  request.onload=()=>{if(request.status===200){awaitingApply=true;notify('正在应用…');$('status').textContent='已保存，等待设备应用';refreshStatus();}else{notify('重试');$('status').textContent=request.status===403?'请求被拒绝，请从设备地址重新打开':request.status===409?(JSON.parse(request.responseText||'{}').result===7?'壁纸已满，请先删除一张':'设备忙，请稍后重试'):'上传未完成，请重试';}};
  request.onerror=()=>{notify('重试');$('status').textContent='连接中断，请重新连接设备后重试';};request.ontimeout=()=>{notify('重试');$('status').textContent='上传超时，请重试';};
  request.onloadend=()=>{closeConfirm();controls(false);$('progress').hidden=true;$('cancelUpload').hidden=true;request=null;};request.send(bytes);
 }
-$('send').onclick=()=>upload(false);$('reset').onclick=()=>{askConfirm($('reset'),'恢复默认壁纸？',()=>upload(true));};
+$('send').onclick=()=>upload(false);$('reset').onclick=()=>{askConfirm($('reset'),'使用空白背景？',()=>upload(true));};
 
 const commandControls=['sleep','reduced','brightness','wifiEnabled','wifiScan','wifiDisconnect','bleEnabled','bleScan','bleIncoming','bleOutgoing'];
 function api(path,body){
@@ -139,11 +139,11 @@ async function refreshStatus(){
  const phases=['空闲','接收中','校验中','保存中','已应用','失败','已取消','已超时'];$('wallState').textContent=phases[state.wallpaper.phase]||'处理中';
  lastGeneration=state.wallpaper.generation;
  if(state.wallpaper.items){
- const ids=[0,1,...state.wallpaper.items],signature=JSON.stringify([ids,state.wallpaper.selected]);
- $('libraryCount').textContent=`${state.wallpaper.items.length} / ${state.wallpaper.capacity} 张自定义壁纸`;
+ const ids=state.wallpaper.items,signature=JSON.stringify([ids,state.wallpaper.selected]);
+ $('libraryCount').textContent=`${state.wallpaper.items.length} / ${state.wallpaper.capacity} 张壁纸`;
  if(lastLibrary!==signature){lastLibrary=signature;$('library').replaceChildren();for(const id of ids){
  const row=document.createElement('li'),apply=document.createElement('button');
- const name=id===0?'晴日':id===1?'流光':`壁纸 ${String(id-1).padStart(2,'0')}`;
+ const name=(state.wallpaper.names||{})[id]||`壁纸 ${String(id-1).padStart(2,'0')}`;
  apply.textContent=name+(state.wallpaper.selected===id?' · 已应用':' · 应用');apply.onclick=()=>control(12,[id]);row.append(apply);
  if(id>=2){const remove=document.createElement('button');remove.textContent='删除';remove.onclick=()=>askConfirm(remove,`删除${name}？`,()=>control(13,[id]));row.append(remove);}
  $('library').append(row);}}

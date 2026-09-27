@@ -10,6 +10,7 @@
 #include "runtime_monitor.h"
 #include "display_perf.h"
 #include "frame_trace.h"
+#include "map_perf.h"
 #include "wallpaper_service.h"
 #include "management.h"
 #include "driver/gpio.h"
@@ -237,7 +238,7 @@ static void receive(uint8_t type,const uint8_t *data,size_t n,void *ctx){
     (void)ctx;
     if(type==BR_HELLO&&n==1&&data[0]==BR_VERSION){
         uint8_t ready[12]={BR_VERSION,16};jx_put16(ready+2,360);jx_put16(ready+4,360);
-        jx_put16(ready+6,BR_CAP_SERVICES|BR_CAP_PERF|BR_CAP_LCD_PERF|BR_CAP_AUDIT);jx_put32(ready+8,BR_PCB);
+        jx_put16(ready+6,BR_CAP_SERVICES|BR_CAP_PERF|BR_CAP_LCD_PERF|BR_CAP_AUDIT|BR_CAP_MAP_PERF);jx_put32(ready+8,BR_PCB);
         probe_stop();bridge=true;bridge_seen=tick();bridge_request=0;
         attached=send_packet(BR_READY,ready,sizeof(ready));return;
     }
@@ -259,6 +260,10 @@ static void receive(uint8_t type,const uint8_t *data,size_t n,void *ctx){
 #endif
         }
         if(type==41){
+            if(n==5&&data[0]==10){
+                if(map_perf_query(jx_u32(data+1),usb_snapshot,8192))send_packet(42,usb_snapshot,strlen(usb_snapshot));
+                return;
+            }
             /* Local diagnostic controls: no credentials or persistent setting changes. */
             if(n==2&&data[0]==1&&data[1]<=12){monitor_scene=-1;badge_ui_probe_restore(data[1]);}
             else if(n==2&&data[0]==2&&data[1]<=1)badge_ui_perf_enable(data[1]);
@@ -315,10 +320,12 @@ static void receive(uint8_t type,const uint8_t *data,size_t n,void *ctx){
         badge_wallpaper_hotspot();char info[400];wallpaper_info(info,sizeof(info));send_packet(JX_WALL_INFO,info,strlen(info));
     }else if(attached&&type>=JX_WALL_BEGIN&&type<=JX_WALL_CANCEL){
         uint32_t session=n>=4?jx_u32(data):0,offset=0;int result=2;
-        if(type==JX_WALL_BEGIN&&n==8){session=0;result=wallpaper_begin(1,jx_u32(data),jx_u32(data+4),&session);}
+        if(type==JX_WALL_BEGIN&&n>=8){session=0;result=wallpaper_begin_timed(1,jx_u32(data),jx_u32(data+4),data+8,n-8,&session);}
         if(type==JX_WALL_CHUNK&&n>8){offset=jx_u32(data+4);result=wallpaper_chunk(1,session,offset,data+8,n-8);if(!result)offset+=n-8;}
         if(type==JX_WALL_FINISH&&n==4){result=wallpaper_finish_async(session);if(!result)return;}
         if(type==JX_WALL_CANCEL&&n==4){wallpaper_cancel(1,session);result=0;}
+        /* Flash work is not host inactivity; start the idle timeout at its ACK. */
+        if(bridge)bridge_seen=tick();
         uint8_t ack[10]={type,(uint8_t)result};jx_put32(ack+2,session);jx_put32(ack+6,offset);send_packet(JX_WALL_ACK,ack,sizeof(ack));
     }
 }
@@ -350,11 +357,11 @@ static void battery_init(void){
 static void battery_update(void){
     if(!adc||!calibration)return;
     int sum=0,raw,mv;
-    for(int i=0;i<32;i++){if(adc_oneshot_read(adc,adc_channel,&raw)!=ESP_OK){state.battery_mv=-1;badge_ui_refresh();return;}sum+=raw;}
+    for(int i=0;i<32;i++){if(adc_oneshot_read(adc,adc_channel,&raw)!=ESP_OK){state.battery_mv=-1;badge_ui_battery_sample(-1);return;}sum+=raw;}
     if(adc_cali_raw_to_voltage(calibration,(sum+16)/32,&mv)==ESP_OK){
         /* Frozen R36/R37 divider is 3:1; preserve user-confirmed gain of 1.0. */
-        if(state.battery_mv!=mv*3){state.battery_mv=mv*3;badge_ui_refresh();}
-    }else {state.battery_mv=-1;badge_ui_refresh();}
+        state.battery_mv=mv*3;badge_ui_battery_sample(state.battery_mv);
+    }else {state.battery_mv=-1;badge_ui_battery_sample(-1);}
 }
 static void service_poll(lv_timer_t *timer){
     (void)timer;static uint32_t battery_tick;int64_t poll_at=esp_timer_get_time();

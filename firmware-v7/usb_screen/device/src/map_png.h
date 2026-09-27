@@ -7,4 +7,5 @@ typedef struct map_png map_png_t;
 map_png_t *map_png_create(uint16_t *pixels);
 int map_png_feed(map_png_t *png,const void *data,size_t size);
 bool map_png_done(const map_png_t *png);
+const char *map_png_error(const map_png_t *png);
 void map_png_destroy(map_png_t *png);

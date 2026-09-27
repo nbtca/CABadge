@@ -1,3 +1,47 @@
+## 2026-09-27 最新：7.9.16-eaf-transition
+
+动态首页导航冻结单个LCD-native EAF frame，借给统一cache/Direct，无导航截图/整帧copy/swap；LVGL已有RGB565_SWAPPED用于暂停/fallback，缩略图仅采样换序。STOP不再开下一帧，当前帧完成并drain后交权。返回首页转场结束后恢复EAF；首次载入分3个idle轮次预热邻居。Prototype/timing/显示参数不变。
+
+编译/烧录hash及短USB动画检查通过：控制/名片/功能面板共+15 Direct，未新增miss；目标页EAF停止、返回恢复，静态回归通过。未采可比转场毫秒数据，不宣称提升比例。手指/目视反馈待用户。已停自动操作、恢复原ID10、串口释放。详情主记录R82及outputs/cabadge-v7.9.16-eaf-transition/basic-check.json。
+
+## 2026-09-27 最新：7.9.15-eaf-timing
+
+EAF资源新增Flash头JXWT v1 CONSTANT/PER_FRAME时间表；make_eaf.py保留GIF每帧duration，生成.eaf.timing，upload_eaf.py一起上传。正式Direct backend按当前帧时长累计绝对deadline，原显示架构不变；旧壁纸默认33333us。编译/烧录hash、固定30与80/180/420ms GIF、菜单暂停恢复、息屏/静态切换、真实重启持久化及旧EAF播放检查通过。实屏目视未验收。已删本轮测试素材，恢复测试前STATIC ID9，端口释放。罗小黑转换版是20FPS，已生成50ms sidecar但未改设备旧ID18；详情docs/EAF_TIMING.md与主记录R81。
+
+## 2026-09-27 补充：emote原型已评估，默认仍7.9.14 Direct
+
+CABADGE_EAF_EMOTE=1可选构建esp_emote_gfx3.0.5原型；播放无整帧buffer，短测24.46FPS vs Direct29.86FPS，PSRAM后端20KiB vs266KiB，但菜单需恢复253KiB冻结图且普通resume从头播放。未迁移默认。测试后已恢复原7.9.14 Direct BIN、ID18，串口释放。原型构建/USB菜单及静态切换通过，未做实屏目视；详情主记录R80与docs/EAF_EMOTE_PROTOTYPE.md。
+
+## 最新补充：2026-09-27 / 7.9.14-eaf-direct
+
+EAF 首页播放旁路 lv_eaf/LVGL renderer：官方格式解析及 RLE → PSRAM 单帧 LCD-native RGB565 → 原 compositor 任务/双 staging → ST77916。33,333us 调度，保留 3MiB 文件支持。按下手势/菜单/息屏/叠层时 join/drain 后交回 LVGL，冻结帧原地转换字节序；不另建全屏副本。QSPI/Adapter/缓存及其他应用参数未改。
+
+编译和 COM3 应用烧录 hash 通过。USB 基本暂停/恢复、静态切换通过；最后 180 帧平均完成间隔 33.378ms，约29.96提交/秒，最差39.319ms，非面板物理扫描率。实屏颜色/上滑/残影等待用户确认。当前保留 ID18 罗小黑，串口释放。原始结果 outputs/cabadge-v7.9.14-eaf-direct/basic-check.json；主测试记录 R79。
+
+## 最新补充：2026-09-27 / 7.9.13-eaf3m
+
+EAF上限已扩至3MiB，连续空槽分配，流式Flash上传，无整文件PSRAM缓冲；静态库位置/分区不变。目标仍20FPS。完整终末地动画2066776 B/101帧已导入ID10，原7项CRC保留，静态切换及重启恢复经USB确认，画面目视待用户。编译和应用烧录哈希校验通过；串口已释放。详见根目录首板测试记录R77、assets/wallpapers/README.md和outputs/cabadge-v7.9.13-eaf3m/basic-check.json。旧固件不能安全写入含多槽EAF的库。
+
+> 2026-09-27 EAF：源码/实板7.9.12-eaf，固定esp_lv_eaf_player 0.3.0；同一wallpaper库新增EAF类型，Flash mmap原数据、PSRAM单帧解码，目标20FPS，无新FS/分区。测试动态壁纸已导入ID6并选中；菜单/息屏暂停、返回恢复、静态切换销毁及重启恢复均由USB基本检查通过，视觉/触摸待用户反馈。RLE8/360×360/不透明/256KiB的首版素材约束及导入方式见assets/wallpapers/README.md；详细实测见R76。
+
+> 2026-09-27 统一壁纸库：源码/实板7.9.11-wallpaper。晴日/流光不再编进应用，显式tools/install_wallpapers.py导入同一wallpaper分区，可像上传图片一样删除；空库为空白背景，不自动补回。原有壁纸ID保持兼容。编译、应用烧录哈希、首次导入及新增图片删除后重启持久性已验证；后续用户库发生额外变化且补导入USB超时，已暂停操作，详见主记录R75。
+
+> 2026-09-27 电池显示：当前源码/实板7.9.10-battery，输出outputs/cabadge-v7.9.10-battery。控制中心改手机式电池轮廓与电压近似分档填充，低电红色、无效读数问号；持续≤3500mV约10秒提示一次“电量低，请充电”，≥3700mV持续30秒重新使能，提示避开转场/息屏。无精确SOC或充电状态推断，不增加任务，不改BlueMap或显示性能参数。电池策略检查、编译、应用烧录哈希及USB版本读回通过；实际放电提醒与图标目视验收待用户反馈。证据见主记录R74。
+
+> 2026-09-24 BlueMap stale-while-revalidate：当前源码/实板7.9.9-mapstale，输出outputs/cabadge-v7.9.9-mapstale。TTL到期的Tile继续作为命中立即显示，本次refresh只等真正缺失的Tile；有界后台队列在前台完成后逐张更新，同key在飞行/排队时去重，成功才原位替换，失败保留旧图。新视野缺图会让后台第二路让位，第一路不等待后台。一轮实板地图检查：LOD2过期1～3张时refresh均0 MISS、约1.0～1.1秒完成，后台记录随后成功；另一次后台仍运行时refresh约1.4秒且只用第一路。详见主记录R73；v1.1.0发布附件不变。
+
+> 2026-09-24 BlueMap 7.9.8-maprx实板采样：LOD2成功Tile约64～80 KiB/s、Pngle累计约1.87～4.18秒；LOD3四张冷Tile全成功，约57～70 KiB/s、Pngle约1.63～2.76秒。约132秒采样中BlueMap页Internal/DMA/PSRAM空闲最低50783/42419/4949828 B、始终2 lane。首次快速切换后的LOD2有两张在15379 B报DECODE invalid filter，后续同坐标成功；原因未定、未改固件。原始记录与边界见主记录R72。
+
+> 2026-09-24 BlueMap接收与采样优化：当前源码/实板7.9.8-maprx，输出outputs/cabadge-v7.9.8-maprx。TCP窗口14360、邮箱12、Wi-Fi RX BA窗口8、HTTP client接收缓冲8192；静态Wi-Fi RX缓冲10不变。非交错8-bit RGB/RGBA PNG仅对500x500源图中命中128x128输出的像素做颜色转换与回调，其余PNG流式解压、滤波和CRC保留。真实LOD2 PNG离线采样/碎片/CRC检查通过，编译及应用分区烧录哈希通过，USB读回版本正确；当时尚未做本版冷区速度或低内存实板测试，详见主记录R71。Cache、2 lane、Keep-Alive、UI与v1.1.0发布附件不变。
+
+> 2026-09-24 BlueMap大Tile修复：7.9.7-maplod，输出outputs/cabadge-v7.9.7-maplod。旧LOD2 `-1` 的可复现主因是12秒整Tile截止时间内HTTP body未读完；新版分类记录HTTP/read/timeout/connection/PNG parse/CRC/decode/size/other，时限30秒，适度提高TCP窗口、邮箱与HTTP client接收缓冲。一次LOD2/LOD3实板检查8张成功，详见主记录R70；v1.1.0发布附件不变。
+
+> 2026-09-23 BlueMap冷区历史版本：7.9.6-mapcold的20张有界LRU、旧视野后台入缓存及双槽解码流水线见R69。本轮没有改动这些机制。
+
+> 2026-09-23 BlueMap加载历史版本：7.9.4-mapfast的9张LRU、两路HTTP及实板结果见R67。
+
+> 2026-09-23 BlueMap诊断：当前源码内部版本7.9.3-mapdiag，构建输出outputs/cabadge-v7.9.3-mapdiag；新增tools/map_perf_monitor.py，使用现有USB二进制query，无UART/ESP_LOG。发布v1.1.0附件及工作台默认7.9.2-memory保持原样。实板状态见首板记录R66。
+
 > 2026-09-23 复刻树精简：65个旧报告/实验工具/废弃测试已移除。packet/Decoder独立到usb_screen/framing.py，工作台导入正常；板端重建三BIN与正式包完全相同，不重刷。软件验证见首板记录R65，历史工具从d1fe971或发布标签恢复。
 
 # CABadge 当前交接

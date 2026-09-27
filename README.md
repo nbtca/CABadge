@@ -10,6 +10,8 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 
 [下载 v1.1.0](https://github.com/nbtca/CABadge/releases/tag/v1.1.0) · [发布与升级说明](docs/RELEASE-v1.1.0.md) · [已知问题](docs/KNOWN_ISSUES.md) · [实板测试记录](首板测试记录.md)
 
+当前 `main` 源码版本为 **7.9.16-eaf-transition**，包含 BlueMap 下载/缓存改进、统一壁纸库、EAF Direct 动态壁纸与逐资源 timing、冻结当前帧的页面转场，以及 [动态壁纸转换说明](docs/EAF_TIMING.md)。上方 v1.1.0 下载链接仍对应已发布的 7.9.2-memory；最新源码构建方法见 [BUILD](docs/BUILD.md)，验证范围见 [HANDOFF](firmware-v7/HANDOFF.md)。
+
 ## 可以做什么
 
 - **展示与切换壁纸**：圆形触摸屏展示静态图片，支持浏览、选择和保存上传的壁纸。
@@ -23,7 +25,7 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 <img width="3072" height="4096" alt="微信图片_20260921232254_389_45" src="https://github.com/user-attachments/assets/352ce8c5-d4d8-4a3f-81fc-405a92101e80" />
 <img width="3072" height="4096" alt="微信图片_20260921232253_388_45" src="https://github.com/user-attachments/assets/a3a62f19-1980-4c97-b3e8-a65cfecd9afc" />
 
-GIF、BLE 传图和 OTA 尚未作为本版功能提供。完整的异常场景和长期稳定性测试仍在完善中。
+当前源码支持在电脑上将 GIF/视频转换为 EAF 动态壁纸，设备不直接播放 GIF/视频。BLE 传图和 OTA 尚未提供。完整的异常场景和长期稳定性测试仍在完善中。
 
 ## 硬件概览
 

@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 void badge_ui_connection_cache_stats(char *out,size_t size);
+void badge_ui_battery_sample(int mv);
 /* Gallery UI; the action blue comes from the existing association mark. */
 #define UI_BG 0xF4F6F8
 #define UI_SURFACE 0xFFFFFF
@@ -12,7 +13,7 @@ void badge_ui_connection_cache_stats(char *out,size_t size);
 #define UI_ACCENT 0x365B86
 #define UI_SELECTED 0xDEE8F5
 #define UI_LINE 0xDCE3EC
-#define UI_VERSION "7.9.2-memory"
+#define UI_VERSION "7.9.16-eaf-transition"
 typedef struct {
     int brightness;
     bool reduced_motion;
@@ -51,7 +52,7 @@ typedef struct {
     void (*disconnect)(bool outgoing);
 } badge_ble_actions_t;
 extern const lv_font_t font14, font18, font24, font36, font56;
-extern const lv_image_dsc_t badge_logo, badge_wallpaper, badge_ribbons;
+extern const lv_image_dsc_t badge_logo;
 void badge_ui_click_guard(lv_event_t *event);
 void badge_ui_create(lv_obj_t *parent, badge_state_t *state, void (*save)(void));
 void badge_ui_page(int index, bool animate);
@@ -79,9 +80,10 @@ bool badge_ui_is_asleep(void);
 bool badge_ui_gallery_clean(void);
 void badge_ui_set_photo(const lv_image_dsc_t *photo);
 void badge_ui_restore_photo(const lv_image_dsc_t *photo);
-void badge_ui_library(const int *ids,const lv_image_dsc_t *const *thumbs,int count);
+void badge_ui_library(const int *ids,const lv_image_dsc_t *const *thumbs,const char *const *names,int count);
 unsigned badge_ui_thumbnail_window(int ids[3]);
 void badge_ui_thumbnails_changed(void);
+bool badge_ui_loaded_eaf(const void *data,size_t size,int id);
 void badge_ui_loaded_photo(const lv_image_dsc_t *photo,int id,bool apply_now);
 void badge_ui_wifi_bind(const badge_wifi_actions_t *actions);
 void badge_ui_wifi_results(const badge_wifi_ap_t *aps,int count);

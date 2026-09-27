@@ -7,18 +7,23 @@ $env:PIP_CACHE_DIR = 'F:\CABadgeBuild\platformio\idf61\.cache\pip'
 New-Item -ItemType Directory -Force -Path $env:TEMP | Out-Null
 $firmware = Split-Path $PSScriptRoot
 $stage = 'F:\CABadgeBuild\staging\usb-screen-v7-idf61'
-$export = [IO.Path]::GetFullPath((Join-Path $firmware '..\outputs\cabadge-v7.9.2-memory'))
-if ($env:CABADGE_DISPLAY_PERF -eq '1') { $export = Join-Path $firmware '..\outputs\cabadge-v7.9.2-memory-diagnostic' }
+$export = [IO.Path]::GetFullPath((Join-Path $firmware '..\outputs\cabadge-v7.9.16-eaf-transition'))
+if ($env:CABADGE_DISPLAY_PERF -eq '1') { $export = Join-Path $firmware '..\outputs\cabadge-v7.9.16-eaf-transition-diagnostic' }
+if ($env:CABADGE_EAF_EMOTE -eq '1') { $export += '-emote-prototype' }
 New-Item -ItemType Directory -Force -Path $stage,$export,(Join-Path $stage 'src\ui'),(Join-Path $stage 'components\lvgl') | Out-Null
 Copy-Item -Path (Join-Path $PSScriptRoot 'device\*') -Destination $stage -Recurse -Force
+if ($env:CABADGE_EAF_EMOTE -eq '1') {
+    Add-Content -LiteralPath (Join-Path $stage 'src\idf_component.yml') -Value '  espressif2022/esp_emote_gfx: "3.0.5"'
+    Add-Content -LiteralPath (Join-Path $stage 'sdkconfig.defaults') -Value "`n# CONFIG_GFX_EAF_JPEG_DECODE_SUPPORT is not set`n# CONFIG_GFX_EAF_HEATSHRINK_SUPPORT is not set`n# CONFIG_GFX_FONT_FREETYPE_SUPPORT is not set"
+}
 $html = [IO.File]::ReadAllBytes((Join-Path $PSScriptRoot 'device\src\wallpaper.html'))
 [IO.File]::WriteAllText((Join-Path $stage 'src\wallpaper_html.h'), 'static const unsigned char wallpaper_html[]={' + ($html -join ',') + ',0};')
-foreach ($name in 'ui_transition_cache.c','ui_transition_cache.h','ui_transition_compositor.c','ui_transition_compositor.h','badge_ui.c','badge_ui.h','wifi_panel.c','assets.c','apps.c','apps.h','miner.c','miner.h','app_assets.c','grok.c','grok.h','grok_data.h') {
+foreach ($name in 'ui_transition_cache.c','ui_transition_cache.h','ui_transition_compositor.c','ui_transition_compositor.h','badge_ui.c','badge_ui.h','battery_policy.h','wifi_panel.c','assets.c','apps.c','apps.h','miner.c','miner.h','app_assets.c','grok.c','grok.h','grok_data.h') {
     Copy-Item -LiteralPath (Join-Path $firmware "ui\$name") -Destination (Join-Path $stage "src\ui\$name") -Force
 }
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'protocol.h') -Destination (Join-Path $stage 'src\protocol.h') -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'shake_detector.h') -Destination (Join-Path $stage 'src\shake_detector.h') -Force
-foreach ($name in 'wallpaper_store.h','wallpaper_store.c','management_protocol.h','bridge_protocol.h','perf_stats.h') { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination (Join-Path $stage "src\$name") -Force }
+foreach ($name in 'wallpaper_timing.h','wallpaper_store.h','wallpaper_store.c','management_protocol.h','bridge_protocol.h','perf_stats.h') { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination (Join-Path $stage "src\$name") -Force }
 Copy-Item -LiteralPath (Join-Path $firmware 'lv_conf.h') -Destination (Join-Path $stage 'lv_conf.h') -Force
 & robocopy (Join-Path $firmware 'vendor\lvgl-9.4.0') (Join-Path $stage 'components\lvgl\lvgl') /E /NFL /NDL /NJH /NJS /NP | Out-Null
 if ($LASTEXITCODE -ge 8) { throw 'Cannot stage LVGL sources.' }
@@ -57,11 +62,17 @@ foreach ($name in 'bootloader.bin','partitions.bin','firmware.bin','firmware.elf
 }
 Copy-Item -LiteralPath (Join-Path $env:PLATFORMIO_BUILD_DIR 'usb-screen\config\sdkconfig.h') -Destination (Join-Path $export 'sdkconfig.verified.h') -Force
 $sources = [ordered]@{}
-foreach ($name in 'ui_transition_cache.c','ui_transition_cache.h','ui_transition_compositor.c','ui_transition_compositor.h','badge_ui.c','badge_ui.h','wifi_panel.c','assets.c','apps.c','apps.h','miner.c','miner.h','app_assets.c','grok.c','grok.h','grok_data.h') {
+foreach ($name in 'ui_transition_cache.c','ui_transition_cache.h','ui_transition_compositor.c','ui_transition_compositor.h','badge_ui.c','badge_ui.h','battery_policy.h','wifi_panel.c','assets.c','apps.c','apps.h','miner.c','miner.h','app_assets.c','grok.c','grok.h','grok_data.h') {
     $sources[$name] = (Get-FileHash -LiteralPath (Join-Path $stage "src\ui\$name") -Algorithm SHA256).Hash.ToLowerInvariant()
 }
 $sources['lodepng.c'] = (Get-FileHash -LiteralPath $pngSource -Algorithm SHA256).Hash.ToLowerInvariant()
 $sources['app_service.c'] = (Get-FileHash -LiteralPath (Join-Path $stage 'src\app_service.c') -Algorithm SHA256).Hash.ToLowerInvariant()
+foreach ($name in 'wallpaper_timing.h','wallpaper_service.c','wallpaper_store.c','eaf_wallpaper.c','eaf_emote.c','eaf_validate.h') {
+    $sources[$name] = (Get-FileHash -LiteralPath (Join-Path $stage "src\$name") -Algorithm SHA256).Hash.ToLowerInvariant()
+}
+New-Item -ItemType Directory -Force (Join-Path $export 'assets\wallpapers') | Out-Null
+Copy-Item -LiteralPath (Join-Path $firmware 'assets\wallpapers\live_test.eaf') -Destination (Join-Path $export 'assets\wallpapers\live_test.eaf') -Force
+Copy-Item -LiteralPath (Join-Path $firmware 'assets\wallpapers\live_test.eaf.timing') -Destination (Join-Path $export 'assets\wallpapers\live_test.eaf.timing') -Force
 [ordered]@{
     pcb_sha256='c7c59dff5e6f2065a2157a81414d9d21c5cb1196a7b277656e15007753801a8d'
     purpose='Shared v7 LVGL UI with physical ST77916 LCD, touch and USB services'
@@ -74,10 +85,10 @@ $sources['app_service.c'] = (Get-FileHash -LiteralPath (Join-Path $stage 'src\ap
     transition_cache_copies=1
     transition_cache_l2_bytes=0
     diagnostic_cache_debug=($env:CABADGE_TRANSITION_CACHE_DEBUG -eq '1')
-    render_optimization='ESP-IDF performance -O2; Flash-backed RGB565 built-in wallpaper; opaque 180px RGB565 thumbnails cached on source change; member page uses shared transition cache only; native snap scrolling without per-frame scale'
+    render_optimization='ESP-IDF performance -O2; unified Flash wallpaper library; opaque 180px RGB565 thumbnail LRU; dynamic EAF home excluded from raster cache; other transition parameters unchanged'
     hardware_test='PENDING; not flashed or physically verified'
     product='CABadge'
-    firmware_version='7.9.2-memory'
+    firmware_version='7.9.16-eaf-transition'
     sdk='ESP-IDF 6.1; PlatformIO espressif32 7.1.3; framework-espidf 4.60100.0'
     memory='Octal PSRAM 80 MHz; data cache 32 KB / 64-byte line; PSRAM boot memtest enabled; official SPI DMA queue depth 2, maximum chunk 32 rows'
     ui='Native horizontal wallpaper paging; blue member card; interruptible navigation; down control/up functions'
@@ -87,6 +98,8 @@ $sources['app_service.c'] = (Get-FileHash -LiteralPath (Join-Path $stage 'src\ap
     radio='Wi-Fi; NimBLE peripheral CABadge plus central scan/connect; one inbound and one outbound BLE link'
     motion='SC7A20 50Hz; shake wakes only while screen asleep; no navigation or photo change'
     wallpaper='USB and direct local HTTP RGB565 upload; 31-image library in expanded 0x8f0000 partition at 0x710000; legacy migration; open direct hotspot'
+    eaf_emote_prototype=($env:CABADGE_EAF_EMOTE -eq '1')
+    eaf='esp_lv_eaf_player 0.3.0; official block decoder -> single RGB565 frame -> shared Direct Compositor worker with per-resource absolute deadlines; JXWT v1 CONSTANT/PER_FRAME metadata (legacy 33333us); frozen LVGL image only during handoff; RLE8 up to 3MiB/360 frames/24 rows per block; contiguous shared library slots; streamed Flash upload; Flash mmap source; PSRAM-only decoder allocations; software JPEG disabled'
     hashes=$hashes
     shared_ui_sources=$sources
 } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $export 'verification.json') -Encoding UTF8

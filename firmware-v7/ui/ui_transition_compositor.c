@@ -26,7 +26,9 @@ size_t ui_transition_compositor_rows(const ui_compositor_frame_t *f,int first,in
             for(unsigned i=0;i<f->count;i++)if(a>=left[i]&&b<=right[i])layer=(int)i;
             uint8_t *dst=out+((row-first)*f->width+a-f->x)*2;size_t bytes=(b-a)*2;
             if(layer>=0){const ui_compositor_layer_t *l=&f->layers[layer];
-                memcpy(dst,l->pixels+(y-l->y)*l->stride+(a-l->x)*2,bytes);copied+=bytes;
+                const uint8_t *src=l->pixels+(y-l->y)*l->stride+(a-l->x)*2;
+                memcpy(dst,src,bytes);
+                copied+=bytes;
             }else for(int x=0;x<b-a;x++)memcpy(dst+x*2,&f->background,2);
         }
     }
@@ -49,6 +51,14 @@ static atomic_bool active,cancelled,failed;
 static uint8_t *blocks[2];
 static struct {uint64_t prep,prep_max,frame_prep_max,submit,drain,lcd,lcd_max,interval,interval_max,bytes,copy,wall;uint32_t frames,attempts,transactions,skipped,errors;} perf;
 static int64_t started,last_completed;
+static ui_compositor_prepare_cb stream_prepare;
+static void *stream_context;
+static uint32_t stream_period;
+static portMUX_TYPE stream_mux=portMUX_INITIALIZER_UNLOCKED;
+static struct {uint64_t decode,decode_max,pack,submit,drain,interval,interval_max;uint32_t frames,errors,transactions;} stream_perf;
+bool ui_transition_compositor_stream_active(void){return ui_transition_compositor_active()&&stream_period!=0;}
+bool ui_transition_compositor_stream_failed(void){return atomic_load(&failed);}
+
 static int64_t perf_now(void){
 #if CABADGE_TRANSITION_COMPOSITOR_PERF
     return esp_timer_get_time();
@@ -63,31 +73,47 @@ static bool valid(const ui_compositor_frame_t *f){
     return true;
 }
 static void run(void *arg){
-    (void)arg;ui_compositor_frame_t f;
+    (void)arg;ui_compositor_frame_t f={0};TickType_t wait=portMAX_DELAY;
+    int64_t due=0,stream_last=0;
     for(;;){
-        xQueueReceive(queue,&f,portMAX_DELAY);
+        bool received=xQueueReceive(queue,&f,wait)==pdTRUE;
         if(atomic_load(&cancelled)){
             /* Only the explicit sentinel acknowledges stop. A queued ordinary
              * frame may be dequeued just before cancellation; acknowledging it
              * too would leave a stale semaphore token for the next transition. */
-            if(!f.count){physical_display_transition_drain();xSemaphoreGive(stopped);}
+            if(!f.count){physical_display_transition_drain();wait=portMAX_DELAY;xSemaphoreGive(stopped);}
             continue;
         }
+        bool streaming=stream_period!=0;
+        int64_t decoded=0,packed=0,submitted=0,drained_us=0;
+        unsigned stream_tx=0;uint32_t duration_us=stream_period;
+        if(streaming){
+            if(received){due=esp_timer_get_time();stream_last=0;}
+            if(atomic_load(&cancelled))continue; /* do not begin another decode after STOP */
+            int64_t at=esp_timer_get_time();bool ok=stream_prepare(stream_context,&duration_us);decoded=esp_timer_get_time()-at;
+            if(!ok||duration_us<1000||duration_us>60000000){atomic_store(&failed,true);portENTER_CRITICAL(&stream_mux);stream_perf.errors++;portEXIT_CRITICAL(&stream_mux);wait=portMAX_DELAY;continue;}
+        }
         esp_err_t rc=ESP_OK;uint64_t prep_before=perf.prep;int submitted_rows=0;int64_t lcd_start=0;perf.attempts++;
-        for(int y=0;y<f.height&&!atomic_load(&cancelled);y+=BLOCK_ROWS){
+        for(int y=0;y<f.height&&(streaming||!atomic_load(&cancelled));y+=BLOCK_ROWS){
             int rows=minimum(BLOCK_ROWS,f.height-y);uint8_t *block=blocks[(y/BLOCK_ROWS)&1];
             /* draw_bitmap's next address command drains the preceding transfer.
              * Alternating blocks allows packing B while DMA still reads A. */
+            int64_t clock_at=streaming?esp_timer_get_time():0;
             int64_t at=perf_now();size_t copied=ui_transition_compositor_rows(&f,y,rows,block);
+            if(streaming)packed+=esp_timer_get_time()-clock_at;
             uint64_t elapsed=perf_now()-at;perf.prep+=elapsed;if(elapsed>perf.prep_max)perf.prep_max=elapsed;
             perf.copy+=copied;at=perf_now();
             if(!lcd_start)lcd_start=at;
+            clock_at=streaming?esp_timer_get_time():0;
             rc=physical_display_transition_draw(f.x,f.y+y,f.x+f.width,f.y+y+rows,block);
+            if(streaming){submitted+=esp_timer_get_time()-clock_at;stream_tx++;}
             perf.submit+=perf_now()-at;perf.transactions++;perf.bytes+=(uint64_t)f.width*rows*2;
             if(rc!=ESP_OK)break;
             submitted_rows+=rows;
         }
+        int64_t clock_at=streaming?esp_timer_get_time():0;
         int64_t at=perf_now();esp_err_t drained=physical_display_transition_drain();perf.drain+=perf_now()-at;
+        if(streaming)drained_us=esp_timer_get_time()-clock_at;
         uint64_t prep=perf.prep-prep_before;if(prep>perf.frame_prep_max)perf.frame_prep_max=prep;
         if(lcd_start){uint64_t lcd=perf_now()-lcd_start;perf.lcd+=lcd;if(lcd>perf.lcd_max)perf.lcd_max=lcd;}
         if(rc!=ESP_OK||drained!=ESP_OK){perf.errors++;atomic_store(&failed,true);}
@@ -95,10 +121,28 @@ static void run(void *arg){
             int64_t now=perf_now();if(last_completed){uint64_t d=now-last_completed;perf.interval+=d;if(d>perf.interval_max)perf.interval_max=d;}
             last_completed=now;perf.frames++;
         }
+        wait=portMAX_DELAY;
+        if(streaming){
+            int64_t now=esp_timer_get_time();
+            portENTER_CRITICAL(&stream_mux);
+            stream_perf.decode+=decoded;if((uint64_t)decoded>stream_perf.decode_max)stream_perf.decode_max=decoded;
+            stream_perf.pack+=packed;stream_perf.submit+=submitted;stream_perf.drain+=drained_us;stream_perf.transactions+=stream_tx;
+            if(rc!=ESP_OK||drained!=ESP_OK)stream_perf.errors++;
+            else if(submitted_rows==f.height){
+                if(stream_last){uint64_t gap=now-stream_last;stream_perf.interval+=gap;if(gap>stream_perf.interval_max)stream_perf.interval_max=gap;}
+                stream_last=now;stream_perf.frames++;
+            }
+            portEXIT_CRITICAL(&stream_mux);
+            /* Absolute frame deadlines: decode/flush time is inside this duration.
+             * On overrun retain the frame sequence, rebase instead of busy catch-up. */
+            due+=duration_us;if(due<now)due=now;
+            wait=pdMS_TO_TICKS((due-now+999)/1000);if(!wait)wait=1;
+            if(atomic_load(&failed))wait=portMAX_DELAY;
+        }
     }
 }
 bool ui_transition_compositor_active(void){return atomic_load(&active);}
-bool ui_transition_compositor_begin(const ui_compositor_frame_t *f){
+static bool begin(const ui_compositor_frame_t *f,ui_compositor_prepare_cb prepare,void *context,uint32_t period){
     if(ui_transition_compositor_active()||!valid(f))return false;
     /* Preserve a DMA reserve; cache fallback remains available without staging. */
     if(heap_caps_get_free_size(MALLOC_CAP_DMA|MALLOC_CAP_INTERNAL)<16*1024)return false;
@@ -109,12 +153,25 @@ bool ui_transition_compositor_begin(const ui_compositor_frame_t *f){
     if(!physical_display_transition_acquire())return false;
     blocks[0]=physical_display_transition_buffer(0);blocks[1]=physical_display_transition_buffer(1);
     if(!blocks[0]||!blocks[1]){physical_display_transition_release();return false;}
+    stream_prepare=prepare;stream_context=context;stream_period=period;
+    portENTER_CRITICAL(&stream_mux);memset(&stream_perf,0,sizeof(stream_perf));portEXIT_CRITICAL(&stream_mux);
     memset(&perf,0,sizeof(perf));started=perf_now();last_completed=0;
     atomic_store(&cancelled,false);atomic_store(&failed,false);atomic_store(&active,true);
     xQueueOverwrite(queue,f);return true;
 }
+bool ui_transition_compositor_begin(const ui_compositor_frame_t *f){return begin(f,NULL,NULL,0);}
+bool ui_transition_compositor_stream_begin(const ui_compositor_frame_t *f,ui_compositor_prepare_cb prepare,void *context,uint32_t period){
+    return prepare&&period>=1000&&begin(f,prepare,context,period);
+}
+void ui_transition_compositor_stream_stats(char *out,size_t size){
+    portENTER_CRITICAL(&stream_mux);__typeof__(stream_perf) p=stream_perf;portEXIT_CRITICAL(&stream_mux);
+    unsigned n=p.frames?p.frames:1,intervals=p.frames>1?p.frames-1:1;
+    snprintf(out,size,"{\"completed\":%u,\"decode_us\":%llu,\"decode_max_us\":%llu,\"staging_us\":%llu,\"submit_us\":%llu,\"dma_drain_us\":%llu,\"interval_us\":%llu,\"worst_interval_us\":%llu,\"transactions\":%u,\"errors\":%u}",
+        (unsigned)p.frames,(unsigned long long)(p.decode/n),(unsigned long long)p.decode_max,(unsigned long long)(p.pack/n),
+        (unsigned long long)(p.submit/n),(unsigned long long)(p.drain/n),(unsigned long long)(p.interval/intervals),(unsigned long long)p.interval_max,(unsigned)(p.transactions/n),(unsigned)p.errors);
+}
 void ui_transition_compositor_present(const ui_compositor_frame_t *f){
-    if(!ui_transition_compositor_active()||!valid(f))return;
+    if(!ui_transition_compositor_active()||stream_period||!valid(f))return;
     if(atomic_load(&failed)){ui_transition_compositor_stop();return;}
     if(uxQueueMessagesWaiting(queue))perf.skipped++;
     xQueueOverwrite(queue,f);
@@ -127,6 +184,7 @@ void ui_transition_compositor_stop(void){
     atomic_store(&cancelled,true);ui_compositor_frame_t stop={0};xQueueOverwrite(queue,&stop);
     xSemaphoreTake(stopped,portMAX_DELAY);
     physical_display_transition_release();atomic_store(&active,false);
+    stream_prepare=NULL;stream_context=NULL;stream_period=0;
     blocks[0]=blocks[1]=NULL;perf.wall=perf_now()-started;
 #if CABADGE_TRANSITION_COMPOSITOR_PERF
     char summary[1024];ui_transition_compositor_stats(summary,sizeof(summary));ui_transition_compositor_report(summary);
@@ -141,6 +199,10 @@ void ui_transition_compositor_stats(char *out,size_t size){
         (unsigned long)perf.attempts,(unsigned long long)perf.frame_prep_max,(unsigned long long)perf.lcd,(unsigned long long)perf.lcd_max);
 }
 #else
+bool ui_transition_compositor_stream_begin(const ui_compositor_frame_t *f,ui_compositor_prepare_cb cb,void *ctx,uint32_t period){(void)f;(void)cb;(void)ctx;(void)period;return false;}
+bool ui_transition_compositor_stream_active(void){return false;}
+bool ui_transition_compositor_stream_failed(void){return false;}
+void ui_transition_compositor_stream_stats(char *out,size_t size){snprintf(out,size,"{}");}
 bool ui_transition_compositor_begin(const ui_compositor_frame_t *f){(void)f;return false;}
 void ui_transition_compositor_present(const ui_compositor_frame_t *f){(void)f;}
 void ui_transition_compositor_stop(void){}

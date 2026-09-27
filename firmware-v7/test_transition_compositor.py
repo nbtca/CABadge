@@ -39,7 +39,8 @@ while depth:
  end+=1
 branch=source[a:end]
 check=check.replace(' puts("Production compositor:', '''
- int acknowledgements=0;bool cancelled=true;
+ int acknowledgements=0,wait=0;bool cancelled=true;
+ #define portMAX_DELAY 123
  #define atomic_load(p) (*(p))
  #define physical_display_transition_drain() ((void)0)
  #define xSemaphoreGive(s) (++acknowledgements)
