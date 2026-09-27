@@ -6,11 +6,11 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 
 这里收录硬件设计、固件源码、配套电脑工具和实板测试记录，供复刻、改进和协作开发使用。
 
-**当前正式版本：v1.1.0 / 内部固件 7.9.2-memory。** 包含统一缓存位图转场、Direct Compositor 和内存优化。已完成编译、烧录及基本功能检查；长期稳定性与完整人工验收仍在完善。
+**当前正式版本：v1.2.0 / 内部固件 7.9.16-eaf-transition。** 包含统一缓存位图转场、Direct Compositor 和内存优化。已完成编译、烧录及基本功能检查；长期稳定性与完整人工验收仍在完善。
 
-[下载 v1.1.0](https://github.com/nbtca/CABadge/releases/tag/v1.1.0) · [发布与升级说明](docs/RELEASE-v1.1.0.md) · [已知问题](docs/KNOWN_ISSUES.md) · [实板测试记录](首板测试记录.md)
+[下载 v1.2.0](https://github.com/nbtca/CABadge/releases/tag/v1.2.0) · [发布与升级说明](docs/RELEASE-v1.2.0.md) · [已知问题](docs/KNOWN_ISSUES.md) · [实板测试记录](首板测试记录.md)
 
-当前 `main` 源码版本为 **7.9.16-eaf-transition**，包含 BlueMap 下载/缓存改进、统一壁纸库、EAF Direct 动态壁纸与逐资源 timing、冻结当前帧的页面转场，以及 [动态壁纸转换说明](docs/EAF_TIMING.md)。上方 v1.1.0 下载链接仍对应已发布的 7.9.2-memory；最新源码构建方法见 [BUILD](docs/BUILD.md)，验证范围见 [HANDOFF](firmware-v7/HANDOFF.md)。
+当前 `main` 源码版本为 **7.9.16-eaf-transition**，包含 BlueMap 下载/缓存改进、统一壁纸库、EAF Direct 动态壁纸与逐资源 timing、冻结当前帧的页面转场，以及 [动态壁纸转换说明](docs/EAF_TIMING.md)。上方 v1.2.0 下载链接对应同版固件；最新源码构建方法见 [BUILD](docs/BUILD.md)，验证范围见 [HANDOFF](firmware-v7/HANDOFF.md)。
 
 ## 可以做什么
 
@@ -49,14 +49,14 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 
 ### 1. 下载固件与配套硬件
 
-固件下载 [v1.1.0 Release](https://github.com/nbtca/CABadge/releases/tag/v1.1.0)，硬件生产包沿用 [v1.0 Release](https://github.com/nbtca/CABadge/releases/tag/v1.0)。固件版本与 PCB 修订独立编号，v1.1.0 没有改板。
+固件下载 [v1.2.0 Release](https://github.com/nbtca/CABadge/releases/tag/v1.2.0)，硬件生产包沿用 [v1.0 Release](https://github.com/nbtca/CABadge/releases/tag/v1.0)。固件版本与 PCB 修订独立编号，v1.2.0 没有改板。
 
 |文件|用途|
 |---|---|
-|`CABadge-v1.1.0-firmware.zip`|当前三个 BIN、安装说明、原始验证清单与校验值|
-|`CABadge-v1.1.0-debug.zip`|ELF、有效构建配置，仅排查问题时需要|
+|`CABadge-v1.2.0-firmware.zip`|当前三个 BIN、安装说明、原始验证清单与校验值|
+|`CABadge-v1.2.0-debug.zip`|ELF、有效构建配置，仅排查问题时需要|
 |`CABadge-v1.0-hardware-c7c59dff.zip`|冻结 PCB 生产包、可选钢网文件与下单说明|
-|v1.1.0 的 `Source code (zip)`|该次发布源码、硬件设计与文档|
+|v1.2.0 的 `Source code (zip)`|该次发布源码、硬件设计与文档|
 
 首次点亮直接使用发布固件，无需先搭建编译环境。下载后可通过 Release 的 `SHA256SUMS.txt` 核对附件完整性。
 
@@ -82,7 +82,7 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 
 首板换装的 J1 规格为 **FFC/FPC 0.5 mm、18P、抽屉式上接触**，换座后已成功显示。当前 [BOM](hardware/BOM-DRAFT.csv) 与 [采购表](hardware/LCSC_IMPORT_LIST.csv) 已按截图更正；厂家型号和尺寸图仍未提供，采购前须核对封装与接触方向。**v1.0 旧源码、原理图和交互式 BOM 中仍有原 J1 条目，采购请以 [J1 连接器更正](docs/J1-CONNECTOR.md) 为准。**
 
-### 5. 烧录当前固件 7.9.2-memory
+### 5. 烧录当前固件 7.9.16-eaf-transition
 
 解压固件包，按包内 `README.md` 或 [安装与构建说明](docs/BUILD.md) 操作。烧录前核对校验值和硬件版本，使用支持数据传输的 USB 线，并释放被其他程序占用的串口。
 
@@ -92,9 +92,9 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 |`partitions.bin`|`0x8000`|
 |`firmware.bin`|`0x10000`|
 
-可以用 esptool 直接烧录，也可以使用 v7 工作台的固件安装入口。使用工作台时，将固件解压到源码根目录下的 `outputs/cabadge-v7.9.2-memory/`；具体 Python 依赖见安装说明。
+可以用 esptool 直接烧录，也可以使用 v7 工作台的固件安装入口。使用工作台时，将固件解压到源码根目录下的 `outputs/cabadge-v7.9.16-eaf-transition/`；具体 Python 依赖见安装说明。
 
-烧录完成后 RESET，确认启动的固件版本为 **7.9.2-memory**。不要为了普通升级额外执行全片擦除，以免清掉已有设置和壁纸。
+烧录完成后 RESET，确认启动的固件版本为 **7.9.16-eaf-transition**。不要为了普通升级额外执行全片擦除，以免清掉已有设置和壁纸。
 
 ### 6. 检查自己的板子
 
@@ -113,7 +113,7 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 |`tools/flasher/`|共用烧录工具|
 |`docs/`|安装、构建、发布与已知问题说明|
 
-历史实验固件、原始日志和本地备份没有全部随仓库上传，旧文档中的部分研究链接仅保留为历史出处。`v1.0`、`v1.1.0` 标签固定各次发布快照；主分支继续更新。文档分类见 [仓库索引](docs/INDEX.md)。
+历史实验固件、原始日志和本地备份没有全部随仓库上传，旧文档中的部分研究链接仅保留为历史出处。`v1.0`、`v1.2.0` 标签固定各次发布快照；主分支继续更新。文档分类见 [仓库索引](docs/INDEX.md)。
 
 ## 许可
 
