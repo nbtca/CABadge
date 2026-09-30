@@ -16,11 +16,13 @@
 
 现用型号,Y1,1,40MHz CL15pF,YJX雅晶鑫,TAXM40M4ZHBCDT2T,C424432,2016 4焊盘,现用晶振,是,https://item.szlcsc.com/417823.html
 
-首板换装规格,J1,1,FFC/FPC 0.5mm 18P 抽屉式上接触,未提供,未提供,,保留原PCB封装；替换件尺寸需核对,用户提供换装商品规格截图；原C2856802不再作为现用采购料号,原封装保留；新件无厂家图纸,../docs/J1-CONNECTOR.md
+当前装配规格,J1,1,FFC/FPC 0.5mm 18P 抽屉式上接触,未提供,未提供,,保留原PCB封装；替换件尺寸需核对,2026-09-30用户再次确认沿用首板换装规格；原C2856802不作为现用采购料号,原封装保留；新件无厂家图纸,../docs/J1-CONNECTOR.md
 
 现用型号,J2,1,USB Type-C,HRO,TYPE-C-31-M-12,C165948,USB-C 16P,现用型号,是,https://jlcpcb.com/partdetail/C165948
 
-现用型号,J3,1,电池连接器 SH1.0 2P,SHOU HAN,1.0-2P WT,C2906268,SH1.0 2P 卧贴,两线电池；无NTC,是,https://item.szlcsc.com/3178978.html
+DNP,J3,0,电池连接器 SH1.0 2P（不装）,SHOU HAN,1.0-2P WT,C2906268,SH1.0 2P 卧贴,当前电池正负两线直接焊接；型号和料号仅保留原设计追溯；无需采购,是,README.md#电池与屏幕连接器
+
+整机外购件,BAT_EXT,1,电池 450mAh 42x30x4mm,未提供,未提供,,不适用；非PCB贴装件,2026-09-30用户确认；正负双线直焊；不装J3电池座,不适用,README.md#电池与屏幕连接器
 
 现用型号,SW1,1,电源拨动开关,C&K,JS102011SAQN,C221660,SPDT 侧拨SMD,现用型号,是,https://item.szlcsc.com/222090.html
 
