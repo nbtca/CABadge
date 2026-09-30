@@ -1,0 +1,3 @@
+# Preserve CAD export bytes across platforms; these are generated artifacts.
+*.STL binary
+*.jpg binary
