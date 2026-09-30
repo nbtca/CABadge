@@ -21,9 +21,10 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 - **小应用**：Grok 表情、MC 二维地图、奶蛙矿工；使用说明见 [应用](firmware-v7/APPS.md)。
 - **电脑端调试**：Windows 原生 NBTCA Badge TOOL 提供固件安装与设备联调入口。
 
-<img width="3072" height="4096" alt="微信图片_20260921232252_387_45" src="https://github.com/user-attachments/assets/523d6919-6138-4dc7-834d-ff6c042c3ed2" />
-<img width="3072" height="4096" alt="微信图片_20260921232254_389_45" src="https://github.com/user-attachments/assets/352ce8c5-d4d8-4a3f-81fc-405a92101e80" />
-<img width="3072" height="4096" alt="微信图片_20260921232253_388_45" src="https://github.com/user-attachments/assets/a3a62f19-1980-4c97-b3e8-a65cfecd9afc" />
+<img width="3072" height="4096" alt="44ebd1ad073642b58210a89b23977e9f" src="https://github.com/user-attachments/assets/51c7bce0-58fa-4813-8621-cffee2827b9e" />
+<img width="3072" height="4096" alt="2ba59d724997cc1bf2ca568b1a78c989" src="https://github.com/user-attachments/assets/a6ad94ad-bac8-474c-ab1c-10988e7616c3" />
+<img width="3072" height="4096" alt="10e58efb694e944809ac0757480d7f42" src="https://github.com/user-attachments/assets/2f7458d9-f58d-4769-8252-f9dc3a8ce983" />
+
 
 当前源码支持在电脑上将 GIF/视频转换为 EAF 动态壁纸，设备不直接播放 GIF/视频。BLE 传图和 OTA 尚未提供。完整的异常场景和长期稳定性测试仍在完善中。
 
