@@ -149,7 +149,7 @@ python -m esptool --chip esp32s3 --port COMx --baud 115200 write-flash 0x0 bootl
 
 ## 致谢
 
-感谢 **嘉立创** 和 **华秋** 提供的免费打板支持，也感谢组织成员 **m1ngsama** 提供的 Pro 账号。这些支持为本项目的开发提供了极大的帮助。
+感谢 **[嘉立创](https://www.jlc.com/)** 和 **[华秋](https://www.hqpcb.com/)** 提供的免费打板支持，也感谢组织成员 **[m1ngsama](https://github.com/m1ngsama)** 提供的 Pro 账号。这些支持为本项目的开发提供了极大的帮助。
 
 ## 许可
 
