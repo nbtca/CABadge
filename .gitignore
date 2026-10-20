@@ -51,6 +51,9 @@ simulator-settings.json
 !/hardware/bom/
 !/hardware/fabrication/
 !/hardware/enclosure/
+!/hardware/releases/
+/hardware/releases/*
+!/hardware/releases/V2_1_GEK100_20261020/
 /hardware/enclosure/*
 !/hardware/enclosure/releases/
 /hardware/enclosure/releases/*

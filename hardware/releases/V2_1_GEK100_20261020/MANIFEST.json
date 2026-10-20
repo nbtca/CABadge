@@ -1,0 +1,646 @@
+{
+  "revision": "V2.1 GEK100",
+  "snapshot_date": "2026-10-20",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 71,
+      "sha256": "4f2942cf2511f050740f849aa6a94d7810ce918b0a0c428585e2e7c828db5173"
+    },
+    {
+      "path": "easyeda/CABadge_V2_1_GEK100.epro2",
+      "bytes": 1330651,
+      "sha256": "0811503945fa6988bde69727df846c952ecb4304a703b90fe4d7bedb1699a7c5"
+    },
+    {
+      "path": "easyeda/schematic-preview.svg",
+      "bytes": 173288,
+      "sha256": "7688a5fd870b1ea78c135dfd8b704d64cd349b938c56ab071176241b56ca75e4"
+    },
+    {
+      "path": "kicad/CABadge_V2_1.kicad_dru",
+      "bytes": 1085,
+      "sha256": "98fe6bc7ca3c450788f6dd1d989ca62c0e319d30cdf4e5ec9094dd901fe5b173"
+    },
+    {
+      "path": "kicad/CABadge_V2_1.kicad_pcb",
+      "bytes": 3040408,
+      "sha256": "9d094d57cf92abfb1791aaf05bcdb3205478dee128614ef87b8f4fef2c3da4ea"
+    },
+    {
+      "path": "kicad/CABadge_V2_1.kicad_pro",
+      "bytes": 10766,
+      "sha256": "7ec0e36e5d07042fafd4fe8f3cc7987d6cd37e122b1bd110770dc72862a92d90"
+    },
+    {
+      "path": "kicad/CABadge_V2_1.kicad_sch",
+      "bytes": 136437,
+      "sha256": "10fb5a1c8215c62f440159c59e972912c1ddb54e894b4ae23d4582311470634c"
+    },
+    {
+      "path": "kicad/Controls_Test.kicad_sch",
+      "bytes": 111055,
+      "sha256": "a515e1d97dbc4d96d7563df29d98adfacc4da2ac9d6ec278aa0084ee96912e95"
+    },
+    {
+      "path": "kicad/Display_Sensor.kicad_sch",
+      "bytes": 80257,
+      "sha256": "4a0050c62bafb2997ef79912a79d7c5be49478e01764821842d5bf10e06d36ff"
+    },
+    {
+      "path": "kicad/fp-lib-table",
+      "bytes": 178,
+      "sha256": "692653ef45d4183daa24402dd5ea6431d9fa4fe88a272d79ae3ad895823f2e02"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/C0603_L1_6-W0_8-H0_8_C14663.step",
+      "bytes": 1468144,
+      "sha256": "f9918dd3888f5ca8b9c906b8cb10b9d8e335f6855513b3e235a18123ae353a78"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/C0603_L1_6-W0_8-H0_8_C1654.step",
+      "bytes": 1468144,
+      "sha256": "f9918dd3888f5ca8b9c906b8cb10b9d8e335f6855513b3e235a18123ae353a78"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/C0603_L1_6-W0_8-H0_8_C19702.step",
+      "bytes": 1468144,
+      "sha256": "f9918dd3888f5ca8b9c906b8cb10b9d8e335f6855513b3e235a18123ae353a78"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/C0603_L1_6-W0_8-H0_8_C29936.step",
+      "bytes": 1468144,
+      "sha256": "f9918dd3888f5ca8b9c906b8cb10b9d8e335f6855513b3e235a18123ae353a78"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/C0603_L1_6-W0_8-H0_8_C59461.step",
+      "bytes": 1468144,
+      "sha256": "f9918dd3888f5ca8b9c906b8cb10b9d8e335f6855513b3e235a18123ae353a78"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/C0805_L2_0-W1_3-H1_3_C15850.step",
+      "bytes": 1480675,
+      "sha256": "99acc6b12df8e17000d6e7529bddac9ea44e1240f5635482742aae256f49b5df"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/C0805_L2_0-W1_3-H1_3_C45783.step",
+      "bytes": 1480675,
+      "sha256": "99acc6b12df8e17000d6e7529bddac9ea44e1240f5635482742aae256f49b5df"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/CONN-SMD_2P-P1_00_SHOU-HAN_1_0-2P-WT_C2906268.step",
+      "bytes": 1922192,
+      "sha256": "46d3f3f1f10f5157905d864c300b82786d5f7c90600582d3bd6747199ddcc630"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/CRYSTAL-SMD_4P-L2_0-W1_6-BL_C424432.step",
+      "bytes": 1268719,
+      "sha256": "30e72ec22855fd0a183274442930a5e8627eba4a066cb4f50c375edcf49e6edb"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/D_SOD-123F.step",
+      "bytes": 42604,
+      "sha256": "132323445e3d1f9231e81c083cd88a33cd204dd8b96063bb2ed1f3ab4470c7e7"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/FILTER-SMD_L5_2-W2_0-H1_2-L_C127611.step",
+      "bytes": 1278755,
+      "sha256": "25f0f14ed86e9ee4b2c4daf8abea289711d127a962759683dcff12c08a5efbd8"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/FPC-SMD_18P-P0_50_FPC-05F-18PH20_C2856802.step",
+      "bytes": 4443817,
+      "sha256": "bf2ae09085fd042d75c883d2d59911934ad006ae7e8cb636d593e1ce9ebb0788"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/KEY-SMD_SKRTLAE010-1_C127481.step",
+      "bytes": 2060533,
+      "sha256": "51b7a240098c7decc8fcc9dac2b1a9e7a9b76764f9676e3fdf3ebb92175110c9"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/L0201-RD_C86125.step",
+      "bytes": 1430155,
+      "sha256": "ad273749d2c0ea653dc843e8089c8f58cf930484168898d8184d173138a787fb"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/L0603_L1_6-W0_8-H0_5_BEAD_C19330.step",
+      "bytes": 1387465,
+      "sha256": "37217a45ff91a07e901f84c89d522730f0830ea10d7b55693b6cfcf8faa2952e"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/L0806_L2_0-W1_6-H1_0_C269773.step",
+      "bytes": 1389863,
+      "sha256": "d93cff6143cfe3cad96bbf57e27fb4393863f8d725152dd8f9fcccf9f18299bd"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/L1008_C237552.step",
+      "bytes": 1054949,
+      "sha256": "8138acbb107cb1e7a2b7f01af82b91fa1f3e2b230e6490f46375bf9b3ba16617"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/LED0603-RD_C72043.step",
+      "bytes": 1383057,
+      "sha256": "e859d1f709b2460cc373dac1da175c8c2d9e3ff67763451e9b881eb3346f407a"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/LED0603_L1_6-W0_8-H0_6_C2286.step",
+      "bytes": 1306320,
+      "sha256": "bc7b5c80dea54180b294de289043b7a6224b18dbb4cf2b857d14ad5e3c84660e"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/LGA-12_L2_0-W2_0-H1_0-P0_50_C5126709.step",
+      "bytes": 1768933,
+      "sha256": "8f144c4a436f87effdb4b8c5b6af86837c7c5ebeb277b9dec62cf7b867d140e1"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/LQG15WZ24NH02D_C1012734.step",
+      "bytes": 43502,
+      "sha256": "8bf2ae2bbd9d8b716db21d8d7fb903fac5ba2696150c3ec2e35bcea17b208ff2"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/QFN-56_L7_0-W7_0-P0_40-TL-EP4_0_C2913194.step",
+      "bytes": 5279010,
+      "sha256": "68e24c8da81dafa322b2582d545d6c599b7cf38013b448ad9fbb398d7478773c"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/R0603_C21189.step",
+      "bytes": 1046656,
+      "sha256": "e52f17888a8c6c2cb8d56dccf25e2ed131a12a241311657622543c405e42826c"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/R0603_C23040.step",
+      "bytes": 1046656,
+      "sha256": "e52f17888a8c6c2cb8d56dccf25e2ed131a12a241311657622543c405e42826c"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/R0603_C23162.step",
+      "bytes": 1046656,
+      "sha256": "e52f17888a8c6c2cb8d56dccf25e2ed131a12a241311657622543c405e42826c"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/R0603_C23186.step",
+      "bytes": 1046656,
+      "sha256": "e52f17888a8c6c2cb8d56dccf25e2ed131a12a241311657622543c405e42826c"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/R0603_C23203.step",
+      "bytes": 1046656,
+      "sha256": "e52f17888a8c6c2cb8d56dccf25e2ed131a12a241311657622543c405e42826c"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/R0603_C23345.step",
+      "bytes": 1046656,
+      "sha256": "e52f17888a8c6c2cb8d56dccf25e2ed131a12a241311657622543c405e42826c"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/R0603_C25197.step",
+      "bytes": 1046656,
+      "sha256": "e52f17888a8c6c2cb8d56dccf25e2ed131a12a241311657622543c405e42826c"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/R0603_C25803.step",
+      "bytes": 1046656,
+      "sha256": "e52f17888a8c6c2cb8d56dccf25e2ed131a12a241311657622543c405e42826c"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/R0603_C25804.step",
+      "bytes": 1046656,
+      "sha256": "e52f17888a8c6c2cb8d56dccf25e2ed131a12a241311657622543c405e42826c"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/R0603_C25811.step",
+      "bytes": 1046656,
+      "sha256": "e52f17888a8c6c2cb8d56dccf25e2ed131a12a241311657622543c405e42826c"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/R0603_C25819.step",
+      "bytes": 1046656,
+      "sha256": "e52f17888a8c6c2cb8d56dccf25e2ed131a12a241311657622543c405e42826c"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/R0603_C4190.step",
+      "bytes": 1046656,
+      "sha256": "e52f17888a8c6c2cb8d56dccf25e2ed131a12a241311657622543c405e42826c"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/SGM62117XTGH10G_TR_C5152031_datasheet_body.wrl",
+      "bytes": 2507,
+      "sha256": "faf633a4602e78d5a294fd6c78c4d809176cda6123e7a175087ed7c5b8167319"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/SMA_L4_3-W2_6-LS5_2-RD_C8678.step",
+      "bytes": 1308366,
+      "sha256": "285e5b1c2911495b1f1f1dc19ba4f26e027f726117d08aaa565619c17d7230bb"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/SMA_L4_3-W2_6-LS5_2-RD_C89363.step",
+      "bytes": 1308366,
+      "sha256": "285e5b1c2911495b1f1f1dc19ba4f26e027f726117d08aaa565619c17d7230bb"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/SOD-123FL_L2_8-W1_8-H1_1-LS3_6_C727076.step",
+      "bytes": 1059267,
+      "sha256": "0e20c87ee0077e6cbd018111c9f7363835799e3e50e582343c4d49d4d069e890"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/SOIC-8_L5_3-W5_3-H1_9-LS7_9-P1_27_C97521.step",
+      "bytes": 3307579,
+      "sha256": "9fa02890c7a92d7c26a0182382a0505c3ed2e075ce1ecbf7c6dda419d5ca0ae1"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/SOP-8_L4_9-W3_9-H1_45-LS6_0-P1_27_C7473158.step",
+      "bytes": 3398120,
+      "sha256": "1a64d356c74ef50bb9b33d10b2c9d674bfe9363578c6430a42aeb53ccf5132ae"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/SOT-23-3_L2_9-W1_3-P1_90-LS2_3-BR-1_C426835.step",
+      "bytes": 1391671,
+      "sha256": "db565c233c7c51bb94ee7c6bfeb37c7e6cdb0b02ccc8d06c182f069d16407430"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/SOT-23-3P_L2_9-W1_3-H1_0-LS2_4-P0_95_C15127.step",
+      "bytes": 2773949,
+      "sha256": "77ba908a82212855f2a6d38b120604e403137808eaba47113ce858f1831017e5"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/SOT-23-6_L2_9-W1_6-H1_5-LS2_8-P0_95_C7519.step",
+      "bytes": 3277159,
+      "sha256": "f24d05dd87ac04518fdaed88a57d135441fe22452089387784c4deda2bc09d61"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/SW-SMD_HX-2X4X3_5CA-2_5N_C49234137.step",
+      "bytes": 643258,
+      "sha256": "5a7114b98e01a4183bd1cb85957a115b8397d30e0aab60ccbe6eb121d7dbba13"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/SW-SMD_HX-TS3643CA-0_6-250GF_C36498962.step",
+      "bytes": 1469400,
+      "sha256": "fb322274382b6680b6c882c5ba0aa3872f15a857cf9f2ccdd4161a4720c0eb10"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/SW-SMD_JS102011SAQN_C221660.step",
+      "bytes": 2185044,
+      "sha256": "0204a9ded7a94146fa09594014b26b599173e2286273931aca410f548905f081"
+    },
+    {
+      "path": "kicad/JXBadge.3dshapes/USB-C_SMD-TYPE-C-31-M-12_1_C165948.step",
+      "bytes": 3046649,
+      "sha256": "b083e67ce4d06850a2c3835a6366f4012b2def64f8f2781636381ebcaa33e9a0"
+    },
+    {
+      "path": "kicad/JXBadge.kicad_sym",
+      "bytes": 37181,
+      "sha256": "a9d185640d0ff83d45d245b8bd9aa7b59f4ef8cb9d43c60a9d2b3e91318824d3"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/0603CG240J500NT_C1654.kicad_mod",
+      "bytes": 3545,
+      "sha256": "9837dc6c4da6c59ff94a28a14e6894feecba2573f229b2b0ca7fff7d78e9d302"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/0603WAF0000T5E_C21189.kicad_mod",
+      "bytes": 2750,
+      "sha256": "2aa86407af78fa6a2af624035025da6b253e4474e2422eb1467d0c64bf9bae6a"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/0603WAF1002T5E_C25804.kicad_mod",
+      "bytes": 2750,
+      "sha256": "65120f47b28798c6ca48bd8e8169adc6a5e5d4a0fa08b36f9e04f8573a3a2b66"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/0603WAF1003T5E_C25803.kicad_mod",
+      "bytes": 2750,
+      "sha256": "8aef8bc78e5aaad17bb19b61d8388b09f10f646b0305c78262251108f85c47c2"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/0603WAF2003T5E_C25811.kicad_mod",
+      "bytes": 2750,
+      "sha256": "8b02212643c8fb2092b2be175365c36d3cb68fbe69aed151141c5bc8dc574ed6"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/0603WAF2201T5E_C4190.kicad_mod",
+      "bytes": 2747,
+      "sha256": "c86d6ebdea7dd7790a58eb709ec912f6c668fe2549b198eabf17ed5a43dc6a8c"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/0603WAF220JT5E_C23345.kicad_mod",
+      "bytes": 2750,
+      "sha256": "9d9a65a15d16f419df69a4749fec3370eb14ed7da47def48a26719875f824aea"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/0603WAF4021T5E_C23040_C23040.kicad_mod",
+      "bytes": 2764,
+      "sha256": "92262202382b1d4a199ac4fca6c94b780341c04280b02b80fd7a7e6bec4ac724"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/0603WAF4701T5E_C23162.kicad_mod",
+      "bytes": 2750,
+      "sha256": "ca2f4d5908c82a805c8beaec2a028ae751c55a68e8edce79495d9ebf5199d143"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/0603WAF4702T5E_C25819.kicad_mod",
+      "bytes": 2750,
+      "sha256": "1eff8e75909b240f236521f1d5867c152bfcdc2420b51162187be97096c6f76d"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/0603WAF5101T5E_C23186.kicad_mod",
+      "bytes": 2750,
+      "sha256": "2b861c2d884364a6ed65dafa3373f5b9011686b6e77a72fde8e628d9d6ee67cc"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/0603WAF510KT5E_C25197.kicad_mod",
+      "bytes": 2750,
+      "sha256": "c3cc2cb605691ccf08b1d95fd72aaa45bc0761d306ef6f749f0cf76c874b2de1"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/0603WAF5603T5E_C23203.kicad_mod",
+      "bytes": 2750,
+      "sha256": "4c3d456437dc911c929a9289571dbd2af06fd54fe26355beca8cc529a352350c"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/19-217_GHC-YR1S2_3T_C72043.kicad_mod",
+      "bytes": 5088,
+      "sha256": "77ee77cdfd78094aa17bdf08da548c08a0905e95addff64fba99b61a71ec4368"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/1_0-2P_WT_C2906268.kicad_mod",
+      "bytes": 3530,
+      "sha256": "666d2f459e7bca73bbd17b9318f970301ece0166f749c5477aa28b6c2e05782b"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/AO3401A_C15127.kicad_mod",
+      "bytes": 3189,
+      "sha256": "a8f1a5f5a20e3cbcc0bff80e4c4027c00745022f56ceff3433ca798d6c0fdebe"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/Battery_WirePads.kicad_mod",
+      "bytes": 3003,
+      "sha256": "c8724391fbf30f593ca8c8994dca87f4fad0a86d7ddfbb3613db909e1fddc217"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/BLM18AG601SN1D_C19330.kicad_mod",
+      "bytes": 3973,
+      "sha256": "78c82a7903be5dd95519cbcd546dc13e72748865fa3183481f60e309ff4b7ad6"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/CC0603KRX7R9BB104_C14663.kicad_mod",
+      "bytes": 3552,
+      "sha256": "ae49e76ffa6870aba5bd061827a2192d6023129e57a57ce165bc83421b543457"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/CL10A106KP8NNNC_C19702.kicad_mod",
+      "bytes": 1823,
+      "sha256": "a67145a1cdc091450381c1ae7251020e63eba8ac445a77050d76873b557638e7"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/CL10A226MQ8NRNC_C59461.kicad_mod",
+      "bytes": 1823,
+      "sha256": "e7bb45b1ffe59d44b18b8d5ba97a14c249f8eb75f0884a34496ba53fb44ceb0c"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/CL10B105KA8NNNC_C29936.kicad_mod",
+      "bytes": 3548,
+      "sha256": "17a2427bc3a6732eb663ff0609df43f24db4e8499cfb10f3f51254ed77647558"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/CL21A106KAYNNNE_C15850.kicad_mod",
+      "bytes": 3582,
+      "sha256": "e8148ad19228dd6d0f59e42378a21494595e8ba220e487d73f2f0106697fe7a8"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/CL21A226MAQNNNE_C45783.kicad_mod",
+      "bytes": 3582,
+      "sha256": "d97184527f423be47a3ff1aab5fd82a122990399af58be4375ec288bc079405a"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/DFE201610E-R47M_P2_C269773.kicad_mod",
+      "bytes": 1826,
+      "sha256": "2b11f3dd94941845ba3378ba94423c787290c972751d571eeb0437b8da8b23c1"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/DFE252012P-R47M_P2_C237552.kicad_mod",
+      "bytes": 4354,
+      "sha256": "e4a7c2c2f3929abd2d432a53360c9c41c6f5de369f93698cf4c0b0ee95280925"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/DSK34_C727076_C727076.kicad_mod",
+      "bytes": 1844,
+      "sha256": "b327753984ff70dfc51c6b3d414b2ffa6536f0200071c2ede33fa08ad874c5d8"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/ESP32-S3_R8__C2913194.kicad_mod",
+      "bytes": 12944,
+      "sha256": "ce7389c5b927c473765bce46f9781421e98386e1a2f548a655f79773bfab5500"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/FPC-05F-18PH20_C2856802.kicad_mod",
+      "bytes": 6574,
+      "sha256": "9318cc24c523a0790d775cb9b10a8f6b73178aa16a59b54e6928940205d45e6b"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/FPC_05F_18PH20.kicad_mod",
+      "bytes": 6775,
+      "sha256": "2a3fe91364b4eeb85c194cf09f5b14bc04028d59df49601b45f2bdc5a1bc412e"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/HX-2X4X3_5CA-2_5N_C49234137.kicad_mod",
+      "bytes": 4239,
+      "sha256": "626d8d31cec2af8d0d49e7ce24c0f39a721810841ff43ca5873669f372e05eab"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/HX_TS3643CA-0_6_250GF_C36498962.kicad_mod",
+      "bytes": 4774,
+      "sha256": "1709eec1f388e27ec90dca54dc2c9066b55f5ef47193a9d705e5488c971e6148"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/Inductor_744383560047HT.kicad_mod",
+      "bytes": 3134,
+      "sha256": "eba18dc68e64a7f66c31a0f86854781005720bfe2d83dfe6af97960eabbda85a"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/JS102011SAQN_C221660.kicad_mod",
+      "bytes": 4403,
+      "sha256": "8e33f9ac06c0d8d5303f7108f38de9a3970012794695219a97592a59a8e1284c"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/KH_CL0.5_H2.0_18PIN.kicad_mod",
+      "bytes": 6769,
+      "sha256": "70499d2efb38fbd9d7e8bbdd4f6ead1712f02c1cefbe633dfc2f7fe0ad63b91c"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/KT-0603R_C2286.kicad_mod",
+      "bytes": 3934,
+      "sha256": "9f9937fde22570ba1ed24836b02dc4e50739f4870c297a59e40f09e959d29c50"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/LQG15WZ24NH02D_C1012734.kicad_mod",
+      "bytes": 2522,
+      "sha256": "deef2d7e39ead11cca66a9ea41ed683aee59694b896f7d398590b77ae0ac6a9c"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/LQP03TN2N0B02D_C86125.kicad_mod",
+      "bytes": 1820,
+      "sha256": "0a3f1861036b7fc88ac8320e0e755351f66f04f15e7998ca6f51e8e5b1dfb80b"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/MMBT3904_215_C426835.kicad_mod",
+      "bytes": 3591,
+      "sha256": "8d522466f44a5389b7282446b050566592800191dfcd89ccebb35459111108af"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/NTC_WirePads.kicad_mod",
+      "bytes": 2983,
+      "sha256": "ee2271b511fee1460628a7ddcc6fa401006f5457edb6c702d62ad89fc1f1d351"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/RFANT5220110A0T.kicad_mod",
+      "bytes": 3489,
+      "sha256": "1841262a6b6a856e7a71ede78d3390c99ef3dbd7f400137f28647a47eaa90e75"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/RFANT5220110A0T_C127611.kicad_mod",
+      "bytes": 3760,
+      "sha256": "d50e9536fbb3cca07a3a7faea3bbbcbf2c985c6f549818cba3ce07f2d7841af2"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/SC7A20_LGA12.kicad_mod",
+      "bytes": 5103,
+      "sha256": "9b4f43c108f814471e4352297327e532f698d347f08da7222cc7bf7b26f27455"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/SC7A20TR_C5126709_C5126709.kicad_mod",
+      "bytes": 5319,
+      "sha256": "b8090e572356e5e3fdb653afaa69ee9da15e0e2c02317b69611fdcdc36c0f235"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/SGM62117_TDFN10.kicad_mod",
+      "bytes": 4665,
+      "sha256": "110404d6a20d5ff92e2b6e42ad3330ff066855322a1ff341d2db59a917c1f4e9"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/SGM62117XTGH10G_TR_C5152031.kicad_mod",
+      "bytes": 4871,
+      "sha256": "85a680a916dcfd9f3da3d19012fd6a47e9c6556d3d8eb84acd31ecc669bc60d0"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/SH1_0_2P_WT_C2906268.kicad_mod",
+      "bytes": 3501,
+      "sha256": "617393473394f373e179b42a0eea37f7c03e8f1cd78e1fda34c50ad3306a199d"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/SKRTLBE010.kicad_mod",
+      "bytes": 6578,
+      "sha256": "38143d9c6a5adcc965641527b5c424b249341ec8af392afd2e4d9f1b61e4989e"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/SKRTLBE010_C127481.kicad_mod",
+      "bytes": 4281,
+      "sha256": "87a4a482c3b0e58e7659f6b3826d56b2383749f378596fa458a2e6900bf49af9"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/SMAJ5_0A-E3_61_C89363.kicad_mod",
+      "bytes": 3076,
+      "sha256": "53d4a8e5a435f3f9abf662b66898f4f214efffe1a8c6d08020a44e6e6142af67"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/SMF5_0A_C151296.kicad_mod",
+      "bytes": 2124,
+      "sha256": "958f28d4ce6ed7d36fc38147fc125c32267c585f9e451f09928c46094a96a1e3"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/SS34_C8678_C8678.kicad_mod",
+      "bytes": 3065,
+      "sha256": "d86a81dd9f5598bcbdeab1134e3c7a29eee8bebdb7441b478036965bb9c5b122"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/TAXM2016.kicad_mod",
+      "bytes": 3443,
+      "sha256": "0005de5ffd4f0d612d484553160d8b3e96415a8f970a10a5a4f53cd0bc027084"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/TAXM40M4ZHBCDT2T_C424432.kicad_mod",
+      "bytes": 2815,
+      "sha256": "9618f797cf4842f06a8d8c5e1c0b8fa514b5d59db5e8ce8a9518f19a1bd57e04"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/TP4056-MS_C7473158.kicad_mod",
+      "bytes": 4516,
+      "sha256": "136dc54e12630a41f7a0a03ce7527943ef426bf7f507ae2995690acc5174f929"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/TP4056_MS_ESOP8.kicad_mod",
+      "bytes": 5295,
+      "sha256": "a6b990698a07016f1d04bd711d4c24d0adad827240b5420254616153317593c9"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/TYPE-C-31-M-12_C165948.kicad_mod",
+      "bytes": 6608,
+      "sha256": "5321d405a7654b3ba7cc3f82c9da30a0efc909472e464c742da908158feac834"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/USB_C_HRO_TYPE_C_31_M_12.kicad_mod",
+      "bytes": 8016,
+      "sha256": "0f684f874038ce83c390b6153620d9e8effda643bcaf43302707a631fa64df8b"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/USB_TestPoint_D0.4mm.kicad_mod",
+      "bytes": 1972,
+      "sha256": "27b6e8f46853d4770bc4c1559fe01172fc9a3eb7eb7b540b578bd474155aef57"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/USBLC6-2SC6_C7519.kicad_mod",
+      "bytes": 3357,
+      "sha256": "a88f2ea038399fc0b6efa17dfe89122842e606f620c42bde0a59a39a4e5d2b92"
+    },
+    {
+      "path": "kicad/JXBadge.pretty/W25Q128JVSIQTR_C97521.kicad_mod",
+      "bytes": 4239,
+      "sha256": "5c21efb4ccd20807dc39e98741926b87840139148186bd86fa1d40c609adbc82"
+    },
+    {
+      "path": "kicad/Power_Button.kicad_sch",
+      "bytes": 16936,
+      "sha256": "8d3e4724b3b5e2f88e4c5dd4f8a76ec47e2835413a61bf55facb5696d0e12147"
+    },
+    {
+      "path": "kicad/sym-lib-table",
+      "bytes": 279,
+      "sha256": "52cea1fa1b4ed4c5a62792afe524527e890e4e46228afa3510405b51d7ba3152"
+    },
+    {
+      "path": "kicad/USB_Power.kicad_sch",
+      "bytes": 127336,
+      "sha256": "4d89d9da072927044a4a39968f5fef610a4bdd32e0c6d0e20b1ef0b7ac9a7192"
+    },
+    {
+      "path": "kicad/V2.kicad_sym",
+      "bytes": 2345,
+      "sha256": "e4f5e296a02c3326fa4c7c0469b23922b6e9d73663eafdcb1396b01cbe81af75"
+    },
+    {
+      "path": "README.md",
+      "bytes": 4026,
+      "sha256": "1b70dc8338c613cc0f0d6bb7731406ae6228072fada9786fdd038f46335e83b9"
+    },
+    {
+      "path": "verification/easyeda-pcb-drc.json",
+      "bytes": 137,
+      "sha256": "e566260c63d16cfad6dde887de14999954bd69b87876333689812b7afbda6103"
+    },
+    {
+      "path": "verification/kicad-drc.json",
+      "bytes": 3562,
+      "sha256": "3a97c993870c4b900106944d9e2acdd07a1494035b7dc0298ae3bc643fc2fcda"
+    },
+    {
+      "path": "verification/kicad-erc.json",
+      "bytes": 2421,
+      "sha256": "c2d61bde3b5930d2245eb77a9022e8969ab984b23d70e92b44f1c8e5da997f01"
+    },
+    {
+      "path": "verification/summary.json",
+      "bytes": 1393,
+      "sha256": "bfafc836a6b03c5d2b53a1c8ecab28dc1bed3765685a900466d18cbee6710de0"
+    }
+  ]
+}

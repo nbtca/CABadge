@@ -1,0 +1,14 @@
+#VRML V2.0 utf8
+# SGM62117 TDFN 3x2-10L; simplified datasheet Rev.B p18 nominal body; not vendor STEP.
+Transform { translation 0.000000 0.000000 0.157480 children [ Shape { appearance Appearance { material Material { diffuseColor 0.12 0.12 0.12 } } geometry Box { size 1.181102 0.787402 0.275591 } } ] }
+Transform { translation -0.393701 -0.314961 0.019685 children [ Shape { appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } } geometry Box { size 0.098425 0.157480 0.039370 } } ] }
+Transform { translation -0.196850 -0.314961 0.019685 children [ Shape { appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } } geometry Box { size 0.098425 0.157480 0.039370 } } ] }
+Transform { translation 0.000000 -0.314961 0.019685 children [ Shape { appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } } geometry Box { size 0.098425 0.157480 0.039370 } } ] }
+Transform { translation 0.196850 -0.314961 0.019685 children [ Shape { appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } } geometry Box { size 0.098425 0.157480 0.039370 } } ] }
+Transform { translation 0.393701 -0.314961 0.019685 children [ Shape { appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } } geometry Box { size 0.098425 0.157480 0.039370 } } ] }
+Transform { translation 0.393701 0.255906 0.019685 children [ Shape { appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } } geometry Box { size 0.098425 0.275591 0.039370 } } ] }
+Transform { translation 0.196850 0.255906 0.019685 children [ Shape { appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } } geometry Box { size 0.098425 0.275591 0.039370 } } ] }
+Transform { translation 0.000000 0.177165 0.019685 children [ Shape { appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } } geometry Box { size 0.098425 0.433071 0.039370 } } ] }
+Transform { translation -0.196850 0.255906 0.019685 children [ Shape { appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } } geometry Box { size 0.098425 0.275591 0.039370 } } ] }
+Transform { translation -0.393701 0.255906 0.019685 children [ Shape { appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } } geometry Box { size 0.098425 0.275591 0.039370 } } ] }
+Transform { translation -0.444882 -0.251969 0.298031 children [ Shape { appearance Appearance { material Material { diffuseColor 0.8 0.8 0.8 } } geometry Box { size 0.086614 0.086614 0.005512 } } ] }

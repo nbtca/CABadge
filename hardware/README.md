@@ -1,3 +1,5 @@
+> **当前最新板卡（2026-10-20）：[V2.1 GEK100 双格式源文件](releases/V2_1_GEK100_20261020/README.md)。** 同时提供 KiCad 10 工程与嘉立创EDA专业版 V4 原生工程；已核对器件、引脚与 PCB 焊盘网络。GEK100 按键电源和 R40 机械避让仍待新板实测。下方保留原首板 c7c59dff 的复刻与制造基线说明。
+
 # CABadge c7c59dff 硬件复刻
 
 当前固件 v1.1.0 使用原硬件基线，未改板。KiCad 10 打开 [JXBadge_V1.kicad_pro](JXBadge_V1.kicad_pro)，保持本目录结构。

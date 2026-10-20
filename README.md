@@ -8,6 +8,8 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 
 **当前正式版本：v1.2.0 / 内部固件 7.9.16-eaf-transition。** 包含统一缓存位图转场、Direct Compositor 和内存优化。已完成编译、烧录及基本功能检查；长期稳定性与完整人工验收仍在完善。
 
+**当前最新板卡： [V2.1 GEK100（2026-10-20）](hardware/releases/V2_1_GEK100_20261020/README.md)。** 已同时上传完整的 [KiCad 工程](hardware/releases/V2_1_GEK100_20261020/kicad/CABadge_V2_1.kicad_pro)和[嘉立创EDA专业版工程](hardware/releases/V2_1_GEK100_20261020/easyeda/CABadge_V2_1_GEK100.epro2)，包括 GEK100 按键电源、R40 连接器抽屉避让，以及当前优化后的 EDA 原理图。两套 CAD 的已连接引脚和焊盘网络对比无差异，新增电源与机械适配仍待实板验证。固件与板卡修订分别编号。
+
 [下载 v1.2.0](https://github.com/nbtca/CABadge/releases/tag/v1.2.0) · [发布与升级说明](docs/RELEASE-v1.2.0.md) · [已知问题](docs/KNOWN_ISSUES.md) · [实板测试记录](首板测试记录.md)
 
 当前 `main` 源码版本为 **7.9.16-eaf-transition**，包含 BlueMap 下载/缓存改进、统一壁纸库、EAF Direct 动态壁纸与逐资源 timing、冻结当前帧的页面转场，以及 [动态壁纸转换说明](docs/EAF_TIMING.md)。上方 v1.2.0 下载链接对应同版固件；最新源码构建方法见 [BUILD](docs/BUILD.md)，验证范围见 [HANDOFF](firmware-v7/HANDOFF.md)。
@@ -40,7 +42,7 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 |充电|TP4056-MS，配合外围供电分配与充电使能电路|
 |PCB|直径 50 mm、四层板、名义板厚 1.6 mm|
 
-当前配套硬件为 **JXBadge_EVT_20260909_c7c59dff**。完整器件型号、封装及采购编号见 [BOM](hardware/BOM-DRAFT.csv)。
+最新板卡设计为 **V2.1 GEK100**，源文件与检查结果见[最新版板卡目录](hardware/releases/V2_1_GEK100_20261020/README.md)。已完成首板实测的硬件基线仍为 **JXBadge_EVT_20260909_c7c59dff**；下方复刻流程及现有 [BOM](hardware/BOM-DRAFT.csv)沿用该首板基线，V2.1 新增器件与待验收项以最新版板卡说明为准。
 
 ## 如何开始复刻
 
