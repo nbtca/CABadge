@@ -1,6 +1,6 @@
 # CABadge 当前实体固件
 
-项目发布 **v1.1.0**，内部版本 **7.9.2-memory**；发布说明、安装与已知边界以 [Release](../docs/RELEASE-v1.1.0.md) 为准。`run.cmd` 打开原生工作台，默认包为 `outputs/cabadge-v7.9.2-memory`，不是旧 USB 画面预览。
+项目发布 **v1.2.0**，内部版本 **7.9.16-eaf-transition**；发布说明、安装与已知边界以 [Release](../docs/RELEASE-v1.2.0.md) 为准。`run.cmd` 打开原生工作台，默认包为 `outputs/cabadge-v7.9.16-eaf-transition`，不是旧 USB 画面预览。
 
 ## 使用入口
 

@@ -1,6 +1,6 @@
-# v1.1.0 安装与构建
+# v1.2.0 安装与构建
 
-内部固件版本：7.9.2-memory。下载与烧录地址、旧版分区升级方法见 [发布说明](RELEASE-v1.1.0.md)。发布 ZIP 解压到 `outputs/cabadge-v7.9.2-memory/`，使三个 BIN 与 verification.json 直接位于该目录。设备已运行本版时无需重刷。
+内部固件版本：7.9.16-eaf-transition。下载与烧录地址、旧版分区升级方法见 [发布说明](RELEASE-v1.2.0.md)。发布 ZIP 解压到 `outputs/cabadge-v7.9.16-eaf-transition/`，使三个 BIN 与 verification.json 直接位于该目录。设备已运行本版时无需重刷。
 
 ## Windows 工作台
 

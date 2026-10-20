@@ -1,5 +1,6 @@
 """Native v7 firmware installation and physical-board performance sampling."""
 from pathlib import Path
+import json
 import queue
 import sys
 import threading
@@ -12,7 +13,15 @@ from app import firmware_files, flash_worker, ANSI
 from serial.tools import list_ports
 import performance_probe
 
-RELEASE = ROOT.parent / 'outputs' / 'cabadge-v7.9.2-memory'
+RELEASE = ROOT.parent / 'outputs' / 'cabadge-v7.9.16-eaf-transition'
+
+
+def release_version():
+    try:
+        return json.loads((RELEASE / 'verification.json').read_text(
+            encoding='utf-8-sig'))['firmware_version']
+    except (OSError, ValueError, KeyError, TypeError):
+        return '未准备固件包'
 
 
 def check_flash_runtime():
@@ -89,7 +98,7 @@ class Workbench:
         self.probe_button.pack(side='left')
         ttk.Checkbutton(sampling, text='包含实体屏传输', variable=self.lcd_probe).pack(side='left', padx=8)
         ttk.Combobox(preview,textvariable=self.probe_mode,values=['常规三场景','完整分析','触摸响应（8秒）'],state='readonly',width=24).pack(anchor='w',pady=(6,0))
-        ttk.Label(flash, text='CABadge  7.6.0-apps', font=('Segoe UI Semibold', 15)).pack(anchor='w')
+        ttk.Label(flash, text=f'CABadge  {release_version()}', font=('Segoe UI Semibold', 15)).pack(anchor='w')
         ttk.Label(flash, text='c7c59dff · 实体屏与 USB 服务固件').pack(anchor='w', pady=(7, 16))
         self.install = ttk.Button(flash, text='安装 v7', command=self.start_flash, style='Accent.TButton')
         self.install.pack(anchor='w')
@@ -202,7 +211,7 @@ if __name__ == '__main__':
     if '--check' in sys.argv:
         version = check_flash_runtime()
         firmware_files(RELEASE)
-        print(f'v7 firmware manifest, esptool {version}, ESP32-S3 stub: PASS; no serial port opened')
+        print(f'CABadge {release_version()} manifest, esptool {version}, ESP32-S3 stub: PASS; no serial port opened')
     else:
         root = tk.Tk()
         app = Workbench(root)

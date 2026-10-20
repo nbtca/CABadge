@@ -19,4 +19,4 @@
 
 生产目录是冻结校验集合，包含 MANIFEST 引用的制造、验证及导出源快照，整组保留。硬件库、模型、素材源与许可证均为完整复刻或维护依赖，不按文件名相似判断重复。
 
-仓库自检：`python docs/check_repository.py`；只做结构/语法/链接/制造哈希检查，不连接设备。
+仓库自检：`python docs/check_repository.py`；检查结构、语法、链接、ZIP/EDA 原生归档、受跟踪 MANIFEST 与 SHA256SUMS 清单，不连接设备。回归检查使用 `python docs/test_repository.py` 和 `python firmware-v7/test_workbench.py`，只使用临时测试文件，不打开设备或 GUI。

@@ -8,6 +8,20 @@ files = [Path(p) for p in subprocess.check_output(
 names = {p.as_posix() for p in files}
 errors = []
 counts = dict(files=len(files), markdown=0, links=0, python=0, json=0, zip=0)
+counts.update(manifest_entries=0, sha256_entries=0)
+
+
+def check_hash(parent, name, expected, size=None):
+    target = (parent / name).resolve()
+    key = target.relative_to(root).as_posix()
+    if key not in names:
+        raise ValueError(f'checksum target not tracked: {key}')
+    data = target.read_bytes()
+    if ((size is not None and len(data) != size)
+            or hashlib.sha256(data).hexdigest() != expected.lower()):
+        raise ValueError('size/SHA-256 mismatch')
+
+
 for rel in files:
     p = root / rel
     try:
@@ -19,10 +33,28 @@ for rel in files:
         if p.suffix in ('.json', '.kicad_pro', '.gbrjob'):
             json.loads(raw.decode('utf-8-sig'))
             counts['json'] += 1
-        if p.suffix == '.zip':
+        if p.suffix in ('.zip', '.epro2', '.epro'):
             with zipfile.ZipFile(p) as archive:
                 assert archive.testzip() is None, 'ZIP CRC failure'
             counts['zip'] += 1
+        if p.name == 'MANIFEST.json':
+            for item in json.loads(raw.decode('utf-8-sig'))['files']:
+                try:
+                    check_hash(p.parent, item['path'], item['sha256'], item['bytes'])
+                    counts['manifest_entries'] += 1
+                except Exception as exc:
+                    errors.append(f'{rel}: {item["path"]}: {exc}')
+        if p.name == 'SHA256SUMS.txt':
+            for line in raw.decode('utf-8-sig').splitlines():
+                if not line.strip():
+                    continue
+                try:
+                    expected, name = line.split(maxsplit=1)
+                    assert re.fullmatch(r'[0-9a-fA-F]{64}', expected), 'invalid SHA-256'
+                    check_hash(p.parent, name.removeprefix('*'), expected)
+                    counts['sha256_entries'] += 1
+                except Exception as exc:
+                    errors.append(f'{rel}: {line}: {exc}')
         if p.suffix == '.md':
             counts['markdown'] += 1
             for link in re.findall(r'\[[^\]\n]*\]\(([^)\n]+)\)', raw.decode('utf-8-sig')):
@@ -34,12 +66,6 @@ for rel in files:
                 counts['links'] += 1
     except Exception as exc:
         errors.append(f'{rel}: {exc}')
-manifest = root / 'hardware/fabrication/JXBadge_EVT_20260909_c7c59dff/MANIFEST.json'
-for item in json.loads(manifest.read_text(encoding='utf-8-sig'))['files']:
-    p = manifest.parent / item['path']
-    data = p.read_bytes()
-    if len(data) != item['bytes'] or hashlib.sha256(data).hexdigest() != item['sha256']:
-        errors.append(f'Manufacturing manifest mismatch: {p}')
 # Check the staged firmware source mapping used by usb_screen/build.ps1.
 source_dir = root / 'firmware-v7/usb_screen/device/src'
 cmake = (source_dir / 'CMakeLists.txt').read_text(encoding='utf-8')
@@ -57,4 +83,4 @@ for p in [root / 'hardware/JXBadge_V1.kicad_pcb',
 print(json.dumps(counts, ensure_ascii=False))
 if errors:
     raise SystemExit('\n'.join(errors))
-print('PASS: syntax, tracked local Markdown targets, ZIP CRC, manufacturing hashes, firmware sources and local models.')
+print('PASS: syntax, tracked local Markdown targets, ZIP/native archive CRC, all manifests/SHA-256 lists, firmware sources and local models.')
