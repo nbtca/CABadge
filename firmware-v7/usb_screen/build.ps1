@@ -7,9 +7,13 @@ $env:PIP_CACHE_DIR = 'F:\CABadgeBuild\platformio\idf61\.cache\pip'
 New-Item -ItemType Directory -Force -Path $env:TEMP | Out-Null
 $firmware = Split-Path $PSScriptRoot
 $stage = 'F:\CABadgeBuild\staging\usb-screen-v7-idf61'
-$export = [IO.Path]::GetFullPath((Join-Path $firmware '..\outputs\cabadge-v7.9.16-eaf-transition'))
-if ($env:CABADGE_DISPLAY_PERF -eq '1') { $export = Join-Path $firmware '..\outputs\cabadge-v7.9.16-eaf-transition-diagnostic' }
+$export = [IO.Path]::GetFullPath((Join-Path $firmware '..\outputs\cabadge-v7.9.23-timetiles-fix'))
+if ($env:CABADGE_DISPLAY_PERF -eq '1') { $export = Join-Path $firmware '..\outputs\cabadge-v7.9.23-timetiles-fix-diagnostic' }
 if ($env:CABADGE_EAF_EMOTE -eq '1') { $export += '-emote-prototype' }
+if ($env:CABADGE_EAF_INTERPOLATE -eq '1') {
+    if ($env:CABADGE_EAF_EMOTE -eq '1') { throw 'Interpolation experiment requires the Direct EAF backend.' }
+    $export = Join-Path $firmware '..\outputs\cabadge-eaf-interpolation-20261006\firmware'
+}
 New-Item -ItemType Directory -Force -Path $stage,$export,(Join-Path $stage 'src\ui'),(Join-Path $stage 'components\lvgl') | Out-Null
 Copy-Item -Path (Join-Path $PSScriptRoot 'device\*') -Destination $stage -Recurse -Force
 if ($env:CABADGE_EAF_EMOTE -eq '1') {
@@ -18,9 +22,11 @@ if ($env:CABADGE_EAF_EMOTE -eq '1') {
 }
 $html = [IO.File]::ReadAllBytes((Join-Path $PSScriptRoot 'device\src\wallpaper.html'))
 [IO.File]::WriteAllText((Join-Path $stage 'src\wallpaper_html.h'), 'static const unsigned char wallpaper_html[]={' + ($html -join ',') + ',0};')
-foreach ($name in 'ui_transition_cache.c','ui_transition_cache.h','ui_transition_compositor.c','ui_transition_compositor.h','badge_ui.c','badge_ui.h','battery_policy.h','wifi_panel.c','assets.c','apps.c','apps.h','miner.c','miner.h','app_assets.c','grok.c','grok.h','grok_data.h') {
+foreach ($name in 'ui_transition_cache.c','ui_transition_cache.h','ui_transition_compositor.c','ui_transition_compositor.h','badge_ui.c','badge_ui.h','heart_rate.h','battery_policy.h','wifi_panel.c','assets.c','apps.c','apps.h','motion.h','miner.c','miner.h','app_assets.c','grok.c','grok.h','grok_data.h','fluidbox.c','fluidbox.h','timetiles.c','timetiles.h') {
     Copy-Item -LiteralPath (Join-Path $firmware "ui\$name") -Destination (Join-Path $stage "src\ui\$name") -Force
 }
+Copy-Item -LiteralPath (Join-Path $firmware 'ui\timetiles') -Destination (Join-Path $stage 'src\ui') -Recurse -Force
+Copy-Item -LiteralPath (Join-Path $firmware 'ui\fluidbox') -Destination (Join-Path $stage 'src\ui') -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'protocol.h') -Destination (Join-Path $stage 'src\protocol.h') -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'shake_detector.h') -Destination (Join-Path $stage 'src\shake_detector.h') -Force
 foreach ($name in 'wallpaper_timing.h','wallpaper_store.h','wallpaper_store.c','management_protocol.h','bridge_protocol.h','perf_stats.h') { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination (Join-Path $stage "src\$name") -Force }
@@ -62,12 +68,21 @@ foreach ($name in 'bootloader.bin','partitions.bin','firmware.bin','firmware.elf
 }
 Copy-Item -LiteralPath (Join-Path $env:PLATFORMIO_BUILD_DIR 'usb-screen\config\sdkconfig.h') -Destination (Join-Path $export 'sdkconfig.verified.h') -Force
 $sources = [ordered]@{}
-foreach ($name in 'ui_transition_cache.c','ui_transition_cache.h','ui_transition_compositor.c','ui_transition_compositor.h','badge_ui.c','badge_ui.h','battery_policy.h','wifi_panel.c','assets.c','apps.c','apps.h','miner.c','miner.h','app_assets.c','grok.c','grok.h','grok_data.h') {
+foreach ($name in 'ui_transition_cache.c','ui_transition_cache.h','ui_transition_compositor.c','ui_transition_compositor.h','badge_ui.c','badge_ui.h','heart_rate.h','battery_policy.h','wifi_panel.c','assets.c','apps.c','apps.h','motion.h','miner.c','miner.h','app_assets.c','grok.c','grok.h','grok_data.h','fluidbox.c','fluidbox.h','timetiles.c','timetiles.h') {
     $sources[$name] = (Get-FileHash -LiteralPath (Join-Path $stage "src\ui\$name") -Algorithm SHA256).Hash.ToLowerInvariant()
+}
+foreach ($name in 'sim.c','sim.h','render.c','render.h','config.h','display.h','input.h','LICENSE','NOTICE') {
+    $sources["fluidbox/$name"] = (Get-FileHash -LiteralPath (Join-Path $stage "src\ui\fluidbox\$name") -Algorithm SHA256).Hash.ToLowerInvariant()
+}
+foreach ($name in 'core.c','core.h','raster.c','raster.h','effects.c','effects.h','readable_timer_helpers.c','readable_timer_helpers.h','timetiles_assets.h') {
+    $sources["timetiles/$name"] = (Get-FileHash -LiteralPath (Join-Path $stage "src\ui\timetiles\$name") -Algorithm SHA256).Hash.ToLowerInvariant()
 }
 $sources['lodepng.c'] = (Get-FileHash -LiteralPath $pngSource -Algorithm SHA256).Hash.ToLowerInvariant()
 $sources['app_service.c'] = (Get-FileHash -LiteralPath (Join-Path $stage 'src\app_service.c') -Algorithm SHA256).Hash.ToLowerInvariant()
-foreach ($name in 'wallpaper_timing.h','wallpaper_service.c','wallpaper_store.c','eaf_wallpaper.c','eaf_emote.c','eaf_validate.h') {
+$sources['motion_service.c'] = (Get-FileHash -LiteralPath (Join-Path $stage 'src\motion_service.c') -Algorithm SHA256).Hash.ToLowerInvariant()
+$sources['ble_service.c'] = (Get-FileHash -LiteralPath (Join-Path $stage 'src\ble_service.c') -Algorithm SHA256).Hash.ToLowerInvariant()
+$sources['management.c'] = (Get-FileHash -LiteralPath (Join-Path $stage 'src\management.c') -Algorithm SHA256).Hash.ToLowerInvariant()
+foreach ($name in 'main.c','eaf_wallpaper.h','wallpaper_timing.h','wallpaper_service.c','wallpaper_store.c','eaf_wallpaper.c','eaf_emote.c','eaf_validate.h') {
     $sources[$name] = (Get-FileHash -LiteralPath (Join-Path $stage "src\$name") -Algorithm SHA256).Hash.ToLowerInvariant()
 }
 New-Item -ItemType Directory -Force (Join-Path $export 'assets\wallpapers') | Out-Null
@@ -88,17 +103,21 @@ Copy-Item -LiteralPath (Join-Path $firmware 'assets\wallpapers\live_test.eaf.tim
     render_optimization='ESP-IDF performance -O2; unified Flash wallpaper library; opaque 180px RGB565 thumbnail LRU; dynamic EAF home excluded from raster cache; other transition parameters unchanged'
     hardware_test='PENDING; not flashed or physically verified'
     product='CABadge'
-    firmware_version='7.9.16-eaf-transition'
+    firmware_version='7.9.23-timetiles-fix'
     sdk='ESP-IDF 6.1; PlatformIO espressif32 7.1.3; framework-espidf 4.60100.0'
     memory='Octal PSRAM 80 MHz; data cache 32 KB / 64-byte line; PSRAM boot memtest enabled; official SPI DMA queue depth 2, maximum chunk 32 rows'
     ui='Native horizontal wallpaper paging; blue member card; interruptible navigation; down control/up functions'
     management='P0 management protocol; UI v7: direct local management without access code; local HTTP status/control; BLE GATT Status/Control; no BLE image transfer'
     display='360x360 RGB565; semantic bridge v1; legacy USB pixel transport removed'
     actual_lcd='ST77916 QSPI 40MHz; two RGB565 PARTIAL draw buffers in PSRAM; shared 16-row internal staging prevents large automatic bounce buffers; official esp_lvgl_adapter 0.7.1 / esp_lcd_st77916 2.0.2, CS-held esp_lcd SPI DMA, queue depth 2 / 32-row chunks; GUI core1 priority4; TE unconnected, tear-free not guaranteed; CST816 touch; BL GPIO1 squared 0..1023/1024; CHG_ALLOW GPIO38 LOW'
-    radio='Wi-Fi; NimBLE peripheral CABadge plus central scan/connect; one inbound and one outbound BLE link'
-    motion='SC7A20 50Hz; shake wakes only while screen asleep; no navigation or photo change'
+    timetiles='TimeTiles reconstructed core/assets; large 330px clock composition, 11x13 grid/9px tiles; quiet back/more chrome, date calibration shortcut and modes/settings in More; larger countdown; exclusive effects canvas/full-height Code Rain; double cycles six saved themes, canvas/title triple resolves before double, shared shake event drives TIME TILES FLY; six alarms/private NVS/shared SNTP unchanged; no new task/display path; user manual physical acceptance pending'
+    fluidbox='MIT eMUQI upstream 75d0c076; five modes/1200 particles; round 360px geometry; PSRAM BSS + two native RGB565 images; background sim/render tasks, GUI-owned presentation; SC7A20 acceleration only, no angular inertia; TE unavailable; USB type41/sub12 mode0..4/reset5'
+    radio='Wi-Fi; existing NimBLE peripheral CABadge plus one outbound central; standard Heart Rate 0x180D/0x2A37 Notify, 30s stale, selected-peer reconnect 2..30s; no new task or BLE framework; physical test pending'
+    motion='SC7A20 400Hz +/-2g HR/BDU, GUI reads latest XYZ at ~100Hz; hardware XYZ double-click 250mg, pulse80ms, interval80-480ms, click-only HPF; stable face-down1200ms sleep/face-up300ms auto-wake; Grok tilt/temporary shake and gravity-ball; no page/photo change; physical axes/flip passed, revised real-shell taps pending acceptance'
     wallpaper='USB and direct local HTTP RGB565 upload; 31-image library in expanded 0x8f0000 partition at 0x710000; legacy migration; open direct hotspot'
     eaf_emote_prototype=($env:CABADGE_EAF_EMOTE -eq '1')
+    eaf_interpolation_experiment=($env:CABADGE_EAF_INTERPOLATE -eq '1')
+    eaf_interpolation='Experimental USB type41/sub11 OFF/ON, nonpersistent and default OFF; adjacent native RGB565 50/50 channel blend; 2 extra PSRAM source frames (518400 bytes); one inserted frame per gap, split original duration, no version bump; source decode/blend/staging/submit/final-DMA/work and completed-frame interval measured separately; no optical flow, unchanged 40MHz QSPI/16-row DMA path'
     eaf='esp_lv_eaf_player 0.3.0; official block decoder -> single RGB565 frame -> shared Direct Compositor worker with per-resource absolute deadlines; JXWT v1 CONSTANT/PER_FRAME metadata (legacy 33333us); frozen LVGL image only during handoff; RLE8 up to 3MiB/360 frames/24 rows per block; contiguous shared library slots; streamed Flash upload; Flash mmap source; PSRAM-only decoder allocations; software JPEG disabled'
     hashes=$hashes
     shared_ui_sources=$sources

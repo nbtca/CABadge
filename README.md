@@ -8,7 +8,7 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 
 **当前正式版本：v1.2.0 / 内部固件 7.9.16-eaf-transition。** 包含统一缓存位图转场、Direct Compositor 和内存优化。已完成编译、烧录及基本功能检查；长期稳定性与完整人工验收仍在完善。
 
-**最新测试版本：[v1.3.0-rc.1 / 7.9.23-timetiles-fix](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)。** 新增 TimeTiles、FluidBox、标准 BLE 心率和动作控制更新；已确认烧录与启动，最新手势、画面及长期稳定性仍待实屏验收。本次只发布二进制和调试附件，开发源码尚未并入 `main`。
+**最新测试版本：[v1.3.0-rc.1 / 7.9.23-timetiles-fix](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)。** 新增 TimeTiles、FluidBox、标准 BLE 心率和动作控制更新；已确认烧录与启动，最新手势、画面及长期稳定性仍待实屏验收。对应开发源码现已同步到 `main`，构建方法见 [BUILD](docs/BUILD.md)。
 
 **当前最新板卡： [V2.1 GEK100（2026-10-20）](hardware/releases/V2_1_GEK100_20261020/README.md)。** 已同时上传完整的 [KiCad 工程](hardware/releases/V2_1_GEK100_20261020/kicad/CABadge_V2_1.kicad_pro)和[嘉立创EDA专业版工程](hardware/releases/V2_1_GEK100_20261020/easyeda/CABadge_V2_1_GEK100.epro2)，包括 GEK100 按键电源、R40 连接器抽屉避让，以及当前优化后的 EDA 原理图。EDA 已更新为 2026-10-20 16:04 的人工优化原理图导出，PCB 设计记录与上一快照一致；新版原理图 DRC 和跨格式网表待复核，新增电源与机械适配仍待实板验证。固件与板卡修订分别编号。
 
@@ -16,7 +16,7 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 
 [下载 v1.2.0](https://github.com/nbtca/CABadge/releases/tag/v1.2.0) · [发布与升级说明](docs/RELEASE-v1.2.0.md) · [已知问题](docs/KNOWN_ISSUES.md) · [实板测试记录](首板测试记录.md)
 
-当前 `main` 源码版本为 **7.9.16-eaf-transition**，包含 BlueMap 下载/缓存改进、统一壁纸库、EAF Direct 动态壁纸与逐资源 timing、冻结当前帧的页面转场，以及 [动态壁纸转换说明](docs/EAF_TIMING.md)。上方 v1.2.0 下载链接对应同版固件；最新源码构建方法见 [BUILD](docs/BUILD.md)，验证范围见 [HANDOFF](firmware-v7/HANDOFF.md)。
+当前 `main` 源码版本为 **7.9.23-timetiles-fix**，已同步本地最新的 TimeTiles 时钟、FluidBox 五模式流体、标准 BLE 心率及 SC7A20 动作控制，保留 BlueMap、统一壁纸库、EAF Direct 与逐资源 timing。源码包含所需资源、测试及第三方来源说明；构建方法见 [BUILD](docs/BUILD.md)，功能与验证范围见 [APPS](firmware-v7/APPS.md) 和 [HANDOFF](firmware-v7/HANDOFF.md)。v1.2.0 正式固件仍为 7.9.16，最新测试附件为 v1.3.0-rc.1 / 7.9.23。
 
 ## 可以做什么
 
@@ -24,7 +24,7 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 - **展示协会名片**：内置计协风格名片页面。
 - **连接与管理设备**：Wi-Fi、BLE 连接管理，通过 USB 或本地 HTTP 上传壁纸。
 - **基础交互**：触摸操作、亮度设置、息屏后摇晃唤醒，以及可选 FPS 显示。
-- **小应用**：Grok 表情、MC 二维地图、奶蛙矿工；使用说明见 [应用](firmware-v7/APPS.md)。
+- **小应用**：Grok 表情、MC 二维地图、奶蛙矿工、重力小球、FluidBox 和 TimeTiles；使用说明见 [应用](firmware-v7/APPS.md)。
 - **电脑端调试**：Windows 原生 NBTCA Badge TOOL 提供固件安装与设备联调入口。
 
 <img width="3072" height="4096" alt="44ebd1ad073642b58210a89b23977e9f" src="https://github.com/user-attachments/assets/51c7bce0-58fa-4813-8621-cffee2827b9e" />
@@ -70,7 +70,7 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 
 V2.1 KiCad 资料请从 `main` 分支的 **Code → Download ZIP** 下载整套仓库并保留目录结构；EDA 用户可下载上述 `.epro2`，在专业版“导入专业版”入口导入。两种格式不自动同步，最新 EDA 原理图重新优化过（kicad未变）方便阅读，具体范围见板卡说明。
 
-首次点亮直接使用所选 Release 的固件附件，无需先搭建编译环境，下载后核对 `SHA256SUMS.txt`。**v1.3.0-rc.1 自动生成的 `Source code (zip)` 不是 7.9.23 的对应源码；公开 `main` 固件源码仍为 7.9.16，最新板卡资料以 `main` 的上述目录为准。**
+首次点亮直接使用所选 Release 的固件附件，无需先搭建编译环境，下载后核对 `SHA256SUMS.txt`。**自行编译 7.9.23 请下载 `main` 分支源码，并按 [BUILD](docs/BUILD.md)恢复依赖。v1.3.0-rc.1 标签自动生成的 `Source code (zip)` 仍是该标签发布时的旧源码快照；最新源码此次同步到 `main`，没有移动既有标签。**
 
 ### 2. 核对器件与装配
 

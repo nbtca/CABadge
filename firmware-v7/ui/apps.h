@@ -12,7 +12,9 @@ void badge_apps_open(void);
 void badge_apps_hide(void);
 void badge_apps_bind(bool (*map)(const map_view_t*),void (*save)(uint64_t,int));
 void badge_apps_saved(uint64_t dex,int best);
-void badge_apps_launch(int app); /* 0 list, 1 map, 2 playable miner, 3 Grok */
+void badge_apps_launch(int app); /* 0 list, 1 map, 2 playable miner, 3 Grok, 4 gravity ball, 5 FluidBox, 6 TimeTiles */
+bool badge_apps_clock_sync(void); /* Shared nonblocking SNTP start; GUI or existing map worker. */
+void badge_apps_motion(float x,float y,bool shake,bool available);
 void badge_apps_status(int *page,int *loading,int *error,int *tiles,int *players);
 bool badge_apps_map_accepting(void);
 bool badge_apps_map_result(map_result_t *result); /* consumes pixels on GUI task */

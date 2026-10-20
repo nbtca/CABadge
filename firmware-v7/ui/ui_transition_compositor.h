@@ -14,6 +14,8 @@ typedef struct {
     uint16_t background;
     uint8_t count;
     ui_compositor_layer_t layers[UI_COMPOSITOR_LAYERS];
+    uint32_t source_decode_us,blend_us;
+    bool interpolated;
 } ui_compositor_frame_t;
 /* GUI task only. stop joins the worker before any source can be freed. */
 bool ui_transition_compositor_begin(const ui_compositor_frame_t *frame);
@@ -27,7 +29,7 @@ size_t ui_transition_compositor_rows(const ui_compositor_frame_t *f,int first,in
 /* GUI owns start/stop; prepare runs ONLY on the existing compositor worker.
  * One mutable source is safe: prepare follows completion of the previous DMA.
  * Callback/context lifetime extends through stop acknowledgement. */
-typedef bool (*ui_compositor_prepare_cb)(void *context,uint32_t *duration_us);
+typedef bool (*ui_compositor_prepare_cb)(void *context,ui_compositor_frame_t *frame,uint32_t *duration_us);
 bool ui_transition_compositor_stream_begin(const ui_compositor_frame_t *frame,ui_compositor_prepare_cb prepare,void *context,uint32_t period_us);
 bool ui_transition_compositor_stream_active(void);
 bool ui_transition_compositor_stream_failed(void);

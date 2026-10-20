@@ -3,6 +3,7 @@
 #include "lvgl.h"
 #include <stdbool.h>
 #include <stddef.h>
+#include "heart_rate.h"
 void badge_ui_connection_cache_stats(char *out,size_t size);
 void badge_ui_battery_sample(int mv);
 /* Gallery UI; the action blue comes from the existing association mark. */
@@ -13,7 +14,7 @@ void badge_ui_battery_sample(int mv);
 #define UI_ACCENT 0x365B86
 #define UI_SELECTED 0xDEE8F5
 #define UI_LINE 0xDCE3EC
-#define UI_VERSION "7.9.16-eaf-transition"
+#define UI_VERSION "7.9.23-timetiles-fix"
 typedef struct {
     int brightness;
     bool reduced_motion;
@@ -37,13 +38,14 @@ typedef struct {
     char name[33];
     uint8_t address[6],address_type;
     int rssi;
-    bool connectable;
+    bool connectable,heart_rate;
 } badge_ble_device_t;
 typedef struct {
     bool enabled,advertising,scanning,connecting,inbound,outbound;
     int error,count;
     char inbound_address[18],outbound_address[18],outbound_name[33];
     badge_ble_device_t devices[BADGE_BLE_DEVICES];
+    badge_heart_rate_t heart_rate;
 } badge_ble_info_t;
 typedef struct {
     void (*enable)(bool enabled);

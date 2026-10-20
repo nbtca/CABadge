@@ -1,15 +1,15 @@
 # 复刻资料索引
 
-当前项目版本 v1.1.0，内部固件 7.9.2-memory，硬件 c7c59dff。主分支保留硬件复刻、板端构建、安装使用和必要维护资料。
+当前 `main` 固件源码为 **7.9.23-timetiles-fix**；最新测试附件为 [v1.3.0-rc.1](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)，正式固件仍为 v1.2.0 / 7.9.16。最新板卡为 V2.1 GEK100、配套 V11 外壳，旧首板 c7c59dff 继续保留实测基线含义。
 
 |任务|入口|
 |---|---|
 |从哪里开始|[项目说明](../README.md)|
-|下载和烧录|[发布与升级](RELEASE-v1.1.0.md)|
+|下载和烧录|[v1.2.0 正式版](RELEASE-v1.2.0.md)、[v1.3.0-rc.1 测试版](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)|
 |自行编译|[BUILD](BUILD.md)|
 |采购、PCB 与装配|[硬件](../hardware/README.md)、[J1 更正](J1-CONNECTOR.md)、[焊接检查](../焊接与分阶段上电检查_首板.md)|
 |使用无线与壁纸|[板端服务](../firmware-v7/usb_screen/README.md)|
-|使用应用|[APPS](../firmware-v7/APPS.md)、[GROK](../firmware-v7/GROK.md)|
+|使用应用|[APPS](../firmware-v7/APPS.md)、[GROK](../firmware-v7/GROK.md)、[FluidBox](../firmware-v7/FLUIDBOX.md)、[TimeTiles](../firmware-v7/TIMETILES.md)、[BLE 心率](../firmware-v7/HEART_RATE.md)|
 |界面维护|[DESIGN](../DESIGN.md)、[架构](../UI_ARCHITECTURE_V7.md)、[交接](../firmware-v7/HANDOFF.md)|
 |验证、限制及许可|[首板记录](../首板测试记录.md)、[已知问题](KNOWN_ISSUES.md)、[第三方来源](THIRD_PARTY.md)|
 

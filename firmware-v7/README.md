@@ -1,6 +1,6 @@
 # CABadge 当前实体固件
 
-项目发布 **v1.2.0**，内部版本 **7.9.16-eaf-transition**；发布说明、安装与已知边界以 [Release](../docs/RELEASE-v1.2.0.md) 为准。`run.cmd` 打开原生工作台，默认包为 `outputs/cabadge-v7.9.16-eaf-transition`，不是旧 USB 画面预览。
+当前 `main` 源码为 **7.9.23-timetiles-fix**，含 TimeTiles、FluidBox、标准 BLE 心率和动作控制；新功能操作及待测项见 [APPS](APPS.md) 和 [HANDOFF](HANDOFF.md)。正式安装包仍为 **v1.2.0 / 7.9.16-eaf-transition**，发布说明见 [Release](../docs/RELEASE-v1.2.0.md)。`run.cmd` 打开原生工作台，默认包为 `outputs/cabadge-v7.9.16-eaf-transition`，不是旧 USB 画面预览。
 
 ## 使用入口
 
@@ -26,6 +26,6 @@ BlueMap 使用 16 KiB HTTP + Pngle 流式采样，不创建整张 RGBA；用户�
 
 最小检查：`test_map_stream.py`、`test_physical_display.py`、`test_transition_compositor.py`。实板检查记录见 [R63/R64](../首板测试记录.md)，软件检查不能替代目视验收。
 
-旧桌面模拟器、像素投屏与废弃测试已移出当前树。保留三个当前内存/DMA/compositor 最小检查和工作台 USB framing 自检；历史工具可从 Git 旧提交恢复。板端构建仍使用 `usb_screen/build.ps1`。
+旧桌面模拟器、像素投屏与废弃测试已移出当前树。保留内存/DMA/compositor、地图、EAF、动作、心率、FluidBox、TimeTiles 检查和工作台 USB framing 自检；历史工具可从 Git 旧提交恢复。板端构建仍使用 `usb_screen/build.ps1`。
 
 [当前交接与历史演进](HANDOFF.md) · [文档索引](../docs/INDEX.md) · [已知限制](../docs/KNOWN_ISSUES.md)

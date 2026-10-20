@@ -11,7 +11,11 @@
 #include "display_perf.h"
 #include "frame_trace.h"
 #include "map_perf.h"
+#include "motion_service.h"
+#include "ui/fluidbox.h"
+#include "ui/timetiles.h"
 #include "wallpaper_service.h"
+#include "eaf_wallpaper.h"
 #include "management.h"
 #include "driver/gpio.h"
 #include "driver/usb_serial_jtag.h"
@@ -42,8 +46,6 @@ void wifi_service_init(badge_state_t *state);
 void wifi_service_poll(void);
 void ble_service_init(badge_state_t *state);
 void ble_service_poll(void);
-void motion_service_init(void);
-void motion_service_poll(void);
 static jx_parser_t *parser;
 static uint8_t *packet;
 static char *usb_snapshot;
@@ -264,8 +266,8 @@ static void receive(uint8_t type,const uint8_t *data,size_t n,void *ctx){
                 if(map_perf_query(jx_u32(data+1),usb_snapshot,8192))send_packet(42,usb_snapshot,strlen(usb_snapshot));
                 return;
             }
-            /* Local diagnostic controls: no credentials or persistent setting changes. */
-            if(n==2&&data[0]==1&&data[1]<=12){monitor_scene=-1;badge_ui_probe_restore(data[1]);}
+            /* Local diagnostics; TimeTiles options persist only in its own namespace. */
+            if(n==2&&data[0]==1&&data[1]<=15){monitor_scene=-1;badge_ui_probe_restore(data[1]);}
             else if(n==2&&data[0]==2&&data[1]<=1)badge_ui_perf_enable(data[1]);
             else if(n==2&&data[0]==4&&(data[1]>=1&&data[1]<=15)){monitor_remaining=20;monitor_scene=data[1];monitor_epoch=tick();badge_ui_sleep(false);}
             else if(n==2&&data[0]==3&&data[1]<=15){monitor_remaining=0;monitor_scene=data[1];monitor_epoch=tick();badge_ui_sleep(false);}
@@ -274,10 +276,16 @@ static void receive(uint8_t type,const uint8_t *data,size_t n,void *ctx){
             else if(n==2&&data[0]==6&&data[1]>=10&&data[1]<=100){monitor_period=data[1]*10u;badge_ui_probe_period(monitor_period);}
 #endif
 #if CABADGE_TRANSITION_CACHE_DEBUG
-            else if(n==2&&data[0]==7&&data[1]<=12){monitor_scene=-1;badge_ui_page(data[1],true);}
+            else if(n==2&&data[0]==7&&data[1]<=13){monitor_scene=-1;badge_ui_page(data[1],true);}
             else if(n==2&&data[0]==8&&data[1]<6){extern void badge_ui_probe_panel(int,bool);monitor_scene=-1;badge_ui_probe_panel(data[1]/2,data[1]%2);}
             else if(n==2&&data[0]==9)ui_transition_cache_debug_dump();
 #endif
+#if CABADGE_EAF_INTERPOLATE
+            else if(n==2&&data[0]==11&&data[1]<=1){if(data[1]&&state.reduced_motion)return;eaf_wallpaper_interpolate(data[1]);}
+#endif
+            else if(n==2&&data[0]==12&&data[1]<5)fluidbox_mode(data[1]);
+            else if(n==2&&data[0]==12&&data[1]==5)fluidbox_reset();
+            else if(n>=2&&data[0]==13){if(!timetiles_command(data+1,n-1))return;}
             else if(n!=0)return;
             if(runtime_snapshot(usb_snapshot,8192))send_packet(42,usb_snapshot,strlen(usb_snapshot));
             return;
@@ -427,7 +435,7 @@ void app_main(void){
     lv_timer_set_period(lv_display_get_refr_timer(display),16);
     lv_display_add_event_cb(display,probe_event,LV_EVENT_ALL,NULL);
     lv_obj_remove_style_all(lv_screen_active());lv_obj_remove_flag(lv_screen_active(),LV_OBJ_FLAG_SCROLLABLE);
-    badge_ui_create(lv_screen_active(),&state,save_settings);management_init(&state);battery_init();motion_service_init();wifi_service_init(&state);ble_service_init(&state);wallpaper_service_init();app_service_init();
+    badge_ui_create(lv_screen_active(),&state,save_settings);management_init(&state);battery_init();motion_service_init();wifi_service_init(&state);ble_service_init(&state);wallpaper_service_init();app_service_init();timetiles_init();
     physical_touch_init();
     esp_lv_adapter_touch_config_t input=ESP_LV_ADAPTER_TOUCH_DEFAULT_CONFIG(display,&touch_handle);
     input.callbacks.custom_touch_read=adapter_touch;

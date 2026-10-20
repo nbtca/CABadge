@@ -17,6 +17,10 @@ static lv_image_dsc_t picture;
 static void (*go_back)(void);
 static float current[2][48][2],start[2][48][2],target[2][48][2];
 static float gaze_x,gaze_y,want_x,want_y;
+static float tilt_x,tilt_y,active_tilt_x,active_tilt_y;
+static uint32_t motion_at,reaction_at;
+static int return_emotion;
+static bool motion_valid,reacting;
 static uint32_t changed,next_shape,next_blink,blink_at,last_tick,activity,seed=0x912381;
 static int emotion,pool_index,theme;
 static bool held,moved,long_press,full_redraw;
@@ -77,6 +81,7 @@ static void eye(float pts[48][2],uint16_t ink){
 void grok_tick(uint32_t now){
     if(!image||!pixels)return;
     float dt=clamp((now-last_tick)*.001f,0,.05f);last_tick=now;
+    if(reacting&&now-reaction_at>=1500){reacting=false;select_emotion(return_emotion,now);}
     if(!held&&now-activity>60000&&emotion!=0)select_emotion(0,now);
     const emotion_t *def=&emotions[emotion];
     if(!held&&(int32_t)(now-next_shape)>=0){pool_index=(pool_index+1)%def->count;shape(def->pool[pool_index],now);next_shape=now+random_between(3000,6000);}
@@ -84,7 +89,12 @@ void grok_tick(uint32_t now){
     float open=1;
     if(blink_at&&now-blink_at<180)open=fmaxf(.04f,fabsf((now-blink_at)/90.f-1));
     if(emotion==0||emotion==6)open=.06f;
-    if(!held){want_x=emotion==0?0:7*sinf(now*.0006f);want_y=emotion==0?0:3*sinf(now*.00043f);}
+    if(!held){
+        bool tilt=motion_valid&&now-motion_at<250;
+        want_x=emotion==0?0:tilt?clamp(tilt_x*28,-18,18):7*sinf(now*.0006f);
+        want_y=emotion==0?0:tilt?clamp(tilt_y*24,-14,14):3*sinf(now*.00043f);
+        if(reacting){want_x+=5*sinf((now-reaction_at)*.035f);want_y+=3*cosf((now-reaction_at)*.027f);}
+    }
     float follow=1-expf(-12*dt);gaze_x+=(want_x-gaze_x)*follow;gaze_y+=(want_y-gaze_y)*follow;
     float t=clamp((now-changed)/(float)(def->transition?def->transition:500),0,1);t=t*t*(3-2*t);
     memcpy(pixels,base,SIDE*SIDE*2);
@@ -107,10 +117,19 @@ void grok_tick(uint32_t now){
         lv_obj_invalidate_area(image,&dirty);}
     previous_eyes=changed_area;
 }
+void grok_motion(float x,float y,bool shake,bool available){
+    uint32_t now=lv_tick_get();
+    if(image&&available&&!held&&fabsf(x-active_tilt_x)+fabsf(y-active_tilt_y)>.12f){
+        active_tilt_x=x;active_tilt_y=y;activity=now;if(emotion==0)select_emotion(2,now);
+    }
+    tilt_x=x;tilt_y=y;motion_valid=available;motion_at=now;
+    if(!image||held||!shake||reacting)return;
+    return_emotion=emotion;reacting=true;reaction_at=now;select_emotion(11,now);
+}
 static void touch(lv_event_t *event){
     lv_event_code_t code=lv_event_get_code(event);lv_indev_t *in=lv_indev_active();if(!in)return;
     lv_point_t p;lv_indev_get_point(in,&p);uint32_t now=lv_tick_get();
-    if(code==LV_EVENT_PRESSED){held=true;moved=false;long_press=false;press=p;activity=now;if(emotion==0)select_emotion(1,now);}
+    if(code==LV_EVENT_PRESSED){if(reacting){reacting=false;select_emotion(return_emotion,now);}held=true;moved=false;long_press=false;press=p;activity=now;if(emotion==0)select_emotion(1,now);}
     if(code==LV_EVENT_PRESSING){if(abs(p.x-press.x)+abs(p.y-press.y)>8)moved=true;want_x=clamp((p.x-180)*.18f,-18,18);want_y=clamp((p.y-180)*.15f,-14,14);activity=now;}
     if(code==LV_EVENT_LONG_PRESSED&&!moved){long_press=true;if(lv_obj_has_flag(controls,LV_OBJ_FLAG_HIDDEN))lv_obj_remove_flag(controls,LV_OBJ_FLAG_HIDDEN);else lv_obj_add_flag(controls,LV_OBJ_FLAG_HIDDEN);}
     if(code==LV_EVENT_RELEASED){held=false;activity=now;if(!moved&&!long_press)select_emotion(emotion+1,now);}
@@ -118,6 +137,7 @@ static void touch(lv_event_t *event){
 }
 static void action(lv_event_t *e){
     int id=(int)(intptr_t)lv_event_get_user_data(e);activity=lv_tick_get();
+    if(reacting){reacting=false;select_emotion(return_emotion,activity);}
     if(id==0){if(go_back)go_back();return;}
     if(id==3){theme=!theme;background();lv_obj_set_style_text_color(name_label,theme?lv_color_white():lv_color_hex(0x191919),0);return;}
     select_emotion(emotion+(id==1?-1:1),activity);
@@ -131,7 +151,7 @@ static void control(const char *text,int x,int y,int w,int id){
 void grok_close(void){
     if(image){lv_obj_delete(image);image=NULL;}
     if(controls){lv_obj_delete(controls);controls=NULL;}
-    lv_image_cache_drop(&picture);free(base);free(pixels);base=pixels=NULL;picture.data=NULL;held=false;go_back=NULL;
+    lv_image_cache_drop(&picture);free(base);free(pixels);base=pixels=NULL;picture.data=NULL;held=reacting=false;go_back=NULL;
 }
 bool grok_open(lv_obj_t *parent,void (*back)(void)){
     grok_close();
@@ -148,6 +168,7 @@ bool grok_open(lv_obj_t *parent,void (*back)(void)){
     control("<",70,280,48,1);control(">",242,280,48,2);control("返回",100,24,70,0);control("配色",190,24,70,3);
     name_label=lv_label_create(controls);lv_obj_set_style_text_font(name_label,&font18,0);lv_obj_set_style_text_color(name_label,lv_color_white(),0);lv_obj_set_width(name_label,120);lv_obj_set_style_text_align(name_label,LV_TEXT_ALIGN_CENTER,0);lv_obj_set_pos(name_label,120,292);
     lv_obj_add_flag(controls,LV_OBJ_FLAG_HIDDEN);go_back=back;gaze_x=gaze_y=want_x=want_y=0;held=moved=long_press=false;
+    active_tilt_x=tilt_x;active_tilt_y=tilt_y;
     uint32_t now=lv_tick_get();last_tick=now;select_emotion(2,now);memcpy(current,target,sizeof(current));memcpy(start,target,sizeof(start));grok_tick(now);return true;
 }
 

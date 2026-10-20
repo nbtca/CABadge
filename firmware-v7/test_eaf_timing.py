@@ -27,12 +27,19 @@ except ValueError:
     pass
 
 production = (root/'usb_screen/device/src/eaf_wallpaper.c').read_text()
-callback = re.search(r'static bool next_frame\([^}]+\}', production).group()
+start = production.index('static bool next_frame(')
+end = production.index('{', start) + 1
+depth = 1
+while depth:
+    depth += (production[end] == '{') - (production[end] == '}')
+    end += 1
+callback = production[start:end]
 scheduler = (root/'ui/ui_transition_compositor.c').read_text()
 deadline = re.search(r'due\+=duration_us;[^\n]+', scheduler).group()
 code = r'''
 #include "wallpaper_store.h"
 #include "wallpaper_timing.h"
+#include "ui_transition_compositor.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdatomic.h>
@@ -40,7 +47,8 @@ static uint8_t flash[WALL_LIBRARY_END];
 bool wall_read(uint32_t o,void *p,size_t n){assert(o+n<=sizeof(flash));memcpy(p,flash+o,n);return true;}
 bool wall_write(uint32_t o,const void *p,size_t n){assert(o+n<=sizeof(flash));const uint8_t *b=p;for(size_t i=0;i<n;i++){assert((flash[o+i]&b[i])==b[i]);flash[o+i]&=b[i];}return true;}
 bool wall_erase(uint32_t o,size_t n){assert(o+n<=sizeof(flash));memset(flash+o,255,n);return true;}
-typedef struct {const uint8_t *timing;atomic_uint frame;unsigned frames;bool first;} eaf_backend_t;
+typedef struct {const uint8_t *timing;atomic_uint frame;unsigned frames;bool first;struct {const uint8_t *data;} picture;} eaf_backend_t;
+static int64_t esp_timer_get_time(void){return 0;} /* Scheduler logic, not physical timing. */
 static bool decode(eaf_backend_t *b,unsigned i,bool native){atomic_store(&b->frame,i);return true;}
 ''' + callback + r'''
 int main(void){
@@ -61,15 +69,15 @@ int main(void){
  assert(wall_library_reserve(records,4096,crc,&pending)&&wall_library_publish(records,&pending));
  assert(wall_library_scan(records)&&records[pending.slot].timing_crc==0); /* legacy */
  eaf_backend_t b={.timing=meta,.frames=3,.first=true};
- int64_t due=0;uint32_t duration_us=0;
+ int64_t due=0;uint32_t duration_us=0;ui_compositor_frame_t frame={0};
  unsigned periods[]={80000,180000,420000};
  for(unsigned i=0;i<6;i++){
-  assert(next_frame(&b,&duration_us)&&atomic_load(&b.frame)==i%3&&duration_us==periods[i%3]);
+  assert(next_frame(&b,&frame,&duration_us)&&atomic_load(&b.frame)==i%3&&duration_us==periods[i%3]);
   int64_t start=due,now=start+25000; /* decode + DMA costs are inside deadline */
   DEADLINE
   assert(due==start+periods[i%3]);
  }
- b.first=true;assert(next_frame(&b,&duration_us)&&atomic_load(&b.frame)==2&&duration_us==420000); /* resume */
+ b.first=true;assert(next_frame(&b,&frame,&duration_us)&&atomic_load(&b.frame)==2&&duration_us==420000); /* resume */
  puts("PASS: metadata CRC/count/bounds, Flash reboot/delete/legacy, frame duration, absolute deadlines/resume");
 }
 '''
@@ -77,6 +85,6 @@ code = code.replace('META', ','.join(map(str, metadata))).replace('DEADLINE', de
 (out/'check.c').write_text(code)
 env = dict(os.environ, TEMP='F:/CABadgeBuild/temp', TMP='F:/CABadgeBuild/temp', ZIG_GLOBAL_CACHE_DIR='F:/CABadgeBuild/zig-cache')
 exe = out/'check.exe'
-subprocess.run([str(root/'.venv/Lib/site-packages/ziglang/zig.exe'), 'cc', '-O2', '-UNDEBUG', '-I'+str(root/'usb_screen'),
+subprocess.run([str(root/'.venv/Lib/site-packages/ziglang/zig.exe'), 'cc', '-O2', '-UNDEBUG', '-I'+str(root/'ui'), '-I'+str(root/'usb_screen'),
                 str(out/'check.c'), str(root/'usb_screen/wallpaper_store.c'), '-o', str(exe)], env=env, check=True)
 subprocess.run([str(exe)], check=True)

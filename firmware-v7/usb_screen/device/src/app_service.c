@@ -43,6 +43,14 @@ static TaskHandle_t worker;
 static atomic_uint wanted;
 static atomic_int wanted_world,wanted_lod,wanted_x,wanted_z;
 static atomic_bool map_busy;
+static bool clock_available;
+static atomic_bool clock_started;
+bool badge_apps_clock_sync(void){
+    char ip[24];wifi_wallpaper_address(ip,sizeof(ip));
+    if(!clock_available||!*ip)return false;
+    if(!atomic_exchange(&clock_started,true)&&esp_netif_sntp_start()!=ESP_OK){atomic_store(&clock_started,false);return false;}
+    return true;
+}
 static bool pending_request;
 static map_job_t pending_job;
 static map_cache_t cache;
@@ -480,8 +488,7 @@ static void fetch_map(map_result_t *out,map_perf_t *perf){
     char ip[24];wifi_wallpaper_address(ip,sizeof(ip));
     if(!*ip){out->error=1;return;}
     if(time(NULL)<1700000000){
-        static bool sntp_started;if(!sntp_started){esp_sntp_config_t config=ESP_NETIF_SNTP_DEFAULT_CONFIG("ntp.aliyun.com");sntp_started=esp_netif_sntp_init(&config)==ESP_OK;}
-        if(!sntp_started||esp_netif_sntp_sync_wait(pdMS_TO_TICKS(10000))!=ESP_OK){out->error=2;return;}
+        if(!badge_apps_clock_sync()||esp_netif_sntp_sync_wait(pdMS_TO_TICKS(10000))!=ESP_OK){out->error=2;return;}
     }
     if(stale(v->serial))return;
     if(!scratch)scratch=heap_caps_calloc(1,sizeof(*scratch),MALLOC_CAP_SPIRAM|MALLOC_CAP_8BIT);
@@ -589,6 +596,8 @@ static void save_game(uint64_t dex,int best){
     game_save_t save={dex,best};xQueueOverwrite(saves,&save);xTaskNotifyGive(worker);
 }
 void app_service_init(void){
+    esp_sntp_config_t clock_config=ESP_NETIF_SNTP_DEFAULT_CONFIG("ntp.aliyun.com");clock_config.start=false;
+    clock_available=esp_netif_sntp_init(&clock_config)==ESP_OK;
     map_perf_init();
     requests=xQueueCreate(1,sizeof(map_job_t));results=xQueueCreate(1,sizeof(map_reply_t));saves=xQueueCreate(1,sizeof(game_save_t));
     uint64_t dex=0;int32_t best=0;nvs_handle_t h;

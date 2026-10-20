@@ -2,6 +2,9 @@
 #include "lvgl.h"
 #include <stddef.h>
 #include <stdbool.h>
+#if CABADGE_EAF_INTERPOLATE
+bool eaf_wallpaper_interpolate(bool enabled);
+#endif
 bool eaf_wallpaper_valid(const void *data,size_t size);
 bool eaf_wallpaper_set(lv_obj_t *parent,const void *data,size_t size);
 void eaf_wallpaper_clear(void);

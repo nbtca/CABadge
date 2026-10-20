@@ -1,4 +1,8 @@
 #include "management.h"
+#include "motion_service.h"
+#include "ui/fluidbox.h"
+#include "ui/timetiles.h"
+#include "ui/apps.h"
 #include "eaf_wallpaper.h"
 #include "wallpaper_service.h"
 #include "esp_timer.h"
@@ -81,6 +85,10 @@ static void make_snapshot(void){
     if(state->battery_mv>=0)number(root,"battery_mv",state->battery_mv);else cJSON_AddNullToObject(root,"battery_mv");
     number(root,"brightness",state->brightness);boolean(root,"asleep",badge_ui_is_asleep());boolean(root,"reduced_motion",state->reduced_motion);
     string(root,"brightness_scope","backlight");
+    char motion[512];motion_service_info(motion,sizeof(motion));cJSON_AddItemToObject(root,"motion",cJSON_Parse(motion));
+    char fluid[512];fluidbox_info(fluid,sizeof(fluid));cJSON_AddItemToObject(root,"fluidbox",cJSON_Parse(fluid));
+    char time_tiles[1024];timetiles_info(time_tiles,sizeof(time_tiles));cJSON_AddItemToObject(root,"timetiles",cJSON_Parse(time_tiles));
+    int app,loading,error,tiles,players;badge_apps_status(&app,&loading,&error,&tiles,&players);number(root,"app_page",app);
     cJSON *wifi=cJSON_AddObjectToObject(root,"wifi");
     boolean(wifi,"enabled",state->wifi_enabled);boolean(wifi,"scanning",scanning);boolean(wifi,"connecting",connecting);
     boolean(wifi,"connected",state->wifi_connected==1);string(wifi,"ssid",state->wifi_connected==1?state->wifi_ssid:"");
@@ -95,8 +103,19 @@ static void make_snapshot(void){
         badge_ble_device_t *d=&ble.devices[i];cJSON *item=cJSON_CreateObject();char addr[13];
         for(int j=0;j<6;j++)snprintf(addr+j*2,3,"%02x",d->address[j]);
         string(item,"name",d->name);string(item,"address",addr);number(item,"type",d->address_type);
-        number(item,"rssi",d->rssi);boolean(item,"connectable",d->connectable);cJSON_AddItemToArray(devices,item);
+        number(item,"rssi",d->rssi);boolean(item,"connectable",d->connectable);boolean(item,"heart_rate",d->heart_rate);cJSON_AddItemToArray(devices,item);
     }
+    badge_heart_rate_t hr;ble_service_heart_rate_snapshot(&hr);
+    cJSON *heart=cJSON_AddObjectToObject(root,"heart_rate");
+    string(heart,"status",badge_hr_status_name(hr.status));boolean(heart,"connected",hr.status==BADGE_HR_CONNECTED);
+    boolean(heart,"stale",hr.stale);string(heart,"device_name",hr.device_name);string(heart,"device_address",hr.device_address);
+    number(heart,"rssi",hr.rssi);number(heart,"error",hr.error);
+    if(!hr.stale)number(heart,"bpm",hr.bpm);else cJSON_AddNullToObject(heart,"bpm");
+    if(hr.notifications){
+        cJSON_AddNumberToObject(heart,"last_update_ms",hr.last_update_ms);
+        cJSON_AddNumberToObject(heart,"age_ms",(uint32_t)(esp_timer_get_time()/1000)-hr.last_update_ms);
+    }else {cJSON_AddNullToObject(heart,"last_update_ms");cJSON_AddNullToObject(heart,"age_ms");}
+    cJSON_AddNumberToObject(heart,"notifications",hr.notifications);cJSON_AddNumberToObject(heart,"invalid_packets",hr.invalid_packets);
     cJSON *wall=cJSON_AddObjectToObject(root,"wallpaper");number(wall,"phase",phase);number(wall,"error",wall_error);number(wall,"received",received);
     number(wall,"selected",state->wallpaper_index);number(wall,"capacity",31);
     int ids[31];const char *names[31];uint32_t crcs[31],timings[31];uint8_t types[31];int n=wallpaper_catalog(ids,names,crcs,types,timings);
@@ -106,7 +125,7 @@ static void make_snapshot(void){
             if(names[i])cJSON_AddStringToObject(titles,key,names[i]);
             cJSON_AddNumberToObject(timing_checks,key,timings[i]);cJSON_AddNumberToObject(checks,key,crcs[i]);cJSON_AddStringToObject(kinds,key,types[i]?"EAF":"STATIC");}
     }
-    char eaf[768];eaf_wallpaper_info(eaf,sizeof(eaf));cJSON_AddItemToObject(wall,"eaf",cJSON_Parse(eaf));
+    char eaf[2304];eaf_wallpaper_info(eaf,sizeof(eaf));cJSON_AddItemToObject(wall,"eaf",cJSON_Parse(eaf));
     uint32_t generation=0,size=0,crc=0;
     if(wallpaper_resource_info(&generation,&size,&crc)){cJSON_AddNumberToObject(wall,"generation",generation);cJSON_AddNumberToObject(wall,"size",size);cJSON_AddNumberToObject(wall,"crc",crc);}
     uint8_t bytes[MG_STATUS_BYTES]={MG_VERSION};

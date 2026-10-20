@@ -5,13 +5,16 @@
 #include "ui_transition_cache.h"
 extern void badge_panel_cancel(lv_obj_t*);
 #include "grok.h"
+#include "fluidbox.h"
+#include "timetiles.h"
+#include "motion.h"
 #include "src/misc/cache/lv_cache.h"
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-enum { APP_LIST,APP_MAP,APP_MENU,APP_GAME,APP_DEX,APP_GROK };
+enum { APP_LIST,APP_MAP,APP_MENU,APP_GAME,APP_DEX,APP_GROK,APP_GRAVITY,APP_FLUIDBOX,APP_TIMETILES };
 static lv_obj_t *panel,*parent,*map_image,*map_note,*map_position,*players[12];
 static lv_obj_t *score_label,*time_label,*game_items[32],*chain,*hook,*actor,*overlay,*overlay_title,*overlay_button;
 static lv_point_precise_t rope[2];
@@ -26,6 +29,12 @@ static int game_score=-1,game_seconds=-1,game_target=-1,game_level=-1,map_error,
 static bool visible,map_loading,dragging;
 static lv_point_t drag_start,drag_image_start;
 static uint32_t previous_tick,map_at;
+static lv_obj_t *ball,*goal,*ball_note;
+static gravity_ball_t gravity_game;
+static float tilt_x,tilt_y,zero_x,zero_y;
+static bool motion_available;
+static uint32_t motion_at;
+static int ball_note_score=-2;
 static float map_drag_x,map_drag_z;
 static const float map_scale[]={1,2,5,10,25,50};
 static const char *world_names[]={"主世界","下界","末地"};
@@ -51,11 +60,11 @@ static void save(void){if(game.save_pending&&save_game){save_game(game.dex,game.
 static void cancel_map(void){view.serial++;if(request_map){map_view_t cancel=view;cancel.world=-1;request_map(&cancel);}map_loading=false;}
 static void clear_panel(int mode){
     ui_transition_cache_forget(panel);
-    bool dynamic=mode==APP_MAP||mode==APP_GAME||mode==APP_GROK;
+    bool dynamic=mode==APP_MAP||mode==APP_GAME||mode==APP_GROK||mode==APP_GRAVITY||mode==APP_FLUIDBOX||mode==APP_TIMETILES;
     ui_transition_cache_pause(dynamic);
     if(dynamic)ui_memory_pressure_set(UI_MEMORY_HIGH);
     if(screen==APP_MAP)cancel_map();
-    save();grok_close();
+    save();grok_close();fluidbox_close();timetiles_close();
     lv_obj_clean(panel);lv_image_cache_drop(&map_picture);free((void*)map_picture.data);memset(&map_picture,0,sizeof(map_picture));
     screen=mode;dragging=false;map_image=NULL;game_mode=-1;
     lv_obj_set_style_bg_color(panel,lv_color_hex(mode==APP_MAP?0x101820:mode==APP_GAME?0xEBD5A4:UI_BG),0);
@@ -66,12 +75,46 @@ static void show_grok(void){
     clear_panel(APP_GROK);lv_obj_set_style_bg_color(panel,lv_color_hex(0x101820),0);
     if(!grok_open(panel,show_list)){heading("Grok");label(panel,"Out of memory",80,150,200,&font18,UI_TEXT);}
 }
-static void choose(lv_event_t *e){int id=(int)(intptr_t)lv_event_get_user_data(e);if(id==0)show_map();else if(id==1)show_menu();else show_grok();}
+static void ball_reset(lv_event_t *e){
+    int id=(int)(intptr_t)lv_event_get_user_data(e);
+    if(id){if(motion_available&&lv_tick_get()-motion_at<250){zero_x=tilt_x;zero_y=tilt_y;}}
+    else gravity_game=(gravity_ball_t){0};
+}
+static void show_gravity(void){
+    clear_panel(APP_GRAVITY);heading("重力小球");gravity_game=(gravity_ball_t){0};zero_x=zero_y=0;
+    lv_obj_t *field=box(panel,75,90,210,210,0xE7EDF4,105);lv_obj_remove_flag(field,LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_style_border_color(field,lv_color_hex(0xB8C9DB),0);lv_obj_set_style_border_width(field,2,0);
+    goal=box(panel,0,0,38,38,0xC6DDCC,19);lv_obj_remove_flag(goal,LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_style_border_color(goal,lv_color_hex(0x568568),0);lv_obj_set_style_border_width(goal,2,0);
+    ball=box(panel,170,185,20,20,UI_ACCENT,10);lv_obj_remove_flag(ball,LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_style_border_color(ball,lv_color_hex(0x8CA8CB),0);lv_obj_set_style_border_width(ball,2,0);
+    ball_note=label(panel,"倾斜控制 · 停在圆圈内",67,77,226,&font14,UI_MUTED);
+    button(panel,"重来",100,304,74,36,ball_reset,0);button(panel,"校准",186,304,74,36,ball_reset,1);
+    previous_tick=lv_tick_get();ball_note_score=-2;
+}
+static void fluid_control(lv_event_t *e){
+    if((int)(intptr_t)lv_event_get_user_data(e))fluidbox_next();
+    else fluidbox_reset();
+}
+static void show_fluidbox(void){
+    clear_panel(APP_FLUIDBOX);lv_obj_set_style_bg_color(panel,lv_color_hex(0),0);
+    bool opened=fluidbox_open(panel);heading("FluidBox");
+    if(opened){button(panel,"重来",100,304,74,36,fluid_control,0);button(panel,"切换",186,304,74,36,fluid_control,1);}
+    else label(panel,"Out of memory",80,150,200,&font18,UI_TEXT);
+}
+static void show_timetiles(void){
+    clear_panel(APP_TIMETILES);
+    if(!timetiles_open(panel,show_list)){heading("TimeTiles");label(panel,"Out of memory",80,150,200,&font18,UI_TEXT);}
+}
+static void choose(lv_event_t *e){int id=(int)(intptr_t)lv_event_get_user_data(e);if(id==0)show_map();else if(id==1)show_menu();else if(id==2)show_grok();else if(id==3)show_gravity();else if(id==4)show_fluidbox();else show_timetiles();}
 static void show_list(void){
     clear_panel(APP_LIST);heading("应用");
-    button(panel,"MC 实时地图",60,100,240,54,choose,0);
-    button(panel,"奶蛙矿工",60,168,240,54,choose,1);
-    button(panel,"Grok",60,236,240,54,choose,2);
+    button(panel,"MC 实时地图",60,77,240,36,choose,0);
+    button(panel,"奶蛙矿工",60,117,240,36,choose,1);
+    button(panel,"Grok",60,157,240,36,choose,2);
+    button(panel,"重力小球",60,197,240,36,choose,3);
+    button(panel,"FluidBox",60,237,240,36,choose,4);
+    button(panel,"TimeTiles",60,277,240,36,choose,5);
     ui_transition_cache_request(panel);
 }
 static void request_view(void){
@@ -236,8 +279,23 @@ static void game_frame(float dt){
 }
 static void tick(lv_timer_t *timer){
     (void)timer;uint32_t now=lv_tick_get(),elapsed=now-previous_tick;previous_tick=now;
+    fluidbox_tick(visible&&screen==APP_FLUIDBOX&&!badge_ui_is_asleep());
+    timetiles_poll(visible&&screen==APP_TIMETILES&&!badge_ui_is_asleep());
     if(!visible||badge_ui_is_asleep())return;
     if(screen==APP_GROK)grok_tick(now);
+    if(screen==APP_GRAVITY){
+        bool available=motion_available&&now-motion_at<250;
+        if(available)gravity_ball_step(&gravity_game,tilt_x-zero_x,tilt_y-zero_y,elapsed/1000.f);
+        lv_obj_set_pos(ball,(int)(170+gravity_game.x),(int)(185+gravity_game.y));
+        lv_obj_set_pos(goal,161+gravity_goals[gravity_game.goal][0],176+gravity_goals[gravity_game.goal][1]);
+        lv_obj_set_style_bg_color(goal,lv_color_hex(gravity_game.held_ms?0xA7CBB1:0xC6DDCC),0);
+        int score=available?(int)gravity_game.score:-1;
+        if(score!=ball_note_score){
+            ball_note_score=score;
+            if(available)lv_label_set_text_fmt(ball_note,"得分 %u · 停在圆圈内",gravity_game.score);
+            else lv_label_set_text(ball_note,"传感器未就绪 · 小球已暂停");
+        }
+    }
     if(screen==APP_GAME)game_frame(fminf(elapsed/1000.f,.25f));
     if(screen==APP_MAP&&!dragging&&!map_loading&&now-map_at>=10000)request_view();
 }
@@ -249,13 +307,17 @@ void badge_apps_open(void){
 void badge_apps_hide(void){
     if(!visible){badge_panel_cancel(panel);return;}
     if(screen==APP_LIST){visible=false;badge_panel_cancel(panel);return;}
-    visible=false;ui_transition_cache_pause(false);save();grok_close();if(screen==APP_MAP)cancel_map();
+    visible=false;ui_transition_cache_pause(false);save();grok_close();fluidbox_close();timetiles_close();if(screen==APP_MAP)cancel_map();
     badge_panel_cancel(panel);ui_transition_cache_forget(panel);lv_obj_clean(panel);lv_image_cache_drop(&map_picture);free((void*)map_picture.data);memset(&map_picture,0,sizeof(map_picture));
     show_list();
 }
 void badge_apps_bind(bool (*map)(const map_view_t*),void (*persist)(uint64_t,int)){request_map=map;save_game=persist;}
 void badge_apps_saved(uint64_t dex,int best){game.dex=dex;game.best=best;}
-void badge_apps_launch(int app){badge_apps_open();if(app==3)show_grok();if(app==1)show_map();if(app==2){miner_start(&game,1,0,lv_tick_get());show_game();}}
+void badge_apps_launch(int app){badge_apps_open();if(app==6)show_timetiles();if(app==5)show_fluidbox();if(app==4)show_gravity();if(app==3)show_grok();if(app==1)show_map();if(app==2){miner_start(&game,1,0,lv_tick_get());show_game();}}
+void badge_apps_motion(float x,float y,bool shake,bool available){
+    tilt_x=x;tilt_y=y;motion_available=available;motion_at=lv_tick_get();
+    grok_motion(x,y,visible&&screen==APP_GROK&&!badge_ui_is_asleep()&&shake,available);
+}
 void badge_apps_status(int *page,int *loading,int *error,int *tiles,int *count){*page=visible?screen:-1;*loading=map_loading;*error=map_error;*tiles=map_tiles;*count=map_players;}
 
 void badge_apps_probe(bool open){if(open)badge_apps_open();else {visible=false;badge_ui_external_panel(panel,false);}}

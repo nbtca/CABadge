@@ -226,6 +226,7 @@ const char *badge_ble_summary(void){
         ble_info.outbound?"外设已连接":ble_info.advertising?"可被发现":"已开启";
 }
 static lv_obj_t *ble_panel,*ble_toggle,*ble_note,*ble_list,*ble_scan_button;
+static lv_obj_t *hr_status,*hr_bpm,*hr_detail;
 static void ble_render(void);
 void badge_ui_ble_bind(const badge_ble_actions_t *value){ble_actions=value?*value:(badge_ble_actions_t){0};}
 void badge_ui_ble_message(const char *value){if(ble_note&&strcmp(lv_label_get_text(ble_note),value)){cached_text(ble_note,value);}}
@@ -264,13 +265,23 @@ static void ble_disconnect(lv_event_t *e){
 static bool ble_visual_equal(const badge_ble_info_t *a,const badge_ble_info_t *b){
     if(a->enabled!=b->enabled||a->advertising!=b->advertising||a->scanning!=b->scanning||a->connecting!=b->connecting||a->inbound!=b->inbound||a->outbound!=b->outbound||a->error!=b->error||a->count!=b->count)return false;
     if(strcmp(a->inbound_address,b->inbound_address)||strcmp(a->outbound_address,b->outbound_address)||strcmp(a->outbound_name,b->outbound_name))return false;
-    for(int i=0;i<a->count;i++)if(strcmp(a->devices[i].name,b->devices[i].name)||a->devices[i].rssi!=b->devices[i].rssi||a->devices[i].connectable!=b->devices[i].connectable)return false;
+    if(a->heart_rate.status!=b->heart_rate.status||strcmp(a->heart_rate.device_name,b->heart_rate.device_name))return false;
+    for(int i=0;i<a->count;i++)if(strcmp(a->devices[i].name,b->devices[i].name)||a->devices[i].rssi!=b->devices[i].rssi||a->devices[i].connectable!=b->devices[i].connectable||a->devices[i].heart_rate!=b->devices[i].heart_rate||a->devices[i].address_type!=b->devices[i].address_type||memcmp(a->devices[i].address,b->devices[i].address,6))return false;
     return true;
 }
+static void ble_render_heart_rate(void){
+    if(!hr_bpm)return;
+    const badge_heart_rate_t *hr=&ble_info.heart_rate;char value[48];
+    cached_text(hr_status,badge_hr_status_name(hr->status));
+    if(!hr->stale)snprintf(value,sizeof(value),"♥ %u BPM",hr->bpm);else snprintf(value,sizeof(value),"♥ -- BPM");
+    cached_text(hr_bpm,value);
+    snprintf(value,sizeof(value),"%d dBm · %s",hr->rssi,hr->status==BADGE_HR_CONNECTED?(hr->stale?"stale":"Live"):"点按断开");
+    cached_text(hr_detail,value);
+}
 static void ble_render(void){
-    if(!ble_panel)return;
+    if(!ble_panel||!badge_ui_ble_visible())return;
     static badge_ble_info_t rendered;static bool have_rendered;
-    if(have_rendered&&ble_visual_equal(&rendered,&ble_info))return;
+    if(have_rendered&&ble_visual_equal(&rendered,&ble_info)){ble_render_heart_rate();return;}
     rendered=ble_info;have_rendered=true;
     ui_transition_cache_invalidate_reason(ble_panel,"BLE_CONTENT");
     badge_liquid_set(ble_toggle,ble_info.enabled,state->reduced_motion);
@@ -279,8 +290,17 @@ static void ble_render(void){
     cached_text(lv_obj_get_child(ble_scan_button,0),ble_info.scanning?"扫描中…":"扫描附近设备");
     const char *status=ble_info.error?"操作失败，请重试或重启蓝牙":!ble_info.enabled?"蓝牙已关闭":ble_info.connecting?"正在连接设备…":ble_info.scanning?"正在扫描附近 BLE 设备…":ble_info.advertising?"手机可发现 CABadge":ble_info.inbound?"对方已连接本机":"蓝牙已打开";
     badge_ui_ble_message(status);
-    lv_obj_clean(ble_list);int y=0;
+    lv_obj_clean(ble_list);hr_status=hr_bpm=hr_detail=NULL;int y=0;
     if(ble_info.enabled){
+        if(ble_info.heart_rate.status!=BADGE_HR_IDLE){
+            lv_obj_t *row=surface(ble_list,0,y,256,108,UI_SELECTED,16);y+=116;
+            lv_obj_add_flag(row,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(row,badge_ui_click_guard,LV_EVENT_ALL,NULL);
+            lv_obj_add_event_cb(row,ble_disconnect,LV_EVENT_CLICKED,(void*)1);
+            label(row,*ble_info.heart_rate.device_name?ble_info.heart_rate.device_name:"Heart Rate Sensor",10,6,236,&font14,UI_TEXT);
+            hr_status=label(row,"",10,27,236,&font14,UI_MUTED);
+            hr_bpm=label(row,"",10,47,236,&font24,UI_ACCENT);
+            hr_detail=label(row,"",10,82,236,&font14,UI_MUTED);
+        }
         label(ble_list,"本机 · CABadge",10,y,236,&font18,UI_TEXT);y+=30;
         label(ble_list,"连接到本机的设备",10,y,236,&font14,UI_MUTED);y+=26;
         if(ble_info.inbound){
@@ -289,7 +309,7 @@ static void ble_render(void){
             lv_obj_add_event_cb(row,ble_disconnect,LV_EVENT_CLICKED,(void*)0);y+=50;
             label(ble_list,"已连接 · 点按断开",10,y,236,&font14,UI_MUTED);y+=26;
         }else {label(ble_list,"等待手机连接",10,y,236,&font14,UI_MUTED);y+=30;}
-        if(ble_info.outbound){
+        if(ble_info.outbound&&ble_info.heart_rate.status==BADGE_HR_IDLE){
             label(ble_list,"本机连接的设备 · 点按断开",10,y,236,&font14,UI_MUTED);y+=26;
             lv_obj_t *row=button(ble_list,*ble_info.outbound_name?ble_info.outbound_name:ble_info.outbound_address,0,y,256,44,NULL);
             lv_obj_set_style_bg_color(row,lv_color_hex(UI_SELECTED),0);
@@ -304,10 +324,11 @@ static void ble_render(void){
             lv_obj_set_style_bg_color(row,lv_color_hex(UI_SELECTED),LV_STATE_PRESSED);
             lv_obj_add_event_cb(row,ble_connect,LV_EVENT_CLICKED,(void*)(intptr_t)i);
             label(row,*d->name?d->name:"未命名设备",12,8,232,&font18,UI_TEXT);
-            snprintf(detail,sizeof(detail),"%s · %d dBm",d->connectable?"点按连接":"仅广播",d->rssi);
+            snprintf(detail,sizeof(detail),"%s · %d dBm",d->heart_rate?(d->connectable?"心率 · 点按连接":"心率 · 仅广播"):d->connectable?"点按连接":"仅广播",d->rssi);
             label(row,detail,12,36,232,&font14,UI_MUTED);
         }
     }
+    ble_render_heart_rate();
 }
 void badge_ui_ble_update(const badge_ble_info_t *value){
     ble_info=*value;if(ble_info.count<0)ble_info.count=0;if(ble_info.count>BADGE_BLE_DEVICES)ble_info.count=BADGE_BLE_DEVICES;

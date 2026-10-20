@@ -1,6 +1,8 @@
-# v1.2.0 安装与构建
+# 安装与构建（main：7.9.23-timetiles-fix）
 
-内部固件版本：7.9.16-eaf-transition。下载与烧录地址、旧版分区升级方法见 [发布说明](RELEASE-v1.2.0.md)。发布 ZIP 解压到 `outputs/cabadge-v7.9.16-eaf-transition/`，使三个 BIN 与 verification.json 直接位于该目录。设备已运行本版时无需重刷。
+当前 `main` 源码为 **7.9.23-timetiles-fix**，包含 TimeTiles、FluidBox、标准 BLE 心率与动作控制的完整适配源码、资源和宿主测试。最新测试固件附件是 [v1.3.0-rc.1](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)；其标签在源码同步前建立，自动生成的源码 ZIP 仍是旧快照，编译最新版请下载 `main`。
+
+正式固件仍为 **v1.2.0 / 7.9.16-eaf-transition**，下载与烧录地址、旧版分区升级方法见 [正式版发布说明](RELEASE-v1.2.0.md)。工作台默认安装该正式版：发布 ZIP 解压到 `outputs/cabadge-v7.9.16-eaf-transition/`，使三个 BIN 与 verification.json 直接位于该目录。自行编译的 7.9.23 与工作台默认安装包分别保存，不因源码更新自动重刷设备。
 
 ## Windows 工作台
 
@@ -8,7 +10,7 @@
 
 ## 板端构建
 
-现有环境使用 Windows、F 盘与 PlatformIO。未验证全新机器一键构建或字节级复现；下面是实际脚本约定。
+现有环境使用 Windows、PowerShell 7（`pwsh`）、F 盘与 PlatformIO。未验证全新机器一键构建或字节级复现；下面是实际脚本约定。
 
 1. 用 Python 3.10 创建 `firmware/bringup/.venv` 并安装 PlatformIO 6.2.0；只需这个虚拟环境，不需要旧 firmware 源码。构建脚本固定调用其中的 Python。
 2. 用支持 tarfile 安全解包的 Python 运行 `firmware-v7/setup_deps.py`，获取 LVGL 9.4.0 与字体到 vendor。不再下载已删除模拟器使用的 SDL2；现有生成资源已入库，板端构建不必重新生成图片/字库。
@@ -17,17 +19,23 @@
 ```powershell
 $env:TEMP = $env:TMP = 'F:\CABadgeBuild\temp'
 $env:CABADGE_DISPLAY_PERF = '0'
-$env:CABADGE_TRANSITION_CACHE_DEBUG = '1'
-powershell -NoProfile -ExecutionPolicy Bypass -File firmware-v7/usb_screen/build.ps1
+$env:CABADGE_TRANSITION_CACHE_DEBUG = '0'
+$env:CABADGE_EAF_EMOTE = '0'
+$env:CABADGE_EAF_INTERPOLATE = '0'
+pwsh -NoProfile -ExecutionPolicy Bypass -File firmware-v7/usb_screen/build.ps1
 ```
 
 脚本固定 PlatformIO 核心目录 `F:/CABadgeBuild/platformio/idf61`、暂存 `F:/CABadgeBuild/staging/usb-screen-v7-idf61`。`platformio.ini` 固定 espressif32 7.1.3、framework-espidf 4.60100.0（ESP-IDF 6.1.0）；组件清单固定 LVGL 9.4.0、Adapter 0.7.1、ST77916 2.0.2，锁定信息在 `device/dependencies.lock`。
 
-当前源码导出到 `outputs/cabadge-v7.9.16-eaf-transition/`（v1.1.0 发布附件仍为 7.9.2-memory），会覆盖同名本地产物，先另存发布附件。详细显示诊断开关为 1 时导出 diagnostic 后缀目录，不与正式包混用。
+当前源码导出到 `outputs/cabadge-v7.9.23-timetiles-fix/`，包含三个 BIN、ELF、有效 sdkconfig 和 verification.json。构建会覆盖同名本地产物，先另存已下载的 Release 附件；v1.2.0 工作台目录不受影响。详细显示诊断开关为 1 时导出 diagnostic 后缀目录，不与默认构建混用。emote 和插帧是可选实验，以上命令明确关闭，保持本版 Direct EAF 默认路径。
 
 ## 检查边界
 
-可单独运行 `python firmware-v7/test_physical_display.py`、`python firmware-v7/test_transition_compositor.py`、`python firmware-v7/test_map_stream.py`；这些宿主检查依赖脚本所示的本地 Zig 工具，不启动 UI 模拟器。首次恢复环境需按各脚本路径安装工具。
+宿主检查依赖脚本所示的本地 Zig 工具（`firmware-v7/.venv/Lib/site-packages/ziglang/zig.exe`），首次恢复环境需在该虚拟环境安装 ziglang；脚本中的缓存与临时目录均在 F 盘。这些检查调用生产 C 或测试桩，不启动 UI 模拟器或访问实板。
+
+可运行 `test_motion.py`、`test_heart_rate.py`、`test_fluidbox.py` 与四个 `test_timetiles_*.py`，检查新功能；显示、转场、地图、壁纸及 EAF 检查继续保留。完整运行入口为 `python firmware-v7/对应脚本.py`，工作台回归为 `python firmware-v7/test_workbench.py`。USB 探针 `*_probe.py` 会访问设备，只有安排实板测试时再运行。
+
+新功能操作与待测项见 [TimeTiles](../firmware-v7/TIMETILES.md)、[FluidBox](../firmware-v7/FLUIDBOX.md)、[BLE 心率](../firmware-v7/HEART_RATE.md)及[已知问题](KNOWN_ISSUES.md)。源码公开与构建通过不改变尚未完成的实屏手势、撕裂、异常重连和长期稳定性验收。
 
 旧桌面 CMake、模拟器、像素投屏和过时测试已删除，板端唯一构建入口是 `firmware-v7/usb_screen/build.ps1`。现有工作台使用 `usb_screen/framing.py` 的 USB 编解码；`python firmware-v7/usb_screen/framing.py` 可运行无设备自检。实体画面验收仍需要实际烧录版本。
 

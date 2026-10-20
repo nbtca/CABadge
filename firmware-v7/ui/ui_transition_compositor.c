@@ -55,7 +55,11 @@ static ui_compositor_prepare_cb stream_prepare;
 static void *stream_context;
 static uint32_t stream_period;
 static portMUX_TYPE stream_mux=portMUX_INITIALIZER_UNLOCKED;
-static struct {uint64_t decode,decode_max,pack,submit,drain,interval,interval_max;uint32_t frames,errors,transactions;} stream_perf;
+static struct {
+    uint64_t decode,decode_max,pack,submit,drain,interval,interval_max,work;
+    uint32_t frames,errors,transactions;
+    struct {uint64_t prepare,source_decode,blend,pack,submit,drain,work,work_max;uint32_t frames;} kind[2];
+} stream_perf;
 bool ui_transition_compositor_stream_active(void){return ui_transition_compositor_active()&&stream_period!=0;}
 bool ui_transition_compositor_stream_failed(void){return atomic_load(&failed);}
 
@@ -85,12 +89,12 @@ static void run(void *arg){
             continue;
         }
         bool streaming=stream_period!=0;
-        int64_t decoded=0,packed=0,submitted=0,drained_us=0;
+        int64_t decoded=0,packed=0,submitted=0,drained_us=0,frame_started=0;
         unsigned stream_tx=0;uint32_t duration_us=stream_period;
         if(streaming){
             if(received){due=esp_timer_get_time();stream_last=0;}
             if(atomic_load(&cancelled))continue; /* do not begin another decode after STOP */
-            int64_t at=esp_timer_get_time();bool ok=stream_prepare(stream_context,&duration_us);decoded=esp_timer_get_time()-at;
+            frame_started=esp_timer_get_time();bool ok=stream_prepare(stream_context,&f,&duration_us);decoded=esp_timer_get_time()-frame_started;
             if(!ok||duration_us<1000||duration_us>60000000){atomic_store(&failed,true);portENTER_CRITICAL(&stream_mux);stream_perf.errors++;portEXIT_CRITICAL(&stream_mux);wait=portMAX_DELAY;continue;}
         }
         esp_err_t rc=ESP_OK;uint64_t prep_before=perf.prep;int submitted_rows=0;int64_t lcd_start=0;perf.attempts++;
@@ -131,6 +135,11 @@ static void run(void *arg){
             else if(submitted_rows==f.height){
                 if(stream_last){uint64_t gap=now-stream_last;stream_perf.interval+=gap;if(gap>stream_perf.interval_max)stream_perf.interval_max=gap;}
                 stream_last=now;stream_perf.frames++;
+                uint64_t work=now-frame_started;stream_perf.work+=work;
+                __typeof__(stream_perf.kind[0]) *k=&stream_perf.kind[f.interpolated?1:0];
+                k->frames++;k->prepare+=decoded;k->source_decode+=f.source_decode_us;k->blend+=f.blend_us;
+                k->pack+=packed;k->submit+=submitted;k->drain+=drained_us;k->work+=work;
+                if(work>k->work_max)k->work_max=work;
             }
             portEXIT_CRITICAL(&stream_mux);
             /* Absolute frame deadlines: decode/flush time is inside this duration.
@@ -166,9 +175,17 @@ bool ui_transition_compositor_stream_begin(const ui_compositor_frame_t *f,ui_com
 void ui_transition_compositor_stream_stats(char *out,size_t size){
     portENTER_CRITICAL(&stream_mux);__typeof__(stream_perf) p=stream_perf;portEXIT_CRITICAL(&stream_mux);
     unsigned n=p.frames?p.frames:1,intervals=p.frames>1?p.frames-1:1;
-    snprintf(out,size,"{\"completed\":%u,\"decode_us\":%llu,\"decode_max_us\":%llu,\"staging_us\":%llu,\"submit_us\":%llu,\"dma_drain_us\":%llu,\"interval_us\":%llu,\"worst_interval_us\":%llu,\"transactions\":%u,\"errors\":%u}",
+    snprintf(out,size,"{\"completed\":%u,\"decode_us\":%llu,\"decode_max_us\":%llu,\"staging_us\":%llu,\"submit_us\":%llu,\"dma_drain_us\":%llu,\"interval_us\":%llu,\"worst_interval_us\":%llu,\"transactions\":%u,\"errors\":%u,\"work_us\":%llu,\"sum_interval_us\":%llu",
         (unsigned)p.frames,(unsigned long long)(p.decode/n),(unsigned long long)p.decode_max,(unsigned long long)(p.pack/n),
-        (unsigned long long)(p.submit/n),(unsigned long long)(p.drain/n),(unsigned long long)(p.interval/intervals),(unsigned long long)p.interval_max,(unsigned)(p.transactions/n),(unsigned)p.errors);
+        (unsigned long long)(p.submit/n),(unsigned long long)(p.drain/n),(unsigned long long)(p.interval/intervals),(unsigned long long)p.interval_max,(unsigned)(p.transactions/n),(unsigned)p.errors,
+        (unsigned long long)(p.work/n),(unsigned long long)p.interval);
+    for(unsigned i=0;i<2;i++){
+        __typeof__(p.kind[0]) *k=&p.kind[i];size_t used=strlen(out);if(used>=size-1)return;
+        snprintf(out+used,size-used,",\"%s\":{\"completed\":%u,\"sum_prepare_us\":%llu,\"sum_source_decode_us\":%llu,\"sum_blend_us\":%llu,\"sum_staging_us\":%llu,\"sum_submit_us\":%llu,\"sum_drain_us\":%llu,\"sum_work_us\":%llu,\"max_work_us\":%llu}",
+            i?"inserted":"original",(unsigned)k->frames,(unsigned long long)k->prepare,(unsigned long long)k->source_decode,(unsigned long long)k->blend,
+            (unsigned long long)k->pack,(unsigned long long)k->submit,(unsigned long long)k->drain,(unsigned long long)k->work,(unsigned long long)k->work_max);
+    }
+    size_t used=strlen(out);if(used<size-1)snprintf(out+used,size-used,"}");
 }
 void ui_transition_compositor_present(const ui_compositor_frame_t *f){
     if(!ui_transition_compositor_active()||stream_period||!valid(f))return;

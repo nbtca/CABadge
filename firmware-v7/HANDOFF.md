@@ -1,4 +1,96 @@
-## 2026-09-27 最新：7.9.16-eaf-transition
+## 2026-10-21 当前公开源码：7.9.23-timetiles-fix
+
+按用户要求将本地最新开发源码同步到 main，包含 TimeTiles、FluidBox、标准 BLE 心率、SC7A20 动作、所需资源、测试与操作文档。正式安装包和 Workbench 默认仍为 v1.2.0 / 7.9.16；v1.3.0-rc.1 二进制附件及既有标签不变。该标签的自动源码 ZIP 保留原快照，最新版源码从 main 下载。
+
+本轮从待提交文件导出独立源码副本，并保留旧构建暂存后重新编译。PowerShell 7 构建与导出通过，内部版本 7.9.23-timetiles-fix，BIN 3983872 B；54 份构建输入指纹、有效 sdkconfig 和分区表与既有 7.9.23 发布记录一致。不承诺字节级复现旧 BIN，也没有替换 Release 附件。
+
+20 个固件/工作台宿主检查脚本通过；仓库回归 7 项、USB framing 和地图监测工具离线自检通过。干净副本暴露了 TimeTiles effects 日志目录缺失及 raster 依赖未跟踪参考副本的问题，现已创建日志父目录并以原始提取 SHA-256 固定资源校验，保留全部像素/越界检查。首次失败与复测证据保存于本地 outputs/CABadge_Source_Sync_20261021/，未覆盖历史发布或测试产物。
+
+本轮没有连接设备、烧录、自动切页或复测画面。既有 R104 的手势/主题/摇晃、异常心率重连、撕裂及长稳待测项继续保留；下方历史条目的“未提交/推送”仅表示当时状态。原理图、PCB、外壳及未纳入本次源码同步的本地工作保持不变。
+
+## 2026-10-15 当前开发实板：7.9.23-timetiles-fix（R104）
+
+用户实屏反馈双击只有霓紫/白色且会回白，三击和摇晃无效。已在旧源复现：双击只翻布尔、不换主题；数字第二击先启动动画吞第三击，标题热区/微移过严；分钟换字清空点击，方向判断未保护点击链；摇晃事件未派发到TimeTiles。旧失败和原始输入保留，修订生产源通过同一复现。
+
+当前数字双击轮换并保存六主题，第二次释放后等待420ms区分第三击；数字/扩大标题区域三击进入全高代码雨，不变更主题。分钟变化、场景取消和方向检测保留/保护点击状态，不再在退出时回白。共享SC7A20摇晃事件仅驱动可见时钟的TIME TILES FLY适配飞散场景，弹窗/提醒/睡眠/转场/已有交互不触发；全局传感器/唤醒阈值不改。旧私有NVS布局/版本兼容，没有新任务、LCD或DMA分支。额外不同尺寸粒子、整点/日期和完整Demo仍有原版差距。
+
+生产effects/integration/motion检查通过：六主题颜色和保存、一致的双三击/四旋转/微移/分钟/方向保护，实际摇晃服务派发和状态保护；是宿主代码证据。构建73.53秒、RAM49868B、Flash3983207B、BIN3983632B，SHA256 `27ce117c2d49d86768d0a5ac24f4147d3636aa6792ea40eb6ff17976c1abc7e7`，4产物/54暂存指纹匹配。首次宿主assert编译失败和验证脚本遗漏lodepng路径的保护停止均保留，后者发生在连接/擦写前。
+
+COM3仅写0x10000，32.5秒/Hash of data verified，USB启动版本7.9.23/store_error=0。壁纸选择/库项/CRC/类型及亮度56/减少动态保持，时区480；两计时均完成。主题读前5/读后1，两读间用户操作及最后保存时刻未记录，不据此判实体主题持久化通过或故障。串口释放，只做烧录与只读确认；沿用用户手测安排，没有自动切页/重置/闹钟/触摸测试。新版实屏颜色、双三击/摇晃/方向、校时/提醒、性能/撕裂/长稳仍待用户。
+
+主记录R104；证据outputs/timetiles-gestures-20261015/，发布outputs/cabadge-v7.9.23-timetiles-fix/。hardware-verification.json独立记录安装，构建verification.json保持PENDING；正式v1.1.0/工作台默认和旧产物保留，未提交/推送。操作入口和版本差异见TIMETILES.md。
+
+## 2026-10-15 历史开发实板：7.9.22-timetiles-ui（R103）
+
+用户照片指出页面太乱、时间太小。时钟排布210→330px，11×13步距/9px字块；小标题、无边框返回/更多，日期点按校准，四模式和外观入口合并更多，倒计时字号放大，特效独占画布/代码雨全高。1,440时钟柔光圆屏边界及菜单/旋转/场景恢复代码检查通过。构建74.42秒，BIN3983040B、SHA256 `c55e69aa3031b24b9e9bede4443c774f20dc37968061ad06ed0f1785fae06eb7`；应用区烧录32.6秒/hash与启动版本确认、壁纸及亮度保持。随后用户颜色/三击/摇晃失败反馈保留并由R104继续处理，不计视觉/功能通过。原证据outputs/timetiles-layout-20261015/。
+
+## 2026-10-15 历史开发实板：7.9.21-timetiles-touch（R101/R102）
+
+R102补充作者参考视频：用户提供约39.9秒/720×1280/30fps录像，画面为方形Mosaico原板，非本吧唧。确认原版拖动局部推开回位、双击大量不同尺寸彩色粒子散开重组、摇晃TIME TILES FLY、顶部三击近全屏代码雨；本版双击/代码雨是简化重建，摇晃场景未接入。长按在该片未清楚展示，视频有剪辑且末尾网页1.0.2，与恢复包标记不同。原图/时间段/差异见outputs/timetiles-video-20261015/observations.md；本轮未改源码/烧录/访问USB，没有新增本板功能或性能通过。
+
+用户明确要求“烧录”，已复核现有发布BIN SHA256 `98b7c43aa87e7dd5fd4c7b64647c2d4acd7961cc645c4562a8273814b677bf2a`，通过COM3仅写0x10000应用区，3982944B/32.8秒、Hash of data verified。只读启动状态确认7.9.21-timetiles-touch、TimeTiles store_error=0；前后选中壁纸、库项/名称/类型/payload CRC/timing CRC、亮度56及reduced_motion=false相同。主题4、时区480保留，番茄/倒计时烧录前均已完成，启动后仍为完成；本轮没有验证运行计时重启恢复。
+
+串口已释放；沿用用户自行手测安排，未自动切页、重置计时、建闹钟或运行触摸/联网功能测试。触摸效果/方向、真实SNTP、提醒/贪睡/长稳/撕裂仍待用户。主记录R101，原始证据outputs/timetiles-flash-20261015/；发布目录另增hardware-verification.json，构建时verification.json不改。正式发布和工作台默认包未改，未提交/推送。
+
+## 2026-10-14 历史：7.9.20-timetiles；7.9.21编译候选（R100）
+
+用户提供 `reverse/mosaico-b359b358` 的恢复 C/汇编及可读辅助函数，授权继续移植；当前应用第六项 TimeTiles。原样计时辅助函数和直接提取字体/图标/六主题/119掩码，重建时钟、番茄钟、倒计时、六闹钟/星期/贪睡、方向切换及私有 NVS 检查点。GUI拥有一张259200B PSRAM图，没有新增任务或改显示DMA/分区。重启将运行计时恢复暂停，完全断电后须联网或手动校时。
+
+首版7.9.20构建103.52秒、RAM49840B、Flash3978251B、BIN3978672B，SHA256 `8cdeb6d323c0b84d3ceb1425aa8f0017be06b7235455c15fe72525f65cfaf5f6`。COM3只写0x10000、32.8秒Hash of data verified；USB读回版本。两次自动探针因用户已有专注/倒计时在保护检查处停止，未执行重置、临时闹钟或重启测试；用户后来取消自动测试，串口已释放，不继续干扰当前手测。
+
+用户指出首版只接按钮短按而漏画布特效；7.9.21-timetiles-touch已补普通数字推开/弹性回位、双击散开并切换彩色、680ms长按聚拢、标题三击字符雨，四方向输入回算一致。按原触发规则适配重建三种彩蛋，抖音加载失败，未观看/比对演示；整点、摇动、日期彩蛋和完整Demo未移植。校时使用UTC系统时间/默认UTC+8；手动保存重排未来闹钟，单调计时不变；修复手动日期有效后不启动后续SNTP的问题，联网后幂等启动共享ntp.aliyun.com客户端。
+
+四项TimeTiles生产C检查及motion/心率/EAF集成回归PASS，触摸版最终构建22.17秒、RAM49856B、Flash3982523B、BIN3982944B，SHA256 `98b7c43aa87e7dd5fd4c7b64647c2d4acd7961cc645c4562a8273814b677bf2a`；4发布产物/54构建源指纹匹配，分区与旧版相同。新包 `outputs/cabadge-v7.9.21-timetiles-touch/` **未烧录**，设备仍保留首版手测状态；不把新源码/编译当作板上更新或实屏通过。
+
+操作、时间校准和差异见TIMETILES.md；原始日志与失败在outputs/timetiles-port-20261014/，根主记录R100。实屏触摸/方向、真实联网时间、到期/贪睡/断电恢复、帧率/撕裂/长稳均待用户手测；无TE、扬声器或振动马达。正式v1.1.0及Workbench默认包未改，未提交/推送。
+
+## 2026-10-11 历史开发实板：7.9.19-fluidbox（R99）
+
+按用户要求移植 eMUQI/esp-mosaico-fluidbox，固定提交75d0c076b3f5b3529253f9238bc936875c47a159，MIT LICENSE/NOTICE及原始33文件blob校核保留。原算法普通C，可在S3运行；未导入S31/CO5300/BMI270/TE驱动。1,200粒子、Particles/Liquid/Water/Lava/Ukiyo-e全部保留；360px圆形容器、native RGB565经原LVGL/40MHz QSPI显示，SC7A20实测轴向输入倾斜/摇动，无omega/alpha旋转惯性。应用第五项“FluidBox”，底部重来/切换、左上返回。
+
+大数组PSRAM BSS，打开时两张画面518400B；core1求解/core0渲染均priority2，GUI持有LVGL对象，关闭先join再释放，息屏暂停。静态内部RAM49328B、Flash3789171B；独立产物outputs/cabadge-v7.9.19-fluidbox。COM3仅写0x10000、hash verified，应用SHA256 d466aef158ac61bc3f86727d296deadbb4c12e8a488de6634eb5828073c74668；分区、NVS及11项壁纸CRC保持，亮度56/reduced_motion=false。构建与临时文件在F盘，正式发布及Workbench默认未改。
+
+五模式两轮各约10秒，复测显示最后块DMA完成率11.71/8.34/8.26/6.42/8.66 FPS，初测9.46/6.72/7.12/5.19/8.46。重置/休眠恢复/六次开关/原ID10 EAF恢复通过，motion与壁纸errors0；关闭后15任务、运行17任务。扣除页面cache占用后PSRAM六次相差仅8B，未发现持续图片泄漏；首轮脚本把cache回收导致空闲量增加判成失败，保留原失败JSON/log，不改固件掩盖。性能受求解/渲染/外部内存与GUI合成限制，不能按S31的320MHz/250MHz PSRAM原始FPS推断S3收益。
+
+自动测试已停止，设备Water模式亮屏、USB端口已释放；不要再自动切页干扰目视。颜色、真实倾斜/摇动跟随、触摸和无撕裂/长稳/温升仍待用户；TE未接，完成FPS不是扫描Hz。精确记录以首板测试记录R99为准，移植架构/复现见FLUIDBOX.md，原证据outputs/fluidbox-port-20261011；现有HRS异常重连/30秒无Notify实测待办保留。本包默认不编译R98混帧实验；源码开关和旧包保留。未提交/推送。
+
+## 2026-10-06 历史开发实板：罗小黑插帧实验（R98，版本号仍7.9.18-heart-rate）
+
+已按用户要求实现并COM3仅烧0x10000、hash verified。相邻RGB565帧逐通道50/50混合，非光流/AI；两张额外PSRAM源帧518400B，缓存下一原帧避免重复解码。原QSPI40MHz、16行/23块、末块DMA排空及版本号不变；正式默认包和旧心率应用未覆盖。应用SHA256 c7445619500a66f42b0f594d963838fca7e55ba67d52cd255fac648daf0a12c2，独立产物`outputs/cabadge-eaf-interpolation-20261006/firmware/`。
+
+同版关/开/关、各预热2秒后约15/30/15秒：完成帧率28.000/23.440/28.034FPS，含等待完成间隔35.714/42.662/35.671ms；开启时354原帧+354中间帧均已计入23.440。缓存原帧完整cost20.189ms，中间帧预解码14.832+混合28.570+staging8.133+submit11.245+末块0.300及循环开销，共63.630ms；均摊处理41.909ms。保持原30FPS动画速度需要60FPS输出，本段原画面推进约11.72FPS；用户确认“更慢”。仅证明本混帧版本退步，不是所有插值算法或屏幕扫描Hz的结论。
+
+五项生产像素/时序/借帧/输入/合成软件检查PASS。实板菜单/息屏/静态切回恢复及资源CRC/亮度46/减少动态false保留通过，errors0；首轮固定1秒恢复断言失败保留，状态等待复测在3.266秒Direct恢复。task15，transition/lvgl最小栈2384/3480B。重影/色彩/撕裂与长期稳定未验收，旧HRS真实重连/无Notify过期待测仍保留。详细方法、均值表、失败与证据以根主记录R98为准；不另建冲突总结。
+
+实验编译环境`CABADGE_EAF_INTERPOLATE=1`；USB type41/sub11 `[11,0]`/`[11,1]`非持久开关，重启默认OFF，减少动态模式不接受开启。目前设备已恢复罗小黑ID10、保持插帧ON供观察，COM3已释放。日常关闭无需重新烧录或动壁纸库。新实测metadata为实验目录`hardware-verification.json`，构建时verification.json及所有历史产物原义不改。未提交/推送。
+
+## 2026-10-06 历史壁纸样张：独眼扫视（R96，固件未改）
+
+COM3实时读回仍7.9.18-heart-rate。本轮仅制作并导入用户提供的三色独眼动态壁纸：360×360、12秒循环、155个编码帧，EAF1443004B及逐帧timing；慢扫视/快速转向/停顿/瞳孔缩放，不是传感器或触摸跟随。新选中ID21，旧十项壁纸CRC、亮度46及reduced_motion=false保持。约13秒USB短检查帧154回到0、完成156、提交errors0；端口已释放，颜色/节奏/撕裂及长期目视验收待用户。素材、预览、源图备份和证据在`outputs/cabadge-eye-20261006/`，生成源码`tools/make_eye_wallpaper.py`；未重刷、未修改固件源码。浏览器预览支持减少动态效果，设备EAF不自动跟随该设置，可手动改选静态图。
+
+R97只读瓶颈分析：沿用R96记录，平均decode14.256ms、staging8.074ms、submit11.046ms、末块drain0.306ms，合计33.682ms；主要限制是全帧解码/搬运/传屏帧级串行。submit已含前块DMA等待，不额外叠加理论SPI时间；长驻留使总体interval不能用作运动段FPS。即时只读探测COM3不存在，未新增实板采样；未修改/烧录/切换，优化收益尚未测量。详见主记录R97。
+
+## 2026-10-04 最新开发实板：7.9.18-heart-rate
+
+基于当前7.9.17-motion，复用ESP-IDF 6.1 NimBLE host/central外连和原GUI队列，新增标准HRS 0x180D/Measurement 0x2A37 Notify。Bluetooth列表识别/优先展示心率设备，选择后发现服务/自身CCCD并订阅；实时显示真实设备名、Connected及♥ BPM。30秒无有效通知stale/--，断线旧值立即失效，选中地址2～30秒退避重连，手动断开/关蓝牙取消；一个host callout兼顾5秒RSSI读数，无新RTOS任务/任务栈/蓝牙框架。不实现小米私有认证、步数/电量/睡眠。
+
+生产协议/状态/GAP/GATT mock边界单测与motion/battery/compositor/EAF transition回归PASS；最终构建36.73秒，静态RAM60248B（较7.9.17 +508B）、Flash3761963B（+16016B），无warning/error匹配。纯BPM/RSSI/stale更新仅刷新心率标签，只有无线状态变化才调用全局UI刷新。应用SHA256=64a18f65773ddc59db6c3a852d48aa2b2fa25d4669173270bf272390fe1a6809；30份记录源hash校核一致，分区与旧包相同，COM3仅写0x10000、flash hash verified，NVS/壁纸库保持。正式v1.1.0和工作台默认包不变。
+
+真实扫描到Xiaomi Smart Band 9 Pro 0863（D0:AE:05:01:08:63），已完成连接→CCCD→Notify→持续BPM更新；最终版12秒采样有效通知21次、invalid_packets0，BPM观察79～81，最后80/RSSI−65dBm，15个不同更新时间。首轮候选获用户确认蓝牙页面能看到设备/Connected/BPM并持续更新，最终版保持相同布局。实板任务仍15个，NimBLE栈配置4096B不变；最后采样lvgl最小剩余6664B、nimble_host1624B，Internal free78375B/minimum39828B。最终版首页扫描/连接/Notify期间EAF完成帧311→904、errors0；蓝牙页按原交接暂停不当作阻塞。两段50秒监测未捕获真实断开→重连过渡，自动重连及连接内30秒无通知stale仍待实物复测，不将单测当射频验收；Wi-Fi有开启但未关联，无并发大流量压力验收。
+
+产物outputs/cabadge-v7.9.18-heart-rate（basic-check.json记录最终实板短测试及未验项目）；交接前只读采样仍Connected，BPM83、有效通知402、invalid_packets0，COM3已释放。主记录R95；接口/线程/限制及重复测试说明HEART_RATE.md。其他任务/程序化壁纸可include ui/heart_rate.h后调用ble_service_heart_rate_snapshot，必须检查stale；快照过期BPM=0，HTTP/USB JSON为bpm:null。预编码EAF本轮不新增心率叠层。UI和无线状态不跨线程直接操作LVGL。
+
+## 2026-10-01 历史开发实板：7.9.17-motion（双敲修订候选）
+
+基于7.9.16，仅接入SC7A20动作与应用：Grok倾斜注视/摇动暂态、稳定朝下1.2s息屏及自动息屏后的朝上0.3s唤醒、硬件双敲唤醒、应用第四项重力小球。显示DMA/壁纸/PCB/外壳未改；正式v1.1.0与工作台默认不变。游戏校准为临时软件水平零点；不是芯片永久倾斜校准，也不是ESP深睡。
+
+首轮用户右低/下低/朝上实测确认screen=(rawX,-rawY,rawZ)；真实翻面亮灭获用户反馈通过。但Z-only/100Hz双敲侧壳及底壳未亮、硬件计数不增，保留失败。按用户要求只读重开V6原生SW装配：PCB未翻转、Z+1.8mm，中央距0.8mm底板1mm，三边缘支承；传感器靠近中心且在电池投影下。CAD不替代振动或打印实测。
+
+修订芯片400Hz、应用约100Hz读取XYZ、XYZ硬件双击250mg、80ms脉冲/80–480ms间隔；保留最近IA源便于排除触摸唤醒。参数在ui/motion.h，轴映射在motion_service.c。test_motion.py实际生产函数及电池/转场回归PASS；编译/COM3应用烧录hash和USB版本/寄存器配置读回、应用列表/小球/Grok/息屏恢复/壁纸设置保留通过。最新应用hash184524ec2baf5f1345a20ba35f9b97597d30005cbecb555b098c7f530eca2fae。
+
+修订装壳侧敲用户确认亮屏，double_taps由0增至19、最后源0x72(Y双击)、shake/face_wakes/errors为0；再次息屏后底敲用户确认亮屏，双击计数19→22、源0x74(Z双击)、errors0，但shake同时0→1，不能从聚合计数独立归因底敲首次亮屏分支。两次静置10样本计数保持；这是短复测，不是长期误唤醒验收。Grok/小球目视仍待反馈。最终设备主页亮屏、COM3释放。主记录R83、APPS.md/GROK.md及outputs/cabadge-v7.9.17-motion/basic-check-shell-tap.json。
+
+## 2026-09-27 历史：7.9.16-eaf-transition
 
 动态首页导航冻结单个LCD-native EAF frame，借给统一cache/Direct，无导航截图/整帧copy/swap；LVGL已有RGB565_SWAPPED用于暂停/fallback，缩略图仅采样换序。STOP不再开下一帧，当前帧完成并drain后交权。返回首页转场结束后恢复EAF；首次载入分3个idle轮次预热邻居。Prototype/timing/显示参数不变。
 

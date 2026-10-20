@@ -1,0 +1,29 @@
+Mosaico FluidBox derives its simulation, particle renderer, and firmware
+integration from:
+V4C38/esp32-fluidbox, MIT License, Copyright (c) 2026 V4C38.
+Source: https://github.com/V4C38/esp32-fluidbox
+Upstream commit: 21d7516d143da25bab9176257131d01a66a2573d.
+The MIT license text and copyright notice are retained in LICENSE.
+Local modifications include Mosaico hardware support, simulation parameters
+and particle foam, additional rendering modes, and a TE-synchronized display
+pipeline with PSRAM frame buffers.
+
+The CO5300 initialization sequence in main/display.c is adapted from:
+esp-mosaico/esp-mosaico-bsp, via eMUQI/QuotaFrame.
+Copyright 2026 Espressif Systems (Shanghai) CO LTD.
+Licensed under Apache-2.0; see licenses/Apache-2.0.txt.
+Source: https://github.com/esp-mosaico/esp-mosaico-bsp
+Source file: components/esp-mosaico-bsp/onboard/display.c.
+The sequence has been adapted to a standalone DMA renderer without LVGL.
+The modified display implementation uses TE synchronization, PSRAM frame
+buffers, and band transfers scheduled after the panel scan passes each band.
+QuotaFrame reference commit: 4c1aa477a340fc100003e892b2ecba292c77bb9e.
+BSP original commit: 392860b1d1a123c3377947074b2af1f600e86c5d.
+
+CABadge port source: eMUQI/esp-mosaico-fluidbox
+Commit: 75d0c076b3f5b3529253f9238bc936875c47a159.
+Port changes: 360x360 circular case, PSRAM BSS, native RGB565 LVGL images,
+SC7A20 acceleration input without gyroscope, touch controls and task lifecycle.
+Only simulation/rendering/configuration files are imported. The CO5300
+initialization sequence, main/display.c, BMI270 driver and TE pipeline
+described above are not included; CABadge uses its existing display adapter.

@@ -601,13 +601,13 @@ void badge_ui_page(int i,bool animate){
     if(i!=current)wallpaper_freeze();
 #endif
 #ifdef ESP_PLATFORM
-    if(i>=0&&i<=12&&app_service_map_busy()){
+    if(i>=0&&i<=15&&app_service_map_busy()){
         badge_apps_hide();cleanup_page=i;cleanup_animate=animate;return;
     }
     cleanup_page=-1;
 #endif
     brightness_preview=-1;
-    if(i>=9&&i<=12){badge_ui_page(1,false);badge_apps_launch(i-9);return;}
+    if(i>=9&&i<=15){badge_ui_page(1,false);badge_apps_launch(i-9);return;}
     if(i<0||i>8)return;
     badge_apps_hide();
     badge_wifi_hide();badge_ble_hide();badge_wallpaper_hide();shown(status,false);
