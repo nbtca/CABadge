@@ -65,7 +65,7 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 |[V2.1 嘉立创EDA工程](hardware/releases/V2_1_GEK100_20261020/easyeda/CABadge_V2_1_GEK100.epro2)|专业版 V4 原生工程，包含人工优化后的原理图和 PCB|
 |[v1.0 的硬件附件](https://github.com/nbtca/CABadge/releases/tag/v1.0)|仅用于复刻旧首板 c7c59dff，不作为 V2.1 生产包|
 
-V2.1 KiCad 资料请从 `main` 分支的 **Code → Download ZIP** 下载整套仓库并保留目录结构；EDA 用户可下载上述 `.epro2`，在专业版“导入专业版”入口导入。两种格式不自动同步，最新 EDA 原理图的 DRC 和跨格式网表仍待复核，具体范围见板卡说明。
+V2.1 KiCad 资料请从 `main` 分支的 **Code → Download ZIP** 下载整套仓库并保留目录结构；EDA 用户可下载上述 `.epro2`，在专业版“导入专业版”入口导入。两种格式不自动同步，最新 EDA 原理图重新优化过（kicad未变）方便阅读，具体范围见板卡说明。
 
 首次点亮直接使用所选 Release 的固件附件，无需先搭建编译环境，下载后核对 `SHA256SUMS.txt`。**v1.3.0-rc.1 自动生成的 `Source code (zip)` 不是 7.9.23 的对应源码；公开 `main` 固件源码仍为 7.9.16，最新板卡资料以 `main` 的上述目录为准。**
 
