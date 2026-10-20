@@ -1,0 +1,349 @@
+{
+  "pcb_sha256": "9d094d57cf92abfb1791aaf05bcdb3205478dee128614ef87b8f4fef2c3da4ea",
+  "input_sha256": {
+    "V11_Cup.step": "d9546406187deac6cf5e7a3d526da990536db52f62d3104c4a0b4d311415290f",
+    "V11_Keeper.step": "dac42c942f05c0591200eb27830225fb9ccafedbd4feaf6d65a9617bdf8ce119",
+    "V11_Button.step": "49f25700a84bf36ffdd9565a6839ade70bead0cf9dd57b196666dc5c61423faa",
+    "V11_Screen.step": "802db73db8988b4f9a3de7a754f2e28fcb141365df99d29d5e82c73943dfa58e",
+    "V11_Battery.step": "7f8cca53f4f64b1dd334deb67b6bcb6066fa80308c049679b16961b3c334b4af",
+    "V11_Insulator.step": "6f6f3523742570ee1606352b06f8ce7e9a12c8bd82bb57aaca0fb030956296c8",
+    "V11_BackLiner.step": "41926f021fd9cb9287168ffe574505e787862bfe25f69dc13da9788b7afa43e3",
+    "reference\\pcb_v21_no_j3.step": "ea1d983ad0a1bcd79d3a2ccf4ee83f861596a4df2faa61f5eede20ad60dcb57d"
+  },
+  "parts": {
+    "Cup": {
+      "solids": 1,
+      "valid": true,
+      "volume_mm3": 8076.118087063204,
+      "bbox_mm": [
+        -30.916006342624897,
+        30.71432716545059,
+        -31.0000001,
+        31.0000001,
+        0.6999998999999993,
+        13.7000001
+      ]
+    },
+    "Keeper": {
+      "solids": 1,
+      "valid": true,
+      "volume_mm3": 36.80000000000001,
+      "bbox_mm": [
+        -27.15,
+        -25.15,
+        -6.0,
+        6.0,
+        2.6,
+        8.8
+      ]
+    },
+    "Button": {
+      "solids": 1,
+      "valid": true,
+      "volume_mm3": 140.19597517572942,
+      "bbox_mm": [
+        -31.8000001,
+        -25.700000000000003,
+        -6.0,
+        6.0,
+        3.55,
+        8.8
+      ]
+    },
+    "Screen": {
+      "solids": 1,
+      "valid": true,
+      "volume_mm3": 7266.847865111693,
+      "bbox_mm": [
+        -26.5,
+        26.5,
+        -26.5,
+        26.5,
+        10.215,
+        13.9
+      ]
+    },
+    "Battery": {
+      "solids": 1,
+      "valid": true,
+      "volume_mm3": 5040.0,
+      "bbox_mm": [
+        -15.0,
+        15.0,
+        -21.0,
+        21.0,
+        5.85,
+        9.85
+      ]
+    },
+    "Insulator": {
+      "solids": 1,
+      "valid": true,
+      "volume_mm3": 242.6720000000002,
+      "bbox_mm": [
+        -15.2,
+        15.2,
+        -21.200000000000003,
+        21.2,
+        5.6,
+        5.8
+      ]
+    },
+    "BackLiner": {
+      "solids": 1,
+      "valid": true,
+      "volume_mm3": 576.9536583456618,
+      "bbox_mm": [
+        -24.9,
+        24.9,
+        -24.9,
+        24.9,
+        1.5,
+        1.8
+      ]
+    },
+    "PCB": {
+      "solids": 567,
+      "valid": true,
+      "volume_mm3": 3473.206754102236,
+      "bbox_mm": [
+        -25.35,
+        25.0118,
+        -25.0,
+        25.0,
+        1.8,
+        6.652200100000001
+      ]
+    }
+  },
+  "zero_mm3": {
+    "static_Cup_Keeper": 0.0,
+    "static_Cup_Button": 0.0,
+    "static_Cup_Screen": 0.0,
+    "static_Cup_Battery": 0.0,
+    "static_Cup_Insulator": 0.0,
+    "static_Cup_BackLiner": 0.0,
+    "static_Cup_PCB": 0.0,
+    "static_Keeper_Button": 0.0,
+    "static_Keeper_Screen": 0.0,
+    "static_Keeper_Battery": 0.0,
+    "static_Keeper_Insulator": 0.0,
+    "static_Keeper_BackLiner": 0.0,
+    "static_Keeper_PCB": 0.0,
+    "static_Button_Screen": 0.0,
+    "static_Button_Battery": 0.0,
+    "static_Button_Insulator": 0.0,
+    "static_Button_BackLiner": 0.0,
+    "static_Button_PCB": 0.0,
+    "static_Screen_Battery": 0.0,
+    "static_Screen_Insulator": 0.0,
+    "static_Screen_BackLiner": 0.0,
+    "static_Screen_PCB": 0.0,
+    "static_Battery_Insulator": 0.0,
+    "static_Battery_BackLiner": 0.0,
+    "static_Battery_PCB": 0.0,
+    "static_Insulator_BackLiner": 0.0,
+    "static_Insulator_PCB": 0.0,
+    "static_BackLiner_PCB": 0.0,
+    "unchanged_Button": 0.0,
+    "unchanged_Screen": 0.0,
+    "unchanged_Battery": 0.0,
+    "unchanged_Insulator": 0.0,
+    "unchanged_BackLiner": 0.0,
+    "PCB_upper_stops_removed": 0.0,
+    "button_top_entry_z0": 0.0,
+    "button_top_entry_z2": 0.0,
+    "button_top_entry_z4": 0.0,
+    "button_top_entry_z6": 0.0,
+    "button_top_entry_z8": 0.0,
+    "button_top_entry_z10": 0.0,
+    "button_top_entry_z12": 0.0,
+    "button_top_entry_z14": 0.0,
+    "button_top_entry_z16": 0.0,
+    "button_top_entry_z18": 0.0,
+    "button_top_entry_z20": 0.0,
+    "button_radial_entry_continuous": 0.0,
+    "keeper_top_entry_cup_0": 0.0,
+    "keeper_top_entry_button_0": 0.0,
+    "keeper_top_entry_cup_2": 0.0,
+    "keeper_top_entry_button_2": 0.0,
+    "keeper_top_entry_cup_4": 0.0,
+    "keeper_top_entry_button_4": 0.0,
+    "keeper_top_entry_cup_6": 0.0,
+    "keeper_top_entry_button_6": 0.0,
+    "keeper_top_entry_cup_8": 0.0,
+    "keeper_top_entry_button_8": 0.0,
+    "keeper_top_entry_cup_10": 0.0,
+    "keeper_top_entry_button_10": 0.0,
+    "keeper_top_entry_cup_12": 0.0,
+    "keeper_top_entry_button_12": 0.0,
+    "keeper_top_entry_cup_14": 0.0,
+    "keeper_top_entry_button_14": 0.0,
+    "keeper_top_entry_cup_16": 0.0,
+    "keeper_top_entry_button_16": 0.0,
+    "keeper_top_entry_cup_18": 0.0,
+    "keeper_top_entry_button_18": 0.0,
+    "keeper_top_entry_cup_20": 0.0,
+    "keeper_top_entry_button_20": 0.0,
+    "keeper_radial_entry_cup_continuous": 0.0,
+    "keeper_radial_entry_button_continuous": 0.0,
+    "button_press_Cup": 0.0,
+    "button_press_Keeper": 0.0,
+    "button_press_Screen": 0.0,
+    "button_press_Battery": 0.0,
+    "button_press_Insulator": 0.0,
+    "button_press_BackLiner": 0.0,
+    "button_press_fixed_PCB": 0.0,
+    "moving_switch_0.0": 0.0,
+    "moving_switch_0.05": 0.0,
+    "moving_switch_0.1": 0.0,
+    "moving_switch_0.15": 0.0,
+    "moving_switch_0.2": 0.0,
+    "moving_switch_0.25": 0.0,
+    "moving_switch_0.3": 0.0,
+    "moving_switch_0.35": 0.0,
+    "moving_switch_0.4": 0.0,
+    "moving_switch_0.45": 0.0,
+    "moving_switch_0.5": 0.0,
+    "moving_switch_0.55": 0.0,
+    "moving_switch_0.6": 0.0,
+    "moving_switch_0.65": 0.0,
+    "screen_top_entry_0": 0.0,
+    "screen_top_entry_1": 0.0,
+    "screen_top_entry_2": 0.0,
+    "screen_top_entry_4": 0.0,
+    "screen_top_entry_8": 0.0,
+    "screen_top_entry_12": 0.0,
+    "USB_plug_13x7": 0.0,
+    "USB_blind_back_missing": 0.0,
+    "flat_floor_missing_18.232_-4.3251": 0.0,
+    "flat_floor_missing_18.232_4.3251": 0.0,
+    "flat_floor_missing_22.4118_-4.3251": 0.0,
+    "flat_floor_missing_22.4118_4.3251": 0.0,
+    "FPC_envelope_Cup": 0.0,
+    "wire_envelope_Cup": 0.0,
+    "battery_solder_Cup": 0.0,
+    "C32_full_height_Cup": 0.0,
+    "FPC_envelope_Keeper": 0.0,
+    "wire_envelope_Keeper": 0.0,
+    "battery_solder_Keeper": 0.0,
+    "C32_full_height_Keeper": 0.0,
+    "FPC_envelope_Button": 0.0,
+    "wire_envelope_Button": 0.0,
+    "battery_solder_Button": 0.0,
+    "C32_full_height_Button": 0.0,
+    "continuous_outer_screen_collar": 0.0,
+    "native_export_match_Cup": 0.0,
+    "native_export_match_Keeper": 0.0,
+    "native_export_match_Button": 0.0,
+    "native_export_match_Screen": 0.0,
+    "native_export_match_Battery": 0.0,
+    "native_export_match_Insulator": 0.0,
+    "native_export_match_BackLiner": 0.0
+  },
+  "positive_mm3": {
+    "outward_stop": 1.5060398615562671,
+    "inward_stop": 0.10499999999997922,
+    "downward_stop": 1.981304664899463,
+    "upward_stop": 0.26724934224485586
+  },
+  "limits": [
+    "Rigid geometry only; adhesive choice/strength, print tolerances, switch return and real assembly unverified.",
+    "Full FPC bend and assembly forces not simulated; do not hinge the screen on the FPC root.",
+    "Battery envelope 42x30x4 supplied by user; seal, leads and expansion require dry fit.",
+    "PCB fixing requires a bonded dielectric laminate, 0.3mm installed including adhesive on both faces.",
+    "Four assumed solder pockets removed; real solder protrusion is unmeasured. Nominal board-back to flat floor gap is 0.3mm, not a solder-height allowance certification.",
+    "J3 intentionally not fitted; U6 VRML represented by additional nominal box; C32 full height additionally checked.",
+    "Old connector STEP does not establish actual drawer travel; connect and lock FPC before closing screen."
+  ],
+  "PCB_edge_first_insertion": "PENDING: tilted translation/rotation and connected FPC not verified",
+  "bond_liner_support_area_mm2": 1923.178861152209,
+  "bonding": {
+    "cup_step_sha256": "d9546406187deac6cf5e7a3d526da990536db52f62d3104c4a0b4d311415290f",
+    "screen_shelf_vs_V9_symmetric_difference_mm2": 0.0,
+    "screen_land_projected_area_mm2": 267.20715844217204,
+    "V9_screen_land_projected_area_mm2": 267.20715844217204,
+    "screen_adhesive_design_gap_mm": 0.2,
+    "keeper_foot_adhesive_design_gap_mm": 0.1,
+    "keeper_foot_bed_overlap_probe_mm2": 23.44949118609396,
+    "PCB_dielectric_laminate_including_both_adhesives_mm": 0.3,
+    "limits": "Original V9 screen bonding face restored. Nominal projected areas are not adhesive coverage/strength; edge-first PCB insertion remains unverified."
+  },
+  "USB_surface": {
+    "cup_step_sha256": "d9546406187deac6cf5e7a3d526da990536db52f62d3104c4a0b4d311415290f",
+    "before_max_USB_vertex_protrusion_mm": 0.3237203531845836,
+    "after_max_USB_vertex_protrusion_mm": 3.552713678800501e-15,
+    "added_floor_fill_volume_mm3": 4.927999999999996,
+    "unexpected_added_volume_mm3": 0.0,
+    "missing_floor_fill_mm3": 0.0,
+    "removed_volume_mm3": 0.08520748436366456,
+    "removed_outside_USB_region_mm3": 0.0,
+    "passed": true,
+    "limits": "Vertex/exact difference checks; PCB insertion, real cable fit and printed assembly remain unverified."
+  },
+  "meshes": {
+    "V11_Cup": {
+      "watertight": true,
+      "bodies": 1,
+      "volume_mm3": 8054.1603974384825,
+      "triangles": 5966,
+      "euler_number": -2,
+      "bounds_mm": [
+        [
+          -30.916006088256836,
+          -30.990964889526367,
+          0.699999988079071
+        ],
+        [
+          30.694303512573242,
+          30.990964889526367,
+          13.699999809265137
+        ]
+      ],
+      "stl_sha256": "95edfb94aef2894de189daf03e3f17c5dafdcc599bde935e03f9709567fd91e1"
+    },
+    "V11_Keeper": {
+      "watertight": true,
+      "bodies": 1,
+      "volume_mm3": 36.79999923706055,
+      "triangles": 28,
+      "euler_number": 2,
+      "bounds_mm": [
+        [
+          -27.149999618530273,
+          -6.0,
+          2.5999999046325684
+        ],
+        [
+          -25.149999618530273,
+          6.0,
+          8.800000190734863
+        ]
+      ],
+      "stl_sha256": "2e4288518b81631003b9cb08c0d073784dba1796b52dba564a69fb1fdbe3ae73"
+    },
+    "V11_Button": {
+      "watertight": true,
+      "bodies": 1,
+      "volume_mm3": 140.03874782385068,
+      "triangles": 436,
+      "euler_number": 2,
+      "bounds_mm": [
+        [
+          -31.798877716064453,
+          -6.0,
+          3.549999952316284
+        ],
+        [
+          -25.69999885559082,
+          6.0,
+          8.800000190734863
+        ]
+      ],
+      "stl_sha256": "b2c196bdcc23985a3fa8abc7ca59dab2e4d5cb4f6d833ad2a3ca6b32697339a8"
+    }
+  },
+  "rigid_checks_passed": true,
+  "passed": false,
+  "status": "RIGID_CHECKS_PASS_INSERTION_PENDING"
+}

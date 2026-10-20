@@ -12,6 +12,8 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 
 **当前最新板卡： [V2.1 GEK100（2026-10-20）](hardware/releases/V2_1_GEK100_20261020/README.md)。** 已同时上传完整的 [KiCad 工程](hardware/releases/V2_1_GEK100_20261020/kicad/CABadge_V2_1.kicad_pro)和[嘉立创EDA专业版工程](hardware/releases/V2_1_GEK100_20261020/easyeda/CABadge_V2_1_GEK100.epro2)，包括 GEK100 按键电源、R40 连接器抽屉避让，以及当前优化后的 EDA 原理图。EDA 已更新为 2026-10-20 16:04 的人工优化原理图导出，PCB 设计记录与上一快照一致；新版原理图 DRC 和跨格式网表待复核，新增电源与机械适配仍待实板验证。固件与板卡修订分别编号。
 
+**当前正式外壳：[V11 一体杯壳，配套 V2.1 GEK100](hardware/enclosure/releases/V11_V2_1_20261020/README.md)。** 提供三个打印件、STEP / SolidWorks 装配模型、[装配图 PDF](hardware/enclosure/releases/V11_V2_1_20261020/images/assembly-guide.pdf)及[装配说明](hardware/enclosure/releases/V11_V2_1_20261020/ASSEMBLY.md)。PCB 采用板边先入、壳内转平，屏幕最后落座；正式配套发布不改写尚待完成的实物装配验证。
+
 [下载 v1.2.0](https://github.com/nbtca/CABadge/releases/tag/v1.2.0) · [发布与升级说明](docs/RELEASE-v1.2.0.md) · [已知问题](docs/KNOWN_ISSUES.md) · [实板测试记录](首板测试记录.md)
 
 当前 `main` 源码版本为 **7.9.16-eaf-transition**，包含 BlueMap 下载/缓存改进、统一壁纸库、EAF Direct 动态壁纸与逐资源 timing、冻结当前帧的页面转场，以及 [动态壁纸转换说明](docs/EAF_TIMING.md)。上方 v1.2.0 下载链接对应同版固件；最新源码构建方法见 [BUILD](docs/BUILD.md)，验证范围见 [HANDOFF](firmware-v7/HANDOFF.md)。
@@ -63,6 +65,7 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 |所选 Release 的 `debug.zip`|与该版固件匹配的 ELF、有效构建配置，仅排查问题时需要|
 |[V2.1 KiCad 工程](hardware/releases/V2_1_GEK100_20261020/kicad/CABadge_V2_1.kicad_pro)|KiCad 10 项目入口，需连同该目录的原理图、PCB、库和模型一起下载|
 |[V2.1 嘉立创EDA工程](hardware/releases/V2_1_GEK100_20261020/easyeda/CABadge_V2_1_GEK100.epro2)|专业版 V4 原生工程，包含人工优化后的原理图和 PCB|
+|[V11 正式配套外壳](hardware/enclosure/releases/V11_V2_1_20261020/README.md)|三个打印 STL、装配模型、爆炸图及剖面图，与 V2.1 PCB 配套|
 |[v1.0 的硬件附件](https://github.com/nbtca/CABadge/releases/tag/v1.0)|仅用于复刻旧首板 c7c59dff，不作为 V2.1 生产包|
 
 V2.1 KiCad 资料请从 `main` 分支的 **Code → Download ZIP** 下载整套仓库并保留目录结构；EDA 用户可下载上述 `.epro2`，在专业版“导入专业版”入口导入。两种格式不自动同步，最新 EDA 原理图重新优化过（kicad未变）方便阅读，具体范围见板卡说明。
@@ -86,6 +89,8 @@ V2.1 KiCad 资料请从 `main` 分支的 **Code → Download ZIP** 下载整套�
 只有复刻 **旧首板 c7c59dff** 时，才使用 v1.0 硬件附件中的 `JXBadge_EVT_20260909_c7c59dff_PCB.zip`；[原下单说明](hardware/fabrication/JXBadge_EVT_20260909_c7c59dff/下单说明.md)保留历史参考含义。交给板厂的是 PCB 制造 ZIP，不是仓库源码 ZIP、整套资料外层 ZIP 或钢网包。
 
 ### 4. 分阶段焊接与首次上电
+
+外壳使用 [V11 正式配套包](hardware/enclosure/releases/V11_V2_1_20261020/README.md)，按[装配图与顺序](hardware/enclosure/releases/V11_V2_1_20261020/ASSEMBLY.md)准备杯壳、按帽和隐藏限位件，电路调试完成后再合屏固定。
 
 按 [焊接与分阶段上电检查](焊接与分阶段上电检查_首板.md) 分组完成：USB 输入 → 3.3 V 电源 → 主控与 USB 下载 → 屏幕与触摸 → 电池与充电。
 

@@ -1,0 +1,11 @@
+{
+  "cup_step_sha256": "d9546406187deac6cf5e7a3d526da990536db52f62d3104c4a0b4d311415290f",
+  "screen_shelf_vs_V9_symmetric_difference_mm2": 0.0,
+  "screen_land_projected_area_mm2": 267.20715844217204,
+  "V9_screen_land_projected_area_mm2": 267.20715844217204,
+  "screen_adhesive_design_gap_mm": 0.2,
+  "keeper_foot_adhesive_design_gap_mm": 0.1,
+  "keeper_foot_bed_overlap_probe_mm2": 23.44949118609396,
+  "PCB_dielectric_laminate_including_both_adhesives_mm": 0.3,
+  "limits": "Original V9 screen bonding face restored. Nominal projected areas are not adhesive coverage/strength; edge-first PCB insertion remains unverified."
+}

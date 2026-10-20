@@ -58,6 +58,7 @@ simulator-settings.json
 !/hardware/enclosure/releases/
 /hardware/enclosure/releases/*
 !/hardware/enclosure/releases/V6_20260930/
+!/hardware/enclosure/releases/V11_V2_1_20261020/
 /hardware/enclosure/releases/V6_20260930/*
 !/hardware/enclosure/releases/V6_20260930/.gitattributes
 !/hardware/enclosure/releases/V6_20260930/README.md

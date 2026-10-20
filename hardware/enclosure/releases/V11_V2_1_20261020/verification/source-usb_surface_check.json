@@ -1,0 +1,12 @@
+{
+  "cup_step_sha256": "d9546406187deac6cf5e7a3d526da990536db52f62d3104c4a0b4d311415290f",
+  "before_max_USB_vertex_protrusion_mm": 0.3237203531845836,
+  "after_max_USB_vertex_protrusion_mm": 3.552713678800501e-15,
+  "added_floor_fill_volume_mm3": 4.927999999999996,
+  "unexpected_added_volume_mm3": 0.0,
+  "missing_floor_fill_mm3": 0.0,
+  "removed_volume_mm3": 0.08520748436366456,
+  "removed_outside_USB_region_mm3": 0.0,
+  "passed": true,
+  "limits": "Vertex/exact difference checks; PCB insertion, real cable fit and printed assembly remain unverified."
+}

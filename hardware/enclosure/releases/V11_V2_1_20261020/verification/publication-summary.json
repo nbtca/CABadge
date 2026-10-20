@@ -1,0 +1,70 @@
+{
+  "release_status": "OFFICIAL_MATCHING_ENCLOSURE",
+  "release_date": "2026-10-20",
+  "enclosure": "V11",
+  "paired_pcb": "V2.1 GEK100",
+  "pcb_sha256": "9d094d57cf92abfb1791aaf05bcdb3205478dee128614ef87b8f4fef2c3da4ea",
+  "geometry_changed": false,
+  "schematic_or_pcb_changed": false,
+  "source_geometry_sha256_verified": {
+    "V11_Cup.step": "d9546406187deac6cf5e7a3d526da990536db52f62d3104c4a0b4d311415290f",
+    "V11_Keeper.step": "dac42c942f05c0591200eb27830225fb9ccafedbd4feaf6d65a9617bdf8ce119",
+    "V11_Button.step": "49f25700a84bf36ffdd9565a6839ade70bead0cf9dd57b196666dc5c61423faa",
+    "V11_Screen.step": "802db73db8988b4f9a3de7a754f2e28fcb141365df99d29d5e82c73943dfa58e",
+    "V11_Battery.step": "7f8cca53f4f64b1dd334deb67b6bcb6066fa80308c049679b16961b3c334b4af",
+    "V11_Insulator.step": "6f6f3523742570ee1606352b06f8ce7e9a12c8bd82bb57aaca0fb030956296c8",
+    "V11_BackLiner.step": "41926f021fd9cb9287168ffe574505e787862bfe25f69dc13da9788b7afa43e3",
+    "reference\\pcb_v21_no_j3.step": "ea1d983ad0a1bcd79d3a2ccf4ee83f861596a4df2faa61f5eede20ad60dcb57d"
+  },
+  "native_archive_original_files_verified": 9,
+  "native_assembly_components": 8,
+  "native_assembly_type": "Fixed-position reference; no driven motion mates",
+  "step_assembly_solids": 573,
+  "step_assembly_bounds_mm": [
+    -31.800000100000002,
+    -31.0000001,
+    0.6999998999976723,
+    30.714327165451,
+    31.0000001,
+    13.9
+  ],
+  "step_assembly_reimport": "PASS",
+  "print_mesh_checks": {
+    "Cup": {
+      "watertight": true,
+      "one_body": true,
+      "triangles": 5966,
+      "volume_mm3": 8054.1603974384825,
+      "sha256": "95edfb94aef2894de189daf03e3f17c5dafdcc599bde935e03f9709567fd91e1"
+    },
+    "Keeper": {
+      "watertight": true,
+      "one_body": true,
+      "triangles": 28,
+      "volume_mm3": 36.79999923706055,
+      "sha256": "2e4288518b81631003b9cb08c0d073784dba1796b52dba564a69fb1fdbe3ae73"
+    },
+    "Button": {
+      "watertight": true,
+      "one_body": true,
+      "triangles": 436,
+      "volume_mm3": 140.03874782385068,
+      "sha256": "b2c196bdcc23985a3fa8abc7ca59dab2e4d5cb4f6d833ad2a3ca6b32697339a8"
+    }
+  },
+  "source_rigid_checks": "RIGID_CHECKS_PASS_INSERTION_PENDING",
+  "source_full_acceptance_passed": false,
+  "physical_assembly_acceptance": "PENDING",
+  "pcb_edge_first_insertion_path": "PENDING",
+  "new_device_or_print_test": "NOT_RUN",
+  "drawing_source": "Unmodified matching STEP shapes at assembly positions; exploded view adds display offsets only. PCB reference omits full flexible cable and some unmodeled details.",
+  "limits": [
+    "Rigid geometry only; adhesive choice/strength, print tolerances, switch return and real assembly unverified.",
+    "Full FPC bend and assembly forces not simulated; do not hinge the screen on the FPC root.",
+    "Battery envelope 42x30x4 supplied by user; seal, leads and expansion require dry fit.",
+    "PCB fixing requires a bonded dielectric laminate, 0.3mm installed including adhesive on both faces.",
+    "Four assumed solder pockets removed; real solder protrusion is unmeasured. Nominal board-back to flat floor gap is 0.3mm, not a solder-height allowance certification.",
+    "J3 intentionally not fitted; U6 VRML represented by additional nominal box; C32 full height additionally checked.",
+    "Old connector STEP does not establish actual drawer travel; connect and lock FPC before closing screen."
+  ]
+}
