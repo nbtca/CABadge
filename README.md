@@ -150,3 +150,7 @@ python -m esptool --chip esp32s3 --port COMx --baud 115200 write-flash 0x0 bootl
 ## 许可
 
 本项目原创内容采用 [MIT License](LICENSE)。第三方字体、库、模型和素材仍遵循各自许可，不因本项目采用 MIT 而改变；字体许可见 [FONT-LICENSE.txt](firmware-v7/ui/FONT-LICENSE.txt)。
+
+## 致谢
+
+感谢 **嘉立创** 和 **华秋** 提供的免费打板支持，也感谢组织成员 **m1ngsama** 提供的 Pro 账号。这些支持为本项目的开发提供了极大的帮助。
