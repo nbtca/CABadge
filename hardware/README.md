@@ -1,3 +1,5 @@
+> **BOM 已同步两版用料（2026-10-20）：[差异与采购说明](bom/README.md)。** [逐位号 BOM](BOM-DRAFT.csv) 与[采购表](LCSC_IMPORT_LIST.csv)均标明旧首板／V2.1 用量和独有器件；V2.1 新增 U7、C32，SW1 换为轻触按键。采购表原“数量”列默认表示 V2.1；交互式 BOM 仍为旧首板快照。
+
 > **当前最新板卡（2026-10-20）：[V2.1 GEK100 双格式源文件](releases/V2_1_GEK100_20261020/README.md)。** 同时提供 KiCad 10 工程与嘉立创EDA专业版 V4 原生工程；已核对器件、引脚与 PCB 焊盘网络。GEK100 按键电源和 R40 机械避让仍待新板实测。下方保留原首板 c7c59dff 的复刻与制造基线说明。
 
 # CABadge c7c59dff 硬件复刻
@@ -8,7 +10,7 @@
 
 - 项目、根原理图、Controls_Test / Display_Sensor / USB_Power 子页、PCB 和设计规则。
 - JXBadge.kicad_sym、JXBadge.pretty、JXBadge.3dshapes 及两份 lib-table：工程使用 KIPRJMOD 相对引用，不随意移动或删减。
-- [BOM](BOM-DRAFT.csv)、[采购表](LCSC_IMPORT_LIST.csv)、[交互式 BOM](bom/ibom.html)：后者下载后在浏览器打开，辅助焊接定位。
+- [BOM](BOM-DRAFT.csv)与[采购表](LCSC_IMPORT_LIST.csv)：按[版本差异说明](bom/README.md)选择旧版或新版数量；[交互式 BOM](bom/ibom.html)仍为旧首板快照，下载后在浏览器打开，辅助旧版焊接定位。
 - [冻结生产包与下单说明](fabrication/JXBadge_EVT_20260909_c7c59dff/下单说明.md)：PCB ZIP 和顶层钢网 ZIP 分开使用；MANIFEST 中的文件整组保持一致。
 
 ## 采购与装配

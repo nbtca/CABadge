@@ -1,0 +1,109 @@
+{
+  "comparison_date": "2026-10-20",
+  "scope": "Actual PCB footprints; procurement overrides are explicit and do not modify CAD.",
+  "boards": {
+    "old": {
+      "path": "hardware/JXBadge_V1.kicad_pcb",
+      "sha256": "c7c59dff5e6f2065a2157a81414d9d21c5cb1196a7b277656e15007753801a8d"
+    },
+    "new": {
+      "path": "hardware/releases/V2_1_GEK100_20261020/kicad/CABadge_V2_1.kicad_pcb",
+      "sha256": "9d094d57cf92abfb1791aaf05bcdb3205478dee128614ef87b8f4fef2c3da4ea"
+    }
+  },
+  "counts": {
+    "old": {
+      "all_footprints": 108,
+      "bom_positions_including_dnp": 97,
+      "fitted_pcb_parts": 94,
+      "external_battery": 1
+    },
+    "new": {
+      "all_footprints": 110,
+      "bom_positions_including_dnp": 99,
+      "fitted_pcb_parts": 96,
+      "external_battery": 1
+    }
+  },
+  "new_references": [
+    "C32",
+    "U7"
+  ],
+  "removed_references": [],
+  "identity_changes": [
+    {
+      "reference": "SW1",
+      "old": {
+        "value": "POWER",
+        "footprint": "JXBadge:JS102011SAQN_C221660"
+      },
+      "new": {
+        "value": "POWER 1s ON / 3s OFF",
+        "footprint": "JXBadge:HX-2X4X3_5CA-2_5N_C49234137"
+      }
+    }
+  ],
+  "position_only_changes": [
+    {
+      "reference": "R40",
+      "old_xy_mm": [
+        105.4,
+        122.9
+      ],
+      "new_xy_mm": [
+        111.3,
+        115.8
+      ]
+    }
+  ],
+  "excluded_markers": [
+    "FID1",
+    "FID2",
+    "FID3",
+    "TP1",
+    "TP2",
+    "TP3",
+    "TP4",
+    "TP5",
+    "TP6",
+    "TP7",
+    "TP8"
+  ],
+  "assembly_dnp": {
+    "C12": "RF tuning placeholder in both CAD files",
+    "C13": "RF tuning placeholder in both CAD files",
+    "J3": "User assembly override: battery wires soldered directly; pads remain in CAD"
+  },
+  "field_resolution": {
+    "C32": "MPN/LCSC inferred from exact C5 footprint and existing approved procurement row",
+    "SW1_new": "MPN/LCSC inferred from exact SW2/SW3 footprint and existing approved procurement row",
+    "U7": "MPN from PCB Value GEK100_13 and manufacturer datasheet; LCSC unverified",
+    "J1": "Current assembly contact direction overrides legacy CAD purchase identity; MPN/LCSC unknown"
+  },
+  "sku_changes": [
+    {
+      "mpn": "JS102011SAQN",
+      "lcsc": "C221660",
+      "old_quantity": 1,
+      "new_quantity": 0
+    },
+    {
+      "mpn": "HX-2X4X3.5CA-2.5N",
+      "lcsc": "C49234137",
+      "old_quantity": 2,
+      "new_quantity": 3
+    },
+    {
+      "mpn": "CC0603KRX7R9BB104",
+      "lcsc": "C14663",
+      "old_quantity": 13,
+      "new_quantity": 14
+    },
+    {
+      "mpn": "GEK100_13",
+      "lcsc": null,
+      "old_quantity": 0,
+      "new_quantity": 1
+    }
+  ]
+}

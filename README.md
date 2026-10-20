@@ -46,7 +46,7 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 |充电|TP4056-MS，配合外围供电分配与充电使能电路|
 |PCB|直径 50 mm、四层板、名义板厚 1.6 mm|
 
-最新板卡设计为 **V2.1 GEK100**，源文件与检查结果见[最新版板卡目录](hardware/releases/V2_1_GEK100_20261020/README.md)。已完成首板实测的硬件基线仍为 **JXBadge_EVT_20260909_c7c59dff**；现有 [BOM](hardware/BOM-DRAFT.csv)、采购表、交互式 BOM 和旧冻结生产包属于首板资料，复刻 V2.1 时需按该版工程核对新增器件与待验收项。
+最新板卡设计为 **V2.1 GEK100**，源文件与检查结果见[最新版板卡目录](hardware/releases/V2_1_GEK100_20261020/README.md)。已完成首板实测的硬件基线仍为 **JXBadge_EVT_20260909_c7c59dff**；[BOM](hardware/BOM-DRAFT.csv) 与[采购表](hardware/LCSC_IMPORT_LIST.csv)已列出两版用量及新旧独有器件，详见[用料差异](hardware/bom/README.md)。交互式 BOM 与旧冻结生产包仍属于首板资料，V2.1 新增电源与机构仍待实板验收。
 
 ## 如何开始复刻
 
@@ -74,7 +74,7 @@ V2.1 KiCad 资料请从 `main` 分支的 **Code → Download ZIP** 下载整套�
 
 ### 2. 核对器件与装配
 
-先选定板卡版本。现有 [BOM](hardware/BOM-DRAFT.csv)、[采购料号表](hardware/LCSC_IMPORT_LIST.csv) 和 [交互式 BOM](hardware/bom/ibom.html) 是首板参考；V2.1 需结合[本版硬件变更](hardware/releases/V2_1_GEK100_20261020/README.md#本版硬件变更)核对 U7 GEK100_13、C32、SW1 及 R40 位置变化，按选用的工程重新核对采购和装配。交互式 BOM 下载到本地后用浏览器打开。
+先选定板卡版本，再从 [BOM](hardware/BOM-DRAFT.csv) 与[采购料号表](hardware/LCSC_IMPORT_LIST.csv)筛选对应版本数量大于 0 的器件；两表均标明共用、旧版独有、新版独有与用量变化，采购表原“数量”列默认表示 V2.1。新版新增 U7 GEK100_13、C32，SW1 由拨动开关改成轻触按键，R40 仅移位；具体型号与每板数量见[两版用料差异](hardware/bom/README.md)。[交互式 BOM](hardware/bom/ibom.html)仍是旧首板快照，下载后用浏览器打开，不用于核对新版完整用料。
 
 查看当前电路时，用 KiCad 10 打开 [CABadge_V2_1.kicad_pro](hardware/releases/V2_1_GEK100_20261020/kicad/CABadge_V2_1.kicad_pro)，或导入对应 EDA 工程。只有复刻旧首板时才使用 [JXBadge_V1.kicad_pro](hardware/JXBadge_V1.kicad_pro)及其整套资料。
 
