@@ -1,6 +1,7 @@
 {
   "revision": "V2.1 GEK100",
   "snapshot_date": "2026-10-20",
+  "eda_export_time": "2026-10-20T16:04:26+08:00",
   "files": [
     {
       "path": ".gitattributes",
@@ -9,13 +10,13 @@
     },
     {
       "path": "easyeda/CABadge_V2_1_GEK100.epro2",
-      "bytes": 1330651,
-      "sha256": "0811503945fa6988bde69727df846c952ecb4304a703b90fe4d7bedb1699a7c5"
+      "bytes": 1328414,
+      "sha256": "c7c9548de0c6889f9c3f2185c30612ce8f3a596ed647d3f482726eb0cbc67bfb"
     },
     {
-      "path": "easyeda/schematic-preview.svg",
-      "bytes": 173288,
-      "sha256": "7688a5fd870b1ea78c135dfd8b704d64cd349b938c56ab071176241b56ca75e4"
+      "path": "easyeda/schematic-preview.webp",
+      "bytes": 265176,
+      "sha256": "db8f3f0cd84b0b822cf9052ccbc2ec6c7bd576649edf2916a3b173c94d1a2cc9"
     },
     {
       "path": "kicad/CABadge_V2_1.kicad_dru",
@@ -619,8 +620,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 4026,
-      "sha256": "1b70dc8338c613cc0f0d6bb7731406ae6228072fada9786fdd038f46335e83b9"
+      "bytes": 4503,
+      "sha256": "738ecbfd76978dff4af94bc1cae563f2f9a88dbb9dfad72a30842c2fe224bc1b"
     },
     {
       "path": "verification/easyeda-pcb-drc.json",
@@ -639,8 +640,8 @@
     },
     {
       "path": "verification/summary.json",
-      "bytes": 1393,
-      "sha256": "bfafc836a6b03c5d2b53a1c8ecab28dc1bed3765685a900466d18cbee6710de0"
+      "bytes": 2653,
+      "sha256": "140c00911363a78e622f8153c1664eea50f68ab9e89d9bf395ac87f95a8b0159"
     }
   ]
 }
