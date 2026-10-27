@@ -25,14 +25,14 @@ class RepositoryChecks(unittest.TestCase):
             'firmware-v7/usb_screen/device/src/CMakeLists.txt':
                 'idf_component_register(SRCS "main.c" INCLUDE_DIRS ".")',
             'firmware-v7/usb_screen/device/src/main.c': '/* test fixture */',
-            'hardware/JXBadge_V1.kicad_pcb': '(test_fixture)',
+            'hardware/pcb/archive/V1_c7c59dff/JXBadge_V1.kicad_pcb': '(test_fixture)',
             'hardware/fabrication/JXBadge_EVT_20260909_c7c59dff/MANIFEST.json':
                 '{"files": []}',
         }.items():
             path = self.root / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(text, encoding='utf8')
-        self.release = self.root / 'hardware/releases/test'
+        self.release = self.root / 'hardware/pcb/current'
         self.release.mkdir(parents=True)
         self.payload = self.release / 'board.epro2'
         with zipfile.ZipFile(self.payload, 'w') as archive:
@@ -62,6 +62,18 @@ class RepositoryChecks(unittest.TestCase):
         self.assertEqual(result.returncode == 0, success, output)
         self.assertIn(expected, output)
         return output
+
+    def test_archived_model_uses_its_project_directory(self):
+        project = self.root / 'hardware/pcb/archive/V1_c7c59dff'
+        (project / 'JXBadge_V1.kicad_pcb').write_text(
+            '(model "${KIPRJMOD}/JXBadge.3dshapes/test.step")', encoding='utf8')
+        model = project / 'JXBadge.3dshapes/test.step'
+        model.parent.mkdir()
+        model.write_text('synthetic model', encoding='utf8')
+        self.git('add', '.')
+        self.run_check(True, 'PASS:')
+        model.unlink()
+        self.run_check(False, 'Missing local 3D model: JXBadge.3dshapes/test.step')
 
     def test_valid_release(self):
         self.run_check(True, 'PASS:')
@@ -97,7 +109,7 @@ class RepositoryChecks(unittest.TestCase):
         self.run_check(False, 'mismatch')
 
     def test_untracked_payload_does_not_mask_incomplete_release(self):
-        self.git('rm', '--cached', 'hardware/releases/test/board.epro2')
+        self.git('rm', '--cached', 'hardware/pcb/current/board.epro2')
         self.run_check(False, 'not tracked')
 
 

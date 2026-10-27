@@ -1,6 +1,6 @@
 # V11 / V2.1 GEK100 装配说明
 
-配套 [V11 正式外壳](README.md)与 [V2.1 PCB](../../../releases/V2_1_GEK100_20261020/README.md)。[下载两页装配图](images/assembly-guide.pdf)，图中 01～08 与下表对应。
+配套 [V11 正式外壳](README.md)与 [V2.1 PCB](../../../pcb/current/README.md)。[下载两页装配图](images/assembly-guide.pdf)，图中 01～08 与下表对应。
 
 ## 准备零件
 

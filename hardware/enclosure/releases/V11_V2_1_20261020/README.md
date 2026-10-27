@@ -2,7 +2,7 @@
 
 2026-10-20 起，项目采用 **V11 一体杯壳作为 V2.1 GEK100 的正式配套外壳**。本次发布沿用现有模型，未修改外壳几何、原理图或 PCB；V6 保留为旧首板的历史版本。
 
-配套板卡：[V2.1 GEK100 双格式工程](../../../releases/V2_1_GEK100_20261020/README.md)，包括 KiCad 10 与嘉立创EDA专业版工程。对应 KiCad PCB SHA-256：`9d094d57cf92abfb1791aaf05bcdb3205478dee128614ef87b8f4fef2c3da4ea`，与 V11 几何检查记录一致。
+配套板卡：[V2.1 GEK100 双格式工程](../../../pcb/current/README.md)，包括 KiCad 10 与嘉立创EDA专业版工程。对应 KiCad PCB SHA-256：`9d094d57cf92abfb1791aaf05bcdb3205478dee128614ef87b8f4fef2c3da4ea`，与 V11 几何检查记录一致。
 
 ## 下载与打印
 

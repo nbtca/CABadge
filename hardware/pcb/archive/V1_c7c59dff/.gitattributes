@@ -1,0 +1,3 @@
+*.kicad* -text
+JXBadge.pretty/** -text
+JXBadge.3dshapes/** binary

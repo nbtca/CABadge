@@ -3,11 +3,11 @@
   "scope": "Actual PCB footprints; procurement overrides are explicit and do not modify CAD.",
   "boards": {
     "old": {
-      "path": "hardware/JXBadge_V1.kicad_pcb",
+      "path": "hardware/pcb/archive/V1_c7c59dff/JXBadge_V1.kicad_pcb",
       "sha256": "c7c59dff5e6f2065a2157a81414d9d21c5cb1196a7b277656e15007753801a8d"
     },
     "new": {
-      "path": "hardware/releases/V2_1_GEK100_20261020/kicad/CABadge_V2_1.kicad_pcb",
+      "path": "hardware/pcb/current/kicad/CABadge_V2_1.kicad_pcb",
       "sha256": "9d094d57cf92abfb1791aaf05bcdb3205478dee128614ef87b8f4fef2c3da4ea"
     }
   },

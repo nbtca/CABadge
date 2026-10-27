@@ -10,7 +10,7 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 
 **最新测试版本：[v1.3.0-rc.1 / 7.9.23-timetiles-fix](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)。** 新增 TimeTiles、FluidBox、标准 BLE 心率和动作控制更新；已确认烧录与启动，最新手势、画面及长期稳定性仍待实屏验收。对应开发源码现已同步到 `main`，构建方法见 [BUILD](docs/BUILD.md)。
 
-**当前最新板卡：[V2.1 星火计划 · EDA 原生重画版（2026-10-27）](hardware/releases/EasyEDA_Native_20261027/README.md)。** [完整嘉立创EDA工程](hardware/releases/EasyEDA_Native_20261027/CABadge_StarPlan_EasyEDA_Native_20261027.epro2)包含复用的五张原理图和在新工程中重画的 PCB，保留确认的原版走线、正面丝印与底部星火计划 Logo。元器件核对已停止，归档说明记录当前状态；[2026-10-20 KiCad / 转换版 EDA](hardware/releases/V2_1_GEK100_20261020/README.md)保留为历史快照。固件与板卡修订分别编号。
+**当前板卡：[V2.1 GEK100 / 星火计划](hardware/pcb/current/README.md)。** 同时提供 [KiCad 工程](hardware/pcb/current/kicad/CABadge_V2_1.kicad_pro)与[嘉立创EDA工程](hardware/pcb/current/easyeda/CABadge_V2_1_GEK100.epro2)。KiCad 保留 2026-10-20 的原文件，EDA 已替换为 2026-10-27 原生重画版，包含五张复用原理图、重画 PCB、原版连线与正面丝印及底部星火计划 Logo。旧的转换版 EDA 已移除；[V1 首板 KiCad](hardware/pcb/archive/V1_c7c59dff/README.md)归档保存。
 
 **当前正式外壳：[V11 一体杯壳，配套 V2.1 GEK100](hardware/enclosure/releases/V11_V2_1_20261020/README.md)。** 提供三个打印件、STEP / SolidWorks 装配模型、[装配图 PDF](hardware/enclosure/releases/V11_V2_1_20261020/images/assembly-guide.pdf)及[装配说明](hardware/enclosure/releases/V11_V2_1_20261020/ASSEMBLY.md)。PCB 采用板边先入、壳内转平，屏幕最后落座；正式配套发布不改写尚待完成的实物装配验证。
 
@@ -46,7 +46,7 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 |充电|TP4056-MS，配合外围供电分配与充电使能电路|
 |PCB|直径 50 mm、四层板、名义板厚 1.6 mm|
 
-最新板卡设计为 **V2.1 星火计划 EDA 原生重画版（2026-10-27）**，源文件与归档结果见[最新版板卡目录](hardware/releases/EasyEDA_Native_20261027/README.md)。已完成首板实测的硬件基线仍为 **JXBadge_EVT_20260909_c7c59dff**；[BOM](hardware/BOM-DRAFT.csv) 与[采购表](hardware/LCSC_IMPORT_LIST.csv)为已有用料资料，本次未继续核对或更新，不能视为原生重画版的完整已确认采购清单。交互式 BOM 与旧冻结生产包仍属于首板资料，V2.1 新增电源与机构仍待实板验收。
+当前板卡为 **V2.1 GEK100 / 星火计划**，KiCad 与 EDA 两种格式见[当前板卡目录](hardware/pcb/current/README.md)。已完成首板实测的硬件基线仍为 **JXBadge_EVT_20260909_c7c59dff**；[BOM](hardware/bom/BOM-DRAFT.csv) 与[采购表](hardware/bom/LCSC_IMPORT_LIST.csv)保留已有两版用量资料，本次只迁移路径，元器件核对已停止。交互式 BOM 与冻结制造包仍属于首板资料，V2.1 新增电源与机构仍待实板验收。
 
 ## 如何开始复刻
 
@@ -56,27 +56,27 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 
 ### 1. 下载固件与配套硬件
 
-固件与板卡分别选择版本：最新测试固件为 [v1.3.0-rc.1 / 7.9.23](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)，正式固件仍为 [v1.2.0 / 7.9.16](https://github.com/nbtca/CABadge/releases/tag/v1.2.0)；当前最新板卡为 [V2.1 星火计划 EDA 原生重画版](hardware/releases/EasyEDA_Native_20261027/README.md)。测试版的新功能和 V2.1 新增电源、机构适配仍待实物验收，固件版本与 PCB 修订独立编号。
+固件与板卡分别选择版本：最新测试固件为 [v1.3.0-rc.1 / 7.9.23](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)，正式固件仍为 [v1.2.0 / 7.9.16](https://github.com/nbtca/CABadge/releases/tag/v1.2.0)；当前板卡为 [V2.1 GEK100 / 星火计划](hardware/pcb/current/README.md)。测试版的新功能和 V2.1 新增电源、机构适配仍待实物验收，固件版本与 PCB 修订独立编号。
 
 |文件|用途|
 |---|---|
 |`CABadge-v1.3.0-rc.1-firmware.zip`|最新测试版三个 BIN、安装说明、验证记录及校验值|
 |`CABadge-v1.2.0-firmware.zip`|正式版三个 BIN、安装说明及校验值|
 |所选 Release 的 `debug.zip`|与该版固件匹配的 ELF、有效构建配置，仅排查问题时需要|
-|[V2.1 KiCad 历史工程](hardware/releases/V2_1_GEK100_20261020/kicad/CABadge_V2_1.kicad_pro)|2026-10-20 快照，需连同该目录的原理图、PCB、库和模型一起下载|
-|[V2.1 嘉立创EDA原生重画工程](hardware/releases/EasyEDA_Native_20261027/CABadge_StarPlan_EasyEDA_Native_20261027.epro2)|2026-10-27 最新专业版 V4 工程，含五张复用原理图及原生重画 PCB|
+|[V2.1 KiCad 工程](hardware/pcb/current/kicad/CABadge_V2_1.kicad_pro)|当前 V2.1 的 KiCad 格式，保留 2026-10-20 原文件，需连同库和模型下载|
+|[V2.1 嘉立创EDA原生重画工程](hardware/pcb/current/easyeda/CABadge_V2_1_GEK100.epro2)|2026-10-27 最新专业版 V4 工程，含五张复用原理图及原生重画 PCB|
 |[V11 正式配套外壳](hardware/enclosure/releases/V11_V2_1_20261020/README.md)|三个打印 STL、装配模型、爆炸图及剖面图，与 V2.1 PCB 配套|
 |[v1.0 的硬件附件](https://github.com/nbtca/CABadge/releases/tag/v1.0)|仅用于复刻旧首板 c7c59dff，不作为 V2.1 生产包|
 
-最新 EDA 用户可下载上述 `.epro2`，在专业版“导入专业版”入口导入，内容与状态见[原生重画版说明](hardware/releases/EasyEDA_Native_20261027/README.md)。历史 KiCad 资料请从 `main` 分支的 **Code → Download ZIP** 下载并保留目录结构；它仍为 2026-10-20 快照，与最新原生重画 PCB 不自动同步。
+V2.1 同时提供两种格式：EDA 用户下载上述 `.epro2`，在专业版“导入专业版”入口导入；KiCad 用户从 `main` 分支的 **Code → Download ZIP** 下载工程并保留 `hardware/pcb/current/kicad/` 的目录结构。EDA 已换为 2026-10-27 原生重画版，KiCad 原文件保持，两种格式不自动同步；详见[当前版本说明](hardware/pcb/current/README.md)。
 
 首次点亮直接使用所选 Release 的固件附件，无需先搭建编译环境，下载后核对 `SHA256SUMS.txt`。**自行编译 7.9.23 请下载 `main` 分支源码，并按 [BUILD](docs/BUILD.md)恢复依赖。v1.3.0-rc.1 标签自动生成的 `Source code (zip)` 仍是该标签发布时的旧源码快照；最新源码此次同步到 `main`，没有移动既有标签。**
 
 ### 2. 核对器件与装配
 
-先选定板卡版本，再从 [BOM](hardware/BOM-DRAFT.csv) 与[采购料号表](hardware/LCSC_IMPORT_LIST.csv)筛选对应版本数量大于 0 的器件；两表均标明共用、旧版独有、新版独有与用量变化，采购表原“数量”列默认表示 V2.1。新版新增 U7 GEK100_13、C32，SW1 由拨动开关改成轻触按键，R40 仅移位；具体型号与每板数量见[两版用料差异](hardware/bom/README.md)。[交互式 BOM](hardware/bom/ibom.html)仍是旧首板快照，下载后用浏览器打开，不用于核对新版完整用料。
+先选定板卡版本，再从 [BOM](hardware/bom/BOM-DRAFT.csv) 与[采购料号表](hardware/bom/LCSC_IMPORT_LIST.csv)筛选对应版本数量大于 0 的器件；两表均标明共用、旧版独有、新版独有与用量变化，采购表原“数量”列默认表示 V2.1。新版新增 U7 GEK100_13、C32，SW1 由拨动开关改成轻触按键，R40 仅移位；具体型号与每板数量见[两版用料差异](hardware/bom/README.md)。[交互式 BOM](hardware/bom/ibom.html)仍是旧首板快照，下载后用浏览器打开，不用于核对新版完整用料。
 
-查看当前设计时，导入[最新 EDA 原生重画工程](hardware/releases/EasyEDA_Native_20261027/README.md)；[CABadge_V2_1.kicad_pro](hardware/releases/V2_1_GEK100_20261020/kicad/CABadge_V2_1.kicad_pro)保留为历史快照。只有复刻旧首板时才使用 [JXBadge_V1.kicad_pro](hardware/JXBadge_V1.kicad_pro)及其整套资料。
+查看 V2.1 设计时，选择[当前 EDA 工程](hardware/pcb/current/easyeda/CABadge_V2_1_GEK100.epro2)或 [KiCad 工程](hardware/pcb/current/kicad/CABadge_V2_1.kicad_pro)。只有复刻 V1 首板时才使用[归档的 JXBadge_V1.kicad_pro](hardware/pcb/archive/V1_c7c59dff/JXBadge_V1.kicad_pro)及其整套资料。
 
 采购时重点核对屏幕完整型号、排线引脚定义、FPC 座的接触方向与封装，不能仅凭“360×360”或“18 针”判断兼容。电池也需核对极性、保护、尺寸与安装空间。BOM 文件保留 `DRAFT` 名称，采购前应结合原理图和 [首板测试记录](首板测试记录.md) 复核，不能当作已验证的即买即装套件清单。
 
@@ -84,7 +84,7 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 
 复刻 **V2.1** 时，从实际选用的 V2.1 PCB 工程导出四层 Gerber、板框及 PTH/NPTH 钻孔，检查后打包交给板厂。当前公开的 V2.1 目录提供设计源文件与验证记录，尚未附配套制造 ZIP；不要用 v1.0 首板包替代。
 
-按[最新版板卡说明](hardware/releases/EasyEDA_Native_20261027/README.md)核对四层、名义 1.6 mm 板厚和直径 50 mm 圆板。项目实际试制沿用华秋普通打样：10 片、黑油白字、有铅喷锡、过孔盖油；叠层、孔工艺及局部间距仍需板厂按实际 Gerber 审核。需要钢网时，从同一版 PCB 的锡膏层另行导出。
+按[最新版板卡说明](hardware/pcb/current/README.md)核对四层、名义 1.6 mm 板厚和直径 50 mm 圆板。项目实际试制沿用华秋普通打样：10 片、黑油白字、有铅喷锡、过孔盖油；叠层、孔工艺及局部间距仍需板厂按实际 Gerber 审核。需要钢网时，从同一版 PCB 的锡膏层另行导出。
 
 只有复刻 **旧首板 c7c59dff** 时，才使用 v1.0 硬件附件中的 `JXBadge_EVT_20260909_c7c59dff_PCB.zip`；[原下单说明](hardware/fabrication/JXBadge_EVT_20260909_c7c59dff/下单说明.md)保留历史参考含义。交给板厂的是 PCB 制造 ZIP，不是仓库源码 ZIP、整套资料外层 ZIP 或钢网包。
 
@@ -98,7 +98,7 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 
 首次排查可以只用 USB 供电、不接电池。每增加一组先断电检查焊接与短路，再上电测量；不要带电插拔屏幕排线。确认主电源和主控正常后再接入屏幕。
 
-首板换装的 J1 规格为 **FFC/FPC 0.5 mm、18P、抽屉式上接触**，换座后已成功显示。当前 [BOM](hardware/BOM-DRAFT.csv) 与 [采购表](hardware/LCSC_IMPORT_LIST.csv) 已按截图更正；厂家型号和尺寸图仍未提供，采购前须核对封装与接触方向。**v1.0 旧源码、原理图和交互式 BOM 中仍有原 J1 条目，采购请以 [J1 连接器更正](docs/J1-CONNECTOR.md) 为准。**
+首板换装的 J1 规格为 **FFC/FPC 0.5 mm、18P、抽屉式上接触**，换座后已成功显示。当前 V2.1 EDA 已标记为 **AFC07-S18ECC-00 / C2840708**，按用户决定保留现有封装；已有 BOM CSV 保留历史数据，本次未重新核对。首板旧采购记录见 [J1 历史更正说明](docs/J1-CONNECTOR.md)，当前工程字段与范围见 [V2.1 说明](hardware/pcb/current/README.md)。
 
 ### 5. 烧录所选版本固件
 
@@ -141,7 +141,7 @@ python -m esptool --chip esp32s3 --port COMx --baud 115200 write-flash 0x0 bootl
 |目录|内容|
 |---|---|
 |`firmware-v7/`|当前固件、UI、工作台、协议与测试|
-|`hardware/`|最新 EDA 原生重画工程、历史 KiCad 工程、BOM 与生产文件|
+|`hardware/`|当前 V2.1 双格式工程、V1 归档、BOM、制造包与外壳|
 |`tools/flasher/`|共用烧录工具|
 |`docs/`|安装、构建、发布与已知问题说明|
 

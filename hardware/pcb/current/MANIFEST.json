@@ -1,22 +1,27 @@
 {
-  "revision": "V2.1 GEK100",
-  "snapshot_date": "2026-10-20",
-  "eda_export_time": "2026-10-20T16:04:26+08:00",
+  "revision": "V2.1 GEK100 / StarPlan",
+  "kicad_snapshot_date": "2026-10-20",
+  "easyeda_snapshot_date": "2026-10-27",
   "files": [
     {
       "path": ".gitattributes",
-      "bytes": 71,
-      "sha256": "4f2942cf2511f050740f849aa6a94d7810ce918b0a0c428585e2e7c828db5173"
+      "bytes": 93,
+      "sha256": "d9242d1971471009f89777f7c01fc10ad9cb51000feccef1bae51dade0ae225a"
     },
     {
       "path": "easyeda/CABadge_V2_1_GEK100.epro2",
-      "bytes": 1328414,
-      "sha256": "c7c9548de0c6889f9c3f2185c30612ce8f3a596ed647d3f482726eb0cbc67bfb"
+      "bytes": 1639009,
+      "sha256": "9c335971ff7f0c77a8030949b27930cb43197a29638a4cce736567127c67a8a5"
+    },
+    {
+      "path": "easyeda/pcb-preview.webp",
+      "bytes": 179002,
+      "sha256": "4fea7bcd6c890bd9a9c3ec14e43861b13ac6f1a3bca2d5a85ed0b63dc41647b8"
     },
     {
       "path": "easyeda/schematic-preview.webp",
-      "bytes": 265176,
-      "sha256": "db8f3f0cd84b0b822cf9052ccbc2ec6c7bd576649edf2916a3b173c94d1a2cc9"
+      "bytes": 82274,
+      "sha256": "4acbd6adc550a98edede4c073682ec4d0c18c66bba6d71353a5e527d4e59e4a2"
     },
     {
       "path": "kicad/CABadge_V2_1.kicad_dru",
@@ -620,13 +625,13 @@
     },
     {
       "path": "README.md",
-      "bytes": 4503,
-      "sha256": "738ecbfd76978dff4af94bc1cae563f2f9a88dbb9dfad72a30842c2fe224bc1b"
+      "bytes": 3560,
+      "sha256": "99e4489df3753e7533f21070b7157dc973e071a49378272d04194fb670c9a1b6"
     },
     {
-      "path": "verification/easyeda-pcb-drc.json",
-      "bytes": 137,
-      "sha256": "e566260c63d16cfad6dde887de14999954bd69b87876333689812b7afbda6103"
+      "path": "verification/easyeda-summary.json",
+      "bytes": 1825,
+      "sha256": "d2031be8f91b00e5f8a7e704ae5edd612fbd73a30169428746f605eff2406a53"
     },
     {
       "path": "verification/kicad-drc.json",
@@ -637,11 +642,6 @@
       "path": "verification/kicad-erc.json",
       "bytes": 2421,
       "sha256": "c2d61bde3b5930d2245eb77a9022e8969ab984b23d70e92b44f1c8e5da997f01"
-    },
-    {
-      "path": "verification/summary.json",
-      "bytes": 2653,
-      "sha256": "140c00911363a78e622f8153c1664eea50f68ab9e89d9bf395ac87f95a8b0159"
     }
   ]
 }

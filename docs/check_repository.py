@@ -75,11 +75,12 @@ for name in re.findall(r'"([^"]+)"', source_list):
                   root / 'firmware-v7/usb_screen' / name]
     if not any(p.is_file() for p in candidates):
         errors.append(f'Missing firmware source: {name}')
-for p in [root / 'hardware/JXBadge_V1.kicad_pcb',
-          *(root / 'hardware/JXBadge.pretty').glob('*.kicad_mod')]:
-    for name in re.findall(r'\(model "\$\{KIPRJMOD\}/([^"\n]+)"', p.read_text(encoding='utf-8')):
-        if not (root / 'hardware' / name).is_file():
-            errors.append(f'Missing local 3D model: {name}')
+for pcb in (root / 'hardware/pcb').rglob('*.kicad_pcb'):
+    project = pcb.parent
+    for p in [pcb, *(project / 'JXBadge.pretty').glob('*.kicad_mod')]:
+        for name in re.findall(r'\(model "\$\{KIPRJMOD\}/([^"\n]+)"', p.read_text(encoding='utf-8')):
+            if not (project / name).is_file():
+                errors.append(f'Missing local 3D model: {name}')
 print(json.dumps(counts, ensure_ascii=False))
 if errors:
     raise SystemExit('\n'.join(errors))

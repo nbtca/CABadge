@@ -11,8 +11,8 @@
     },
     {
       "path": "ASSEMBLY.md",
-      "bytes": 3850,
-      "sha256": "0565b7d1407638750a77a5ba3bc90b5e75700efe150da0467b91d947ceba2a80"
+      "bytes": 3832,
+      "sha256": "adcb88847bccb899dc7700423d8b347f843b86c0199206568048b400d5010c9f"
     },
     {
       "path": "cad/CABadge_V11_V2_1-SolidWorks.zip",
@@ -66,13 +66,13 @@
     },
     {
       "path": "README.md",
-      "bytes": 4118,
-      "sha256": "59c1470a12597a357fb066202f37cd1db53f33ceaf57c3cdbee88e07db41ef4b"
+      "bytes": 4100,
+      "sha256": "5b64a921d7d7ef66689858635f7da2ea02db2c3ce125d5ade418c91c306cca95"
     },
     {
       "path": "SHA256SUMS.txt",
-      "bytes": 1703,
-      "sha256": "dde071b3d041a2993a07a84597efb8e311e327ebe15aec83c52db6c6aa8ac04f"
+      "bytes": 1685,
+      "sha256": "75be69d91586d878d93c753972dc99416171e84e51897f217f34f0dc14694bf4"
     },
     {
       "path": "verification/publication-summary.json",

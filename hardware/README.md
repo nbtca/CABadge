@@ -1,43 +1,28 @@
-> **当前最新板卡（2026-10-27）：[V2.1 星火计划 EDA 原生重画工程](releases/EasyEDA_Native_20261027/README.md)。** 五张原理图直接复用，PCB 在新工程中原生重画，含原版走线、正面丝印和底部星火计划 Logo。元器件核对已停止，当前用料与归档范围见该目录说明。
+# CABadge 硬件资料
 
-> **BOM 已同步两版用料（2026-10-20）：[差异与采购说明](bom/README.md)。** [逐位号 BOM](BOM-DRAFT.csv) 与[采购表](LCSC_IMPORT_LIST.csv)均标明旧首板／V2.1 用量和独有器件；V2.1 新增 U7、C32，SW1 换为轻触按键。采购表原“数量”列默认表示 V2.1；交互式 BOM 仍为旧首板快照。
+**当前板卡：V2.1 GEK100 / 星火计划。** [打开当前版本说明](pcb/current/README.md)，选择 [KiCad 工程](pcb/current/kicad/CABadge_V2_1.kicad_pro)或[嘉立创EDA工程](pcb/current/easyeda/CABadge_V2_1_GEK100.epro2)。
 
-> **历史板卡（2026-10-20）：[V2.1 GEK100 双格式源文件](releases/V2_1_GEK100_20261020/README.md)。** 同时提供 KiCad 10 工程与嘉立创EDA专业版 V4 原生工程；已核对器件、引脚与 PCB 焊盘网络。GEK100 按键电源和 R40 机械避让仍待新板实测。下方保留原首板 c7c59dff 的复刻与制造基线说明。
+| 版本 | 格式与来源 | 入口 |
+| --- | --- | --- |
+| 当前 V2.1 | KiCad 保留 2026-10-20 原文件；EDA 替换为 2026-10-27 原生重画工程 | [pcb/current](pcb/current/README.md) |
+| V1 首板 c7c59dff | 仅 KiCad，连同原理图、项目库和模型归档 | [pcb/archive/V1_c7c59dff](pcb/archive/V1_c7c59dff/README.md) |
 
-# CABadge c7c59dff 硬件复刻
+今天的重画工程属于 V2.1 的 EDA 格式更新，五张原理图复用、PCB 原生重画。旧的 KiCad 转换版 EDA 已从当前仓库文件中移除，过往版本由 Git 历史保留。
 
-当前固件 v1.1.0 使用原硬件基线，未改板。KiCad 10 打开 [JXBadge_V1.kicad_pro](JXBadge_V1.kicad_pro)，保持本目录结构。
+## 目录与使用范围
 
-## 必须一起保留的文件
+| 目录 | 内容 | 版本说明 |
+| --- | --- | --- |
+| [pcb/current](pcb/current/README.md) | 当前 V2.1 的 KiCad、EDA、预览与校验信息 | 后续 V2.1 工程更新使用固定路径 |
+| [V1 归档](pcb/archive/V1_c7c59dff/README.md) | 首板 KiCad 源文件、符号库、封装库和本地模型 | 历史源文件；与冻结制造快照分别保存 |
+| [bom](bom/README.md) | 原 BOM、采购表、料号列表、版本对比及交互式 BOM | CSV 为已有 V1 / V2.1 KiCad 用量记录；交互式 BOM 为 V1 快照，元器件核对已停止 |
+| [冻结制造包](fabrication/JXBadge_EVT_20260909_c7c59dff/下单说明.md) | 首板 Gerber、钻孔、钢网及导出核验源快照 | 本次保持路径与全部文件字节不变 |
+| [V11 外壳](enclosure/releases/V11_V2_1_20261020/README.md) | V2.1 配套打印件、装配模型与说明 | 几何检查仍对应其说明中的 KiCad PCB；[V6](enclosure/releases/V6_20260930/README.md)为历史外壳 |
 
-- 项目、根原理图、Controls_Test / Display_Sensor / USB_Power 子页、PCB 和设计规则。
-- JXBadge.kicad_sym、JXBadge.pretty、JXBadge.3dshapes 及两份 lib-table：工程使用 KIPRJMOD 相对引用，不随意移动或删减。
-- [BOM](BOM-DRAFT.csv)与[采购表](LCSC_IMPORT_LIST.csv)：按[版本差异说明](bom/README.md)选择旧版或新版数量；[交互式 BOM](bom/ibom.html)仍为旧首板快照，下载后在浏览器打开，辅助旧版焊接定位。
-- [冻结生产包与下单说明](fabrication/JXBadge_EVT_20260909_c7c59dff/下单说明.md)：PCB ZIP 和顶层钢网 ZIP 分开使用；MANIFEST 中的文件整组保持一致。
+## 采购、装配与验证
 
-## 采购与装配
+当前 EDA 中 J1 为 AFC07-S18ECC-00 / C2840708，按用户决定保留原封装；U3 保持 SC7A20TR / C5126709。BOM 和商城器件库核对已停止，旧 CSV 未在本次整理中重新核对或改料。
 
-3D打印外壳：[V11 正式外壳（配套 V2.1）](enclosure/releases/V11_V2_1_20261020/README.md)，包含三个打印件、STEP / SolidWorks 装配及装配图。装入顺序见[装配说明](enclosure/releases/V11_V2_1_20261020/ASSEMBLY.md)；[V6](enclosure/releases/V6_20260930/README.md)保留为首板历史版本。
+电池沿用用户提供的 450 mAh、42×30×4 mm，正负线直接焊接、J3 不装。具体版本和历史装配说明见 [BOM 说明](bom/README.md)、[J1 更正](../docs/J1-CONNECTOR.md)和[V1 历史记录](pcb/archive/V1_c7c59dff/README.md#电池与屏幕连接器)。
 
-首板换装 J1 为 FFC/FPC 0.5 mm、18P、抽屉式上接触。厂家精确型号及尺寸图仍待提供；[J1 连接器更正](../docs/J1-CONNECTOR.md) 优先于原理图/库/交互式 BOM 中的旧采购标识，不可直接将原 C2856802 当成已验证替代。
-
-### 电池与屏幕连接器
-
-2026-09-30 用户确认当前装配用料，已同步 [BOM](BOM-DRAFT.csv) 和 [采购表](LCSC_IMPORT_LIST.csv)：
-
-- 电池：**450mAh，42×30×4mm，每台1只**；正负两根线直接焊接，**J3电池座不装**。`BAT_EXT` 是整机外购件的清单标识，不是PCB新增位号。容量及尺寸为用户提供，厂家型号、保护板参数和尺寸公差未提供，不推定料号，也不据此宣称充电或挤压验证通过。
-- J1：**FFC/FPC 0.5mm、18P、抽屉式上接触，每板1只**，沿用首板换装规格，不是翻盖下接。现用件厂家型号和立创编号仍未提供，不以原 C2856802 代填。
-
-BOM中J3标为DNP、采购数量为0；其旧料号和J1旧封装名仅保留追溯。原理图、PCB、交互式BOM及冻结生产包保持原设计快照，以当前两份CSV的采购/装配状态为准。
-
-板为 50 mm 圆形、四层、名义 1.6 mm，目标叠层 JLC04161H-7628；订单工艺须由板厂确认。制造 ZIP 的正确性检查不等于机械适配、射频、充电或产品可靠性验收。
-
-按[焊接与分阶段上电检查](../焊接与分阶段上电检查_首板.md)逐组断电检查与上电，使用板上 VBUS/3V3/GND/BAT/PWR/EN 丝印。不要带电插拔屏幕排线。
-
-## 固件与证据
-
-下载 [v1.1.0](https://github.com/nbtca/CABadge/releases/tag/v1.1.0)，按[安装说明](../docs/RELEASE-v1.1.0.md)烧录。当前实板结果与历史故障见[首板测试记录](../首板测试记录.md)，不把历史 CAD 检查等同于实板全部通过。
-
-运行 `python docs/check_repository.py` 可核对制造 MANIFEST 文件字节数和 SHA-256。冻结验证目录中的原始源快照用于追溯制造包，不是另一个现行硬件版本。
-
-[精简前硬件设计与 CAD 历史](https://github.com/nbtca/CABadge/blob/d1fe9716b383dcb6fd292d683265beacd92fde64/hardware/README.md)
+[焊接与分阶段上电检查](../焊接与分阶段上电检查_首板.md)保留其设计核对依据；[首板测试记录](../首板测试记录.md)保留实物反馈与历史失败。工程归档、文件校验及已有 CAD 检查不代替 V2.1 新板的制造、机械和实物功能验收。

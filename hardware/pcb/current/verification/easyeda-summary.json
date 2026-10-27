@@ -3,7 +3,7 @@
   "project_name": "CABadge-基于 ESP32-S3 的电子吧唧-星火计划",
   "source": "Live EasyEDA desktop 4.1.78 project export after saving all six documents",
   "archive": {
-    "path": "CABadge_StarPlan_EasyEDA_Native_20261027.epro2",
+    "path": "easyeda/CABadge_V2_1_GEK100.epro2",
     "bytes": 1639009,
     "sha256": "9c335971ff7f0c77a8030949b27930cb43197a29638a4cce736567127c67a8a5",
     "zip_crc_passed": true,
