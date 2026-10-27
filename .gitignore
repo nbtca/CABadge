@@ -54,6 +54,7 @@ simulator-settings.json
 !/hardware/releases/
 /hardware/releases/*
 !/hardware/releases/V2_1_GEK100_20261020/
+!/hardware/releases/EasyEDA_Native_20261027/
 /hardware/enclosure/*
 !/hardware/enclosure/releases/
 /hardware/enclosure/releases/*

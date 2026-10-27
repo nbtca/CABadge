@@ -1,0 +1,56 @@
+{
+  "snapshot_date": "2026-10-27",
+  "project_name": "CABadge-基于 ESP32-S3 的电子吧唧-星火计划",
+  "source": "Live EasyEDA desktop 4.1.78 project export after saving all six documents",
+  "archive": {
+    "path": "CABadge_StarPlan_EasyEDA_Native_20261027.epro2",
+    "bytes": 1639009,
+    "sha256": "9c335971ff7f0c77a8030949b27930cb43197a29638a4cce736567127c67a8a5",
+    "zip_crc_passed": true,
+    "restore_verified": false
+  },
+  "save": {
+    "all_six_documents_saved": true,
+    "last_pcb_save_utc": "2026-10-27T07:23:29.8551369Z"
+  },
+  "schematic_pages": [
+    "CABadge_V2_1",
+    "Controls_Test",
+    "Display_Sensor",
+    "Power_Button",
+    "USB_Power"
+  ],
+  "schematics_reused": true,
+  "pcb": {
+    "name": "PCB1",
+    "native_redraw": true,
+    "diameter_mm": 50,
+    "copper_layers": 4,
+    "components": 107,
+    "tracks": 1858,
+    "vias": 237,
+    "pours": 3,
+    "silkscreen_images": 2
+  },
+  "preservation_vs_saved_routed_v11": {
+    "method": "Compare native PCB record bodies; exclude viewport and document framing; compare component rotations modulo 360 degrees",
+    "changed_record_types": {
+      "COMPONENT": 107
+    },
+    "component_changes": "BOM attributes and equivalent 270/-90 degree rotation serialization only",
+    "component_placement_unchanged": true,
+    "non_component_geometry_and_silkscreen_records_unchanged": true
+  },
+  "retained_decisions": {
+    "J1": "AFC07-S18ECC-00 / C2840708; existing footprint retained by user decision",
+    "U3": "SC7A20TR / C5126709; no LIS2DH12 replacement"
+  },
+  "last_saved_drc": {
+    "created_at_utc": "2026-10-27T06:38:37.4663902Z",
+    "passed": true,
+    "violations": [],
+    "rerun_for_this_archive": false
+  },
+  "component_library_audit": "stopped_by_user; incomplete; U7 supplier code remains unresolved",
+  "physical_validation": false
+}
