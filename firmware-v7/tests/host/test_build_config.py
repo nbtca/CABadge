@@ -65,7 +65,8 @@ class BuildConfiguration(unittest.TestCase):
                 self.config('-BuildVariant', 'custom', '-MemberName', name, ok=False)
 
     def test_build_root_override_and_diagnostics_separation(self):
-        env = dict(os.environ, CABADGE_BUILD_ROOT='F:/CABadgeBuild/temp/config-only-' + uuid.uuid4().hex, CABADGE_DISPLAY_PERF='1')
+        parent = Path(os.environ.get('CABADGE_BUILD_ROOT') or 'F:/CABadgeBuild') / 'temp'
+        env = dict(os.environ, CABADGE_BUILD_ROOT=str(parent / ('config-only-' + uuid.uuid4().hex)), CABADGE_DISPLAY_PERF='1')
         cfg = self.config(env=env)
         self.assertTrue(Path(cfg['stage']).is_relative_to(Path(env['CABADGE_BUILD_ROOT'])))
         self.assertFalse(Path(env['CABADGE_BUILD_ROOT']).exists(), 'ConfigurationOnly must not create a stage or output')
