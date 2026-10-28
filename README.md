@@ -1,158 +1,89 @@
 # CABadge · 计协电子吧唧
 
-CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将传统吧唧的身份表达与电子屏幕的可变内容结合，让佩戴者通过壁纸、图案和协会名片展示个人喜好与社团归属。
+基于 ESP32-S3 的开源圆屏电子徽章，面向日常佩戴与社团展示。用静态或动态壁纸表达个人喜好，通过触摸切换协会名片和小应用，也可以通过电脑或无线连接管理内容。
 
-它以日常佩戴和内容展示为核心：平时展示喜欢的画面，需要时通过触摸操作切换内容，通过无线连接或电脑工具更新壁纸、管理设备。界面尽量简洁，让展示内容本身成为主角。
+[固件下载](https://github.com/nbtca/CABadge/releases/tag/v1.2.0) · [PCB 工程](hardware/pcb/current/README.md) · [外壳文件](hardware/enclosure/releases/V11_V2_1_20261020/README.md) · [使用与复刻](docs/REPRODUCE.md)
 
-这里收录硬件设计、固件源码、配套电脑工具和实板测试记录，供复刻、改进和协作开发使用。
+<p align="center">
+  <a href="docs/images/cabadge-front.jpg"><img src="docs/images/cabadge-front.jpg" width="340" alt="CABadge 手持正面，圆屏显示蓝色计协图案" /></a>
+  <br />
+  <sub>圆屏亮屏实物 · 计协图案</sub>
+</p>
 
-## 版本与资料对应
+<table align="center">
+  <tr>
+    <td align="center"><a href="docs/images/cabadge-button.jpg"><img src="docs/images/cabadge-button.jpg" width="200" alt="CABadge 斜侧视角，展示白色外壳、蓝色边框与侧边按键" /></a><br /><sub>侧边按键与边框</sub></td>
+    <td align="center"><a href="docs/images/cabadge-profile.jpg"><img src="docs/images/cabadge-profile.jpg" width="200" alt="CABadge 侧面实物，展示白色外壳的机身轮廓" /></a><br /><sub>侧面轮廓</sub></td>
+  </tr>
+</table>
 
-固件、PCB 和外壳分别选择版本，当前入口如下。公开固件功能沿用现有基线，构建与发布维护不会自动改变工作台默认或实板验收状态。
-
-| 资料 | 当前版本 | 使用入口 |
-| --- | --- | --- |
-| 正式固件 | v1.2.0 / 7.9.16-eaf-transition | [正式附件](https://github.com/nbtca/CABadge/releases/tag/v1.2.0)；工作台默认安装此版 |
-| 测试固件附件 | v1.3.0-rc.1 / 7.9.23-timetiles-fix | [测试附件](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)；新功能与长稳仍有待测项 |
-| 当前公开源码 | [version.json](firmware-v7/version.json)，功能基线 7.9.23 | `main`；[构建说明](docs/BUILD.md)、[开发分支与变体](docs/DEVELOPMENT.md) |
-| 当前 PCB | V2.1 GEK100 / 星火计划 | [双格式工程](hardware/pcb/current/README.md)：[KiCad](hardware/pcb/current/kicad/CABadge_V2_1.kicad_pro)保留 2026-10-20 原文件；[EDA](hardware/pcb/current/easyeda/CABadge_V2_1_GEK100.epro2)为 2026-10-27 原生重画版 |
-| 当前外壳 | V11 一体杯壳 + V11_Button_R2 | [打印件、图纸与装配](hardware/enclosure/releases/V11_V2_1_20261020/README.md)、[大型 CAD 附件](https://github.com/nbtca/CABadge/releases/tag/enclosure-v11-button-r2-20261028) |
-| 历史硬件 | V1 首板 c7c59dff，仅 KiCad | [V1 工程归档](hardware/pcb/archive/V1_c7c59dff/README.md)；冻结制造包保留原有范围 |
-
-**历史源码例外：** `v1.3.0-rc.1` 标签建立时的源码仍为 7.9.16，自动生成的 `Source code (zip)` 不对应其 7.9.23 固件附件。复刻当前公开固件请下载 `main`；既有标签和附件保持历史含义。后续发布按[发布门禁](tools/release/README.md)记录准确源码提交，标签与附件对应同一提交。
-
-本地未发布的 7.9.25 / 个人定制构建保留在独立开发分支，不包含在上表公开源码或附件中。V2.1 的旧转换版 EDA 已删除；当前原生重画版复用五张原理图，PCB 保留原版连线与正面丝印，底部使用星火计划 Logo。
-
-[完整文档索引](docs/INDEX.md) · [实板测试记录](首板测试记录.md) · [已知问题](docs/KNOWN_ISSUES.md) · [仓库整理总结](docs/REPOSITORY-MAINTENANCE-20261028.md)
+照片展示外观与亮屏效果，点击可查看原图；设计版本与验证状态见[下方版本表](#版本与资料对应)。
 
 ## 可以做什么
 
-- **展示与切换壁纸**：圆形触摸屏展示静态图片，支持浏览、选择和保存上传的壁纸。
-- **展示协会名片**：内置计协风格名片页面。
-- **连接与管理设备**：Wi-Fi、BLE 连接管理，通过 USB 或本地 HTTP 上传壁纸。
-- **基础交互**：触摸操作、亮度设置、息屏后摇晃唤醒，以及可选 FPS 显示。
-- **小应用**：Grok 表情、MC 二维地图、奶蛙矿工、重力小球、FluidBox 和 TimeTiles；使用说明见 [应用](firmware-v7/APPS.md)。
-- **电脑端调试**：Windows 原生 NBTCA Badge TOOL 提供固件安装与设备联调入口。
+- **壁纸与名片**：静态图片、EAF 动态壁纸、协会名片，支持触摸浏览和切换。
+- **内容管理**：通过 USB 或本地 HTTP 上传壁纸，支持 Wi-Fi、BLE 连接管理；电脑端提供原生 NBTCA Badge TOOL。
+- **日常交互**：亮度设置、姿态与唤醒交互、可选 FPS 显示。
+- **小应用**：Grok 表情、MC 二维地图、奶蛙矿工、重力小球，以及测试版中的 FluidBox、TimeTiles 和 BLE 心率。详见[应用说明](firmware-v7/APPS.md)。
 
-<img width="3072" height="4096" alt="44ebd1ad073642b58210a89b23977e9f" src="https://github.com/user-attachments/assets/51c7bce0-58fa-4813-8621-cffee2827b9e" />
-<img width="3072" height="4096" alt="2ba59d724997cc1bf2ca568b1a78c989" src="https://github.com/user-attachments/assets/a6ad94ad-bac8-474c-ab1c-10988e7616c3" />
-<img width="3072" height="4096" alt="10e58efb694e944809ac0757480d7f42" src="https://github.com/user-attachments/assets/2f7458d9-f58d-4769-8252-f9dc3a8ce983" />
+GIF/视频需先在电脑端转换为 EAF，设备不直接播放 GIF/视频。OTA 与 BLE 传图尚未提供；功能适用版本及待测项见[已知问题](docs/KNOWN_ISSUES.md)。
 
+## 快速入口
 
-当前源码支持在电脑上将 GIF/视频转换为 EAF 动态壁纸，设备不直接播放 GIF/视频。BLE 传图和 OTA 尚未提供。完整的异常场景和长期稳定性测试仍在完善中。
+| 你想做什么 | 从这里开始 |
+| --- | --- |
+| 已有设备，安装或使用固件 | [正式固件](https://github.com/nbtca/CABadge/releases/tag/v1.2.0)、[测试固件](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)、[安装步骤](docs/REPRODUCE.md#5-烧录所选版本固件)、[无线与壁纸管理](firmware-v7/usb_screen/README.md) |
+| 自己制作一块 CABadge | [V2.1 PCB](hardware/pcb/current/README.md)、[BOM 与采购资料](hardware/bom/README.md)、[V11 外壳与装配](hardware/enclosure/releases/V11_V2_1_20261020/README.md)、[完整复刻流程](docs/REPRODUCE.md) |
+| 修改源码或参与开发 | [构建环境](docs/BUILD.md)、[开发约定](docs/DEVELOPMENT.md)、[界面架构](docs/architecture/UI_ARCHITECTURE_V7.md) |
+
+## 版本与资料对应
+
+固件、PCB 与外壳独立编号，请按用途选择配套文件。
+
+| 资料 | 当前版本 | 下载或说明 |
+| --- | --- | --- |
+| 正式固件 | v1.2.0 / 7.9.16-eaf-transition | [正式 Release](https://github.com/nbtca/CABadge/releases/tag/v1.2.0)，工作台默认安装此版 |
+| 测试固件 | v1.3.0-rc.1 / 7.9.23-timetiles-fix | [测试 Release](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)，新功能仍有待测项 |
+| 公开源码 | [7.9.23-timetiles-fix](firmware-v7/version.json) | `main` 分支；[自行编译](docs/BUILD.md) |
+| 当前 PCB | V2.1 GEK100 / 星火计划 | [工程说明](hardware/pcb/current/README.md)：[嘉立创EDA原生重画版](hardware/pcb/current/easyeda/CABadge_V2_1_GEK100.epro2)（2026-10-27）与 [KiCad 原工程](hardware/pcb/current/kicad/CABadge_V2_1.kicad_pro)（2026-10-20），两者不自动同步 |
+| 配套外壳 | V11 一体杯壳 + V11_Button_R2 | [打印件与装配](hardware/enclosure/releases/V11_V2_1_20261020/README.md)、[SolidWorks / STEP](https://github.com/nbtca/CABadge/releases/tag/enclosure-v11-button-r2-20261028)；R2 打印装配与手感待验证 |
+| 历史硬件 | V1 首板 c7c59dff，仅 KiCad | [V1 归档](hardware/pcb/archive/V1_c7c59dff/README.md)；冻结制造包属于此版 |
+
+**自行编译请使用 `main`。** `v1.3.0-rc.1` 标签的自动 `Source code (zip)` 是旧源码快照，与其 7.9.23 固件附件不对应；[下载说明](docs/REPRODUCE.md#1-下载固件与配套硬件)解释各文件的用途。
+
+首板 c7c59dff 的实测证据见[首板测试记录](首板测试记录.md)。V2.1 新增电源与机构、R2 按钮，以及测试固件的部分交互和长稳仍需分项验证；照片、构建或 CAD 检查不代表这些项目已全部通过。
 
 ## 硬件概览
 
-|部分|当前方案|
-|---|---|
-|主控|ESP32-S3R8，8 MB Octal PSRAM|
-|外部 Flash|W25Q128JVSIQ，16 MB|
-|显示与输入|360×360 圆形 ST77916 屏幕、触摸输入|
-|运动传感器|SC7A20|
-|主电源|SGM62117 升降压至 3.3 V|
-|充电|TP4056-MS，配合外围供电分配与充电使能电路|
-|PCB|直径 50 mm、四层板、名义板厚 1.6 mm|
-
-当前板卡为 **V2.1 GEK100 / 星火计划**，KiCad 与 EDA 两种格式见[当前板卡目录](hardware/pcb/current/README.md)。已完成首板实测的硬件基线仍为 **JXBadge_EVT_20260909_c7c59dff**；[BOM](hardware/bom/BOM-DRAFT.csv) 与[采购表](hardware/bom/LCSC_IMPORT_LIST.csv)保留已有两版用量资料，本次只迁移路径，元器件核对已停止。交互式 BOM 与冻结制造包仍属于首板资料，V2.1 新增电源与机构仍待实板验收。
+| 部分 | 设计规格 |
+| --- | --- |
+| 主控与存储 | ESP32-S3R8，8 MB Octal PSRAM；W25Q128JVSIQ，16 MB Flash |
+| 显示与输入 | 360 × 360 圆形 ST77916 屏幕、触摸输入、SC7A20 运动传感器 |
+| 电源与充电 | SGM62117 升降压至 3.3 V；TP4056-MS 及外围供电分配、充电使能电路 |
+| PCB | 直径 50 mm、四层板、名义板厚 1.6 mm |
 
 ## 如何开始复刻
 
-复刻需要自行采购、焊接和调试。板上包含 QFN 主控和细间距 FPC 连接器，建议具备贴片焊接与万用表排查经验，并准备放大观察工具及合适的焊接设备。
+1. **选定版本**：从上方表格分别选择 PCB、外壳与固件。
+2. **准备器件和板子**：按[BOM 说明](hardware/bom/README.md)核对采购，从所选 PCB 工程导出并检查制造文件。
+3. **焊接与上电**：按[分阶段检查表](焊接与分阶段上电检查_首板.md)调试；V2.1 新增电路的检查要求见[完整复刻说明](docs/REPRODUCE.md#4-分阶段焊接与首次上电)。
+4. **安装固件**：按[烧录步骤](docs/REPRODUCE.md#5-烧录所选版本固件)核对版本、备份需要的数据并安装；已有同版设备可从这一步开始。
+5. **验证与装配**：检查显示、触摸、壁纸及连接，再按[外壳装配说明](hardware/enclosure/releases/V11_V2_1_20261020/ASSEMBLY.md)完成组装。
 
-**流程：下载配套资料 → 核对采购 → PCB 打样 → 分阶段焊接与上电 → 烧录 → 功能检查。** 已有装配完成的同版硬件，可以从第 5 步开始。
-
-### 1. 下载固件与配套硬件
-
-固件与板卡分别选择版本：最新测试固件为 [v1.3.0-rc.1 / 7.9.23](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)，正式固件仍为 [v1.2.0 / 7.9.16](https://github.com/nbtca/CABadge/releases/tag/v1.2.0)；当前板卡为 [V2.1 GEK100 / 星火计划](hardware/pcb/current/README.md)。测试版的新功能和 V2.1 新增电源、机构适配仍待实物验收，固件版本与 PCB 修订独立编号。
-
-|文件|用途|
-|---|---|
-|`CABadge-v1.3.0-rc.1-firmware.zip`|最新测试版三个 BIN、安装说明、验证记录及校验值|
-|`CABadge-v1.2.0-firmware.zip`|正式版三个 BIN、安装说明及校验值|
-|所选 Release 的 `debug.zip`|与该版固件匹配的 ELF、有效构建配置，仅排查问题时需要|
-|[V2.1 KiCad 工程](hardware/pcb/current/kicad/CABadge_V2_1.kicad_pro)|当前 V2.1 的 KiCad 格式，保留 2026-10-20 原文件，需连同库和模型下载|
-|[V2.1 嘉立创EDA原生重画工程](hardware/pcb/current/easyeda/CABadge_V2_1_GEK100.epro2)|2026-10-27 最新专业版 V4 工程，含五张复用原理图及原生重画 PCB|
-|[V11 正式配套外壳](hardware/enclosure/releases/V11_V2_1_20261020/README.md)|三个打印 STL、装配模型、爆炸图及剖面图，与 V2.1 PCB 配套|
-|[v1.0 的硬件附件](https://github.com/nbtca/CABadge/releases/tag/v1.0)|仅用于复刻旧首板 c7c59dff，不作为 V2.1 生产包|
-
-V2.1 同时提供两种格式：EDA 用户下载上述 `.epro2`，在专业版“导入专业版”入口导入；KiCad 用户从 `main` 分支的 **Code → Download ZIP** 下载工程并保留 `hardware/pcb/current/kicad/` 的目录结构。EDA 已换为 2026-10-27 原生重画版，KiCad 原文件保持，两种格式不自动同步；详见[当前版本说明](hardware/pcb/current/README.md)。
-
-首次点亮直接使用所选 Release 的固件附件，无需先搭建编译环境，下载后核对 `SHA256SUMS.txt`。**自行编译 7.9.23 请下载 `main` 分支源码，并按 [BUILD](docs/BUILD.md)恢复依赖。v1.3.0-rc.1 标签自动生成的 `Source code (zip)` 仍是该标签发布时的旧源码快照；最新源码此次同步到 `main`，没有移动既有标签。**
-
-### 2. 核对器件与装配
-
-先选定板卡版本，再从 [BOM](hardware/bom/BOM-DRAFT.csv) 与[采购料号表](hardware/bom/LCSC_IMPORT_LIST.csv)筛选对应版本数量大于 0 的器件；两表均标明共用、旧版独有、新版独有与用量变化，采购表原“数量”列默认表示 V2.1。新版新增 U7 GEK100_13、C32，SW1 由拨动开关改成轻触按键，R40 仅移位；具体型号与每板数量见[两版用料差异](hardware/bom/README.md)。[交互式 BOM](hardware/bom/ibom.html)仍是旧首板快照，下载后用浏览器打开，不用于核对新版完整用料。
-
-查看 V2.1 设计时，选择[当前 EDA 工程](hardware/pcb/current/easyeda/CABadge_V2_1_GEK100.epro2)或 [KiCad 工程](hardware/pcb/current/kicad/CABadge_V2_1.kicad_pro)。只有复刻 V1 首板时才使用[归档的 JXBadge_V1.kicad_pro](hardware/pcb/archive/V1_c7c59dff/JXBadge_V1.kicad_pro)及其整套资料。
-
-采购时重点核对屏幕完整型号、排线引脚定义、FPC 座的接触方向与封装，不能仅凭“360×360”或“18 针”判断兼容。电池也需核对极性、保护、尺寸与安装空间。BOM 文件保留 `DRAFT` 名称，采购前应结合原理图和 [首板测试记录](首板测试记录.md) 复核，不能当作已验证的即买即装套件清单。
-
-### 3. PCB 打样
-
-复刻 **V2.1** 时，从实际选用的 V2.1 PCB 工程导出四层 Gerber、板框及 PTH/NPTH 钻孔，检查后打包交给板厂。当前公开的 V2.1 目录提供设计源文件与验证记录，尚未附配套制造 ZIP；不要用 v1.0 首板包替代。
-
-按[最新版板卡说明](hardware/pcb/current/README.md)核对四层、名义 1.6 mm 板厚和直径 50 mm 圆板。项目实际试制沿用华秋普通打样：10 片、黑油白字、有铅喷锡、过孔盖油；叠层、孔工艺及局部间距仍需板厂按实际 Gerber 审核。需要钢网时，从同一版 PCB 的锡膏层另行导出。
-
-只有复刻 **旧首板 c7c59dff** 时，才使用 v1.0 硬件附件中的 `JXBadge_EVT_20260909_c7c59dff_PCB.zip`；[原下单说明](hardware/fabrication/JXBadge_EVT_20260909_c7c59dff/下单说明.md)保留历史参考含义。交给板厂的是 PCB 制造 ZIP，不是仓库源码 ZIP、整套资料外层 ZIP 或钢网包。
-
-### 4. 分阶段焊接与首次上电
-
-外壳使用 [V11 正式配套包](hardware/enclosure/releases/V11_V2_1_20261020/README.md)，按[装配图与顺序](hardware/enclosure/releases/V11_V2_1_20261020/ASSEMBLY.md)准备杯壳、按帽和隐藏限位件，电路调试完成后再合屏固定。
-
-按 [焊接与分阶段上电检查](焊接与分阶段上电检查_首板.md) 分组完成：USB 输入 → 3.3 V 电源 → 主控与 USB 下载 → 屏幕与触摸 → 电池与充电。
-
-该检查表来自首板；V2.1 还需核对 GEK100 按键电源、USB/电池供电切换与充电联锁，不能用首板成功开机代替新增电路验收。
-
-首次排查可以只用 USB 供电、不接电池。每增加一组先断电检查焊接与短路，再上电测量；不要带电插拔屏幕排线。确认主电源和主控正常后再接入屏幕。
-
-首板换装的 J1 规格为 **FFC/FPC 0.5 mm、18P、抽屉式上接触**，换座后已成功显示。当前 V2.1 EDA 已标记为 **AFC07-S18ECC-00 / C2840708**，按用户决定保留现有封装；已有 BOM CSV 保留历史数据，本次未重新核对。首板旧采购记录见 [J1 历史更正说明](docs/J1-CONNECTOR.md)，当前工程字段与范围见 [V2.1 说明](hardware/pcb/current/README.md)。
-
-### 5. 烧录所选版本固件
-
-解压所选固件包，按包内 `README.md` 操作；[安装与构建说明](docs/BUILD.md)对应公开源码及 v1.2.0 正式版。烧录前核对校验值和硬件版本，使用支持数据传输的 USB 线，并释放被其他程序占用的串口。
-
-|文件|烧录地址|
-|---|---|
-|`bootloader.bin`|`0x0`|
-|`partitions.bin`|`0x8000`|
-|`firmware.bin`|`0x10000`|
-
-安装 Python 与 esptool 5.x，在解压后的 BIN 目录执行命令，`COMx` 换为实际串口。已使用相同分区布局的 7.9.x 设备只更新应用：
-
-```powershell
-python -m esptool --chip esp32s3 --port COMx --baud 115200 write-flash 0x10000 firmware.bin
-```
-
-首次安装或从旧 v1.0 分区布局升级时，写入同一个固件包的三个 BIN：
-
-```powershell
-python -m esptool --chip esp32s3 --port COMx --baud 115200 write-flash 0x0 bootloader.bin 0x8000 partitions.bin 0x10000 firmware.bin
-```
-
-当前壁纸分区从 `0x710000` 开始、大小 `0x8f0000`；旧布局升级前保留壁纸原文件及需要的设备备份。v7 工作台仍默认安装 v1.2.0，将正式包解压到 `outputs/cabadge-v7.9.16-eaf-transition/`；安装测试版使用上述 esptool 命令，具体依赖见所选 Release 的说明。
-
-烧录完成后 RESET，确认启动版本与所选包一致：测试版为 **7.9.23-timetiles-fix**，正式版为 **7.9.16-eaf-transition**。不要为了普通升级额外执行全片擦除，以免清掉已有设置和壁纸。
-
-### 6. 检查自己的板子
-
-依次检查开机显示、触摸与翻页、壁纸切换、Wi-Fi/BLE 基本连接，再检查上传壁纸及重启后的保留情况。遇到问题时记录固件版本、触发步骤和现象，附上照片或串口日志，方便复现与修复。
-
-使用 7.9.23 测试版时，还需检查 TimeTiles 手势/主题/计时提醒、FluidBox 运动输入和 BLE 心率连接；操作及已知限制见 [v1.3.0-rc.1 说明](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)。已有烧录与软件检查不代替这些新功能或 V2.1 整机的实物验收。
-
-当前背光已使用平方曲线调节实际 PWM，旧 5% 测试上限已取消；CHG_ALLOW 仍保持 LOW。成功开机不代表充电、电流温升或长期运行已完整验收。显示 TE 未连接，动态画面仍需观察是否撕裂；具体待办见 [已知问题](docs/KNOWN_ISSUES.md)。
+BOM 保留 `DRAFT` 状态；V2.1 尚未附配套制造 ZIP，需从实际选用的工程导出。V1 冻结制造包不能用于制作 V2.1。具体器件、打样、分区及升级注意事项见[复刻与安装](docs/REPRODUCE.md)。
 
 ## 继续开发
 
-完成首次点亮后，再按 [安装与构建说明](docs/BUILD.md) 恢复开发环境。当前工程使用 LVGL 9.4.0；桌面预览基于 SDL2，板端使用 ESP-IDF / PlatformIO。构建脚本仍有 Windows 和 F 盘路径限制，尚未整理成跨平台的一键构建流程。
+板端使用 ESP-IDF / PlatformIO 与 LVGL 9.4.0，当前构建流程面向 Windows、Python 3.10+ 和 PowerShell 7。环境由 `tools/bootstrap.ps1` 安装；`CABADGE_BUILD_ROOT` 可配置工具目录，默认 `F:\CABadgeBuild`。详细操作见[构建说明](docs/BUILD.md)与[开发约定](docs/DEVELOPMENT.md)。
 
-|目录|内容|
-|---|---|
-|`firmware-v7/`|当前固件、UI、工作台、协议与测试|
-|`hardware/`|当前 V2.1 双格式工程、V1 归档、BOM、制造包与外壳|
-|`tools/flasher/`|共用烧录工具|
-|`docs/`|安装、构建、发布与已知问题说明|
+| 目录 | 内容 |
+| --- | --- |
+| `firmware-v7/` | 公开固件、UI、工作台、协议与宿主检查 |
+| `hardware/` | PCB 工程、V1 归档、BOM、制造包与外壳 |
+| `tools/` | 环境安装、烧录、仓库检查与发布工具 |
+| `docs/` | 使用、复刻、构建、架构及已知问题 |
 
-历史实验固件、原始日志和本地备份没有全部随仓库上传，旧文档中的部分研究链接仅保留为历史出处。`v1.0`、`v1.2.0` 标签固定各次发布快照；主分支继续更新。文档分类见 [仓库索引](docs/INDEX.md)。
+[完整文档索引](docs/INDEX.md) · [已知问题](docs/KNOWN_ISSUES.md) · [第三方来源与许可](docs/THIRD_PARTY.md)
 
 ## 致谢
 
@@ -160,6 +91,4 @@ python -m esptool --chip esp32s3 --port COMx --baud 115200 write-flash 0x0 bootl
 
 ## 许可
 
-本项目原创内容采用 [MIT License](LICENSE)。第三方字体、库、模型和素材仍遵循各自许可，不因本项目采用 MIT 而改变；字体许可见 [FONT-LICENSE.txt](firmware-v7/ui/FONT-LICENSE.txt)。
-
-
+本项目原创内容采用 [MIT License](LICENSE)。第三方字体、库、模型和素材仍遵循各自许可；字体许可见 [FONT-LICENSE.txt](firmware-v7/ui/FONT-LICENSE.txt)。

@@ -5,6 +5,7 @@
 |任务|入口|
 |---|---|
 |从哪里开始|[项目说明](../README.md)|
+|从采购到装配|[复刻与安装](REPRODUCE.md)|
 |下载和烧录|[v1.2.0 正式版](RELEASE-v1.2.0.md)、[v1.3.0-rc.1 测试版](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)|
 |自行编译与并行开发|[BUILD](BUILD.md)、[分支与构建变体](DEVELOPMENT.md)|
 |本轮仓库整理结果|[完成内容、验证与交付总结](REPOSITORY-MAINTENANCE-20261028.md)|
