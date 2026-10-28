@@ -1,0 +1,101 @@
+{
+  "publication_updated_at": "2026-10-28",
+  "button_revision": "R2",
+  "button_source_date": "2026-10-26",
+  "native": {
+    "button_revision": "R2",
+    "native_part_reopened": true,
+    "valid_button_solids": 1,
+    "button_features": 28,
+    "feature_errors_or_warnings": 0,
+    "assembly_reopened": true,
+    "components": [
+      {
+        "file": "V11_Insulator.SLDPRT",
+        "resolved": true,
+        "fixed": true,
+        "placement_verified": true
+      },
+      {
+        "file": "V11_BackLiner.SLDPRT",
+        "resolved": true,
+        "fixed": true,
+        "placement_verified": true
+      },
+      {
+        "file": "V11_Keeper.SLDPRT",
+        "resolved": true,
+        "fixed": true,
+        "placement_verified": true
+      },
+      {
+        "file": "V11_Button_R2.SLDPRT",
+        "resolved": true,
+        "fixed": true,
+        "placement_verified": true
+      },
+      {
+        "file": "V11_Screen.SLDPRT",
+        "resolved": true,
+        "fixed": true,
+        "placement_verified": true
+      },
+      {
+        "file": "V11_Cup.SLDPRT",
+        "resolved": true,
+        "fixed": true,
+        "placement_verified": true
+      },
+      {
+        "file": "V11_Battery.SLDPRT",
+        "resolved": true,
+        "fixed": true,
+        "placement_verified": true
+      },
+      {
+        "file": "V11_PCB_reference.SLDPRT",
+        "resolved": true,
+        "fixed": true,
+        "placement_verified": true
+      }
+    ],
+    "physical_acceptance": false
+  },
+  "native_export_vs_verified_step_difference_mm3": 0.0,
+  "unchanged_native_parts_sha256": {
+    "V11_Cup.SLDPRT": "c92f340e5ab25f17bc58fc84ac8e4321afdd5fbad051be5123a92cd6bc5a53b7",
+    "V11_Keeper.SLDPRT": "ee57e31f7c139cf4d81751e4d95dafd0f503c60f801422e90d393ffcf9718775",
+    "V11_Screen.SLDPRT": "3d364086b9ec706aa608c3d7f306dfd01b237ab46ba0a111116ad2b736883a3d",
+    "V11_Battery.SLDPRT": "76f5da0471dbf89552ce955099bb00e599cb6278a980e1a4dfceb2ae91555e45",
+    "V11_Insulator.SLDPRT": "94114eab9c2a12836032bf3707ce9c7fe2c396540d9ca78dda76e8d172a2088d",
+    "V11_BackLiner.SLDPRT": "bb390baad69efbf164a31051987d4f66804a4baf8a08d3239ebf66fc4a0f8ab0",
+    "V11_PCB_reference.SLDPRT": "8187e336b7c2d06f9fbe5c1d4162ed5eaa002c789c6bfcab905f7386541f70b3"
+  },
+  "step": {
+    "button_revision": "R2",
+    "button_step_sha256": "d4007d50771d56459364d0505e461ed83eb29c5a83733bfad7693a2dbdd6defd",
+    "seven_other_step_sources_unchanged": true,
+    "source_sha256": {
+      "Cup": "d9546406187deac6cf5e7a3d526da990536db52f62d3104c4a0b4d311415290f",
+      "Keeper": "dac42c942f05c0591200eb27830225fb9ccafedbd4feaf6d65a9617bdf8ce119",
+      "Button": "d4007d50771d56459364d0505e461ed83eb29c5a83733bfad7693a2dbdd6defd",
+      "Screen": "802db73db8988b4f9a3de7a754f2e28fcb141365df99d29d5e82c73943dfa58e",
+      "Battery": "7f8cca53f4f64b1dd334deb67b6bcb6066fa80308c049679b16961b3c334b4af",
+      "Insulator": "6f6f3523742570ee1606352b06f8ce7e9a12c8bd82bb57aaca0fb030956296c8",
+      "BackLiner": "41926f021fd9cb9287168ffe574505e787862bfe25f69dc13da9788b7afa43e3",
+      "PCB": "ea1d983ad0a1bcd79d3a2ccf4ee83f861596a4df2faa61f5eede20ad60dcb57d"
+    },
+    "step_assembly_reimport": "PASS",
+    "step_assembly_solids": 573,
+    "step_assembly_bounds_mm": [
+      -32.600000099999995,
+      -31.0000001,
+      0.6999998999976723,
+      30.714327165451,
+      31.0000001,
+      13.9
+    ],
+    "physical_acceptance": false
+  },
+  "physical_acceptance": false
+}

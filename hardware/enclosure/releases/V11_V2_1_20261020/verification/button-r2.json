@@ -1,0 +1,167 @@
+{
+  "status": "BUTTON_CAD_PASS_PRINTED_FIT_PENDING",
+  "cad_passed": true,
+  "physical_acceptance": false,
+  "zero_mm3": {
+    "independent_parameter_geometry_match": 0.0,
+    "native_reopen_export_match": 0.0,
+    "internal_root_and_tip_unchanged": 0.0,
+    "no_added_material_inside_shell_skin": 0.0,
+    "static_button_Cup": 0.0,
+    "static_button_Keeper": 0.0,
+    "static_button_Screen": 0.0,
+    "static_button_Battery": 0.0,
+    "static_button_Insulator": 0.0,
+    "static_button_BackLiner": 0.0,
+    "static_button_PCB": 0.0,
+    "continuous_press_Cup": 0.0,
+    "continuous_press_Keeper": 0.0,
+    "continuous_press_Screen": 0.0,
+    "continuous_press_Battery": 0.0,
+    "continuous_press_Insulator": 0.0,
+    "continuous_press_BackLiner": 0.0,
+    "continuous_press_fixed_PCB": 0.0,
+    "moving_switch_0.0": 0.0,
+    "moving_switch_0.05": 0.0,
+    "moving_switch_0.1": 0.0,
+    "moving_switch_0.15": 0.0,
+    "moving_switch_0.2": 0.0,
+    "moving_switch_0.25": 0.0,
+    "moving_switch_0.3": 0.0,
+    "moving_switch_0.35": 0.0,
+    "moving_switch_0.4": 0.0,
+    "moving_switch_0.45": 0.0,
+    "moving_switch_0.5": 0.0,
+    "moving_switch_0.55": 0.0,
+    "moving_switch_0.6": 0.0,
+    "moving_switch_0.65": 0.0,
+    "button_top_entry_0": 0.0,
+    "keeper_top_entry_button_0": 0.0,
+    "button_top_entry_2": 0.0,
+    "keeper_top_entry_button_2": 0.0,
+    "button_top_entry_4": 0.0,
+    "keeper_top_entry_button_4": 0.0,
+    "button_top_entry_6": 0.0,
+    "keeper_top_entry_button_6": 0.0,
+    "button_top_entry_8": 0.0,
+    "keeper_top_entry_button_8": 0.0,
+    "button_top_entry_10": 0.0,
+    "keeper_top_entry_button_10": 0.0,
+    "button_top_entry_12": 0.0,
+    "keeper_top_entry_button_12": 0.0,
+    "button_top_entry_14": 0.0,
+    "keeper_top_entry_button_14": 0.0,
+    "button_top_entry_16": 0.0,
+    "keeper_top_entry_button_16": 0.0,
+    "button_top_entry_18": 0.0,
+    "keeper_top_entry_button_18": 0.0,
+    "button_top_entry_20": 0.0,
+    "keeper_top_entry_button_20": 0.0,
+    "continuous_radial_button_entry": 0.0,
+    "continuous_keeper_entry_button": 0.0,
+    "offset_press_cup_-0.39_0": 0.0,
+    "offset_press_cup_0_-0.3": 0.0,
+    "offset_press_cup_0_0": 0.0,
+    "offset_press_cup_0_0.39": 0.0,
+    "offset_press_cup_0.39_0": 0.0,
+    "diagonal_offset_press_cup_-0.27_-0.27": 0.0,
+    "diagonal_offset_press_cup_-0.27_0.27": 0.0,
+    "diagonal_offset_press_cup_0.27_-0.27": 0.0,
+    "diagonal_offset_press_cup_0.27_0.27": 0.0
+  },
+  "positive_mm3": {
+    "outward_stop": 1.1690398615562856,
+    "inward_stop": 0.07759999999998456,
+    "downward_stop": 0.7235432188842377,
+    "upward_stop": 0.25945147363272913
+  },
+  "offset_checks_mm3": {
+    "(-0.39, 0)": {
+      "fixed_pcb": 0.0,
+      "keeper": 0.0
+    },
+    "(0.39, 0)": {
+      "fixed_pcb": 0.0,
+      "keeper": 0.0
+    },
+    "(0, -0.3)": {
+      "fixed_pcb": 0.0,
+      "keeper": 0.0
+    },
+    "(0, 0.39)": {
+      "fixed_pcb": 0.0,
+      "keeper": 0.0
+    },
+    "(-0.27, -0.27)": {
+      "fixed_pcb": 0.0,
+      "keeper": 0.0
+    },
+    "(-0.27, 0.27)": {
+      "fixed_pcb": 0.0,
+      "keeper": 0.0
+    },
+    "(0.27, -0.27)": {
+      "fixed_pcb": 0.0,
+      "keeper": 0.0
+    },
+    "(0.27, 0.27)": {
+      "fixed_pcb": 0.0,
+      "keeper": 0.0
+    }
+  },
+  "mesh": {
+    "watertight": true,
+    "bodies": 1,
+    "triangles": 404,
+    "volume_mm3": 140.1551110226395,
+    "bounds_mm": [
+      [
+        -32.59668731689453,
+        -5.799999713897705,
+        3.700000047683716
+      ],
+      [
+        -25.69999885559082,
+        5.799999713897705,
+        8.600000381469727
+      ]
+    ],
+    "sha256": "b6b797a7b1a86a77e8c763374199ac2075d61ba0d59d0d275dde2c31138a2bd3"
+  },
+  "input_sha256": {
+    "V11_Button_R2.SLDPRT": "eb3414b59a8692568ecaf4f9ebc76d487eb58be599793a019f51152d7679ad88",
+    "V11_Button_R2.step": "d4007d50771d56459364d0505e461ed83eb29c5a83733bfad7693a2dbdd6defd",
+    "V11_Button_R2.stl": "b6b797a7b1a86a77e8c763374199ac2075d61ba0d59d0d275dde2c31138a2bd3",
+    "reference/native_button.step": "bb7eaa13604051d1cb45b6e08e98c2f01d2ce9194cd4f2c64da9ac931726cd31"
+  },
+  "dimensions_mm": {
+    "aperture": [
+      10.4,
+      3.4
+    ],
+    "press_face": [
+      9.6,
+      2.6
+    ],
+    "face_single_side_clearance": 0.4,
+    "flange_width": 11.6,
+    "flange_z": [
+      3.75,
+      8.6
+    ],
+    "flange_side_clearance": 0.4,
+    "flange_bottom_clearance": 0.36,
+    "flange_top_clearance": 0.4,
+    "projection_at_outward_stop": 1.6,
+    "projection_at_full_nominal_press_min": 0.95,
+    "nominal_travel": 0.65,
+    "nominal_switch_gap": 0.35
+  },
+  "original_files_unchanged": 39,
+  "limits": [
+    "Print fit, friction, switch return and actuation require actual dry fit.",
+    "No independent return spring; cap can float within original 0.35mm lost motion.",
+    "Larger transverse clearance allows some tilt; no force or tilted-contact simulation.",
+    "Unchanged original full PCB edge-first insertion/FPC and adhesive qualifications remain pending."
+  ]
+}

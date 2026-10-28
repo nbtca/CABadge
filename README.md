@@ -12,7 +12,7 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 
 **当前板卡：[V2.1 GEK100 / 星火计划](hardware/pcb/current/README.md)。** 同时提供 [KiCad 工程](hardware/pcb/current/kicad/CABadge_V2_1.kicad_pro)与[嘉立创EDA工程](hardware/pcb/current/easyeda/CABadge_V2_1_GEK100.epro2)。KiCad 保留 2026-10-20 的原文件，EDA 已替换为 2026-10-27 原生重画版，包含五张复用原理图、重画 PCB、原版连线与正面丝印及底部星火计划 Logo。旧的转换版 EDA 已移除；[V1 首板 KiCad](hardware/pcb/archive/V1_c7c59dff/README.md)归档保存。
 
-**当前正式外壳：[V11 一体杯壳，配套 V2.1 GEK100](hardware/enclosure/releases/V11_V2_1_20261020/README.md)。** 提供三个打印件、STEP / SolidWorks 装配模型、[装配图 PDF](hardware/enclosure/releases/V11_V2_1_20261020/images/assembly-guide.pdf)及[装配说明](hardware/enclosure/releases/V11_V2_1_20261020/ASSEMBLY.md)。PCB 采用板边先入、壳内转平，屏幕最后落座；正式配套发布不改写尚待完成的实物装配验证。
+**当前正式外壳：[V11 一体杯壳，配套 V2.1 GEK100](hardware/enclosure/releases/V11_V2_1_20261020/README.md)。** 当前按钮为 [V11_Button_R2](hardware/enclosure/releases/V11_V2_1_20261020/print/V11_Button_R2.stl)，2026-10-28 已同步修正 STL、STEP、SolidWorks 装配及图纸；杯壳和隐藏限位件不变。提供三个打印件、模型包、[装配图 PDF](hardware/enclosure/releases/V11_V2_1_20261020/images/assembly-guide.pdf)及[装配说明](hardware/enclosure/releases/V11_V2_1_20261020/ASSEMBLY.md)。PCB 采用板边先入、壳内转平，屏幕最后落座；按钮打印配合及整机实物装配仍待验证。
 
 [下载 v1.2.0](https://github.com/nbtca/CABadge/releases/tag/v1.2.0) · [发布与升级说明](docs/RELEASE-v1.2.0.md) · [已知问题](docs/KNOWN_ISSUES.md) · [实板测试记录](首板测试记录.md)
 

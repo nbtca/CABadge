@@ -3,6 +3,8 @@
   "enclosure": "V11",
   "paired_pcb": "V2.1 GEK100",
   "release_date": "2026-10-20",
+  "updated_at": "2026-10-28",
+  "button_revision": "R2",
   "files": [
     {
       "path": ".gitattributes",
@@ -11,48 +13,53 @@
     },
     {
       "path": "ASSEMBLY.md",
-      "bytes": 3832,
-      "sha256": "adcb88847bccb899dc7700423d8b347f843b86c0199206568048b400d5010c9f"
+      "bytes": 4087,
+      "sha256": "d5596e685674192ab078de0be238dad24fa657d033789aaaed6d3c04a03f12f5"
     },
     {
       "path": "cad/CABadge_V11_V2_1-SolidWorks.zip",
-      "bytes": 47849238,
-      "sha256": "ab04ef279ce7845a51c860d8cb9fae8aad09e4ec4b475628995e6d89c88297a1"
+      "bytes": 47833489,
+      "sha256": "12e5f4ce611d5f4b196df5c89f23883bf315529270c6a119923270b7759a81d0"
     },
     {
       "path": "cad/CABadge_V11_V2_1-STEP.zip",
-      "bytes": 26845933,
-      "sha256": "08d458fc62e57399168bd5c7158c7e2899d53182321ec987b9fc3e99836e7309"
+      "bytes": 26842833,
+      "sha256": "e9dbc0c08fc6a267ecb3e3fd9e1e8d30e21f633bb575eb2e26382d96192f8a7b"
     },
     {
       "path": "images/assembly-details.png",
-      "bytes": 506068,
-      "sha256": "9761615658a79c1d76dfbd026b1da62351d60a51db3ebe364fb35ab14a90961c"
+      "bytes": 500635,
+      "sha256": "e4ad3800d83c1685de1cabe1cf8b022c1df765368261ff31b6f07a5600473abf"
     },
     {
       "path": "images/assembly-details.svg",
-      "bytes": 360302,
-      "sha256": "04fb1b264ee1c5dff14c0c9747504e8b308caa4bc4a0cab8cccf67398aac9701"
+      "bytes": 356022,
+      "sha256": "d66863c28cf432a4de12a4c6e9aa496c361643fd63775592b34d18d88012c746"
     },
     {
       "path": "images/assembly-exploded.png",
-      "bytes": 540130,
-      "sha256": "22d0d10f3c1ef787e75c83a983a72abba990f8a4a563e9b8db91ed8e9b4ea14a"
+      "bytes": 544277,
+      "sha256": "47ea7857baba71cf232391eb2426444d67940bc174a83af43ec32175c8f77fd4"
     },
     {
       "path": "images/assembly-exploded.svg",
-      "bytes": 330200,
-      "sha256": "616f16ca0b593ad1f347ad99d55ff407b0a84631fb96fad84c46c62bb8897919"
+      "bytes": 330579,
+      "sha256": "3e58365e9721f9982a1f030bb320c825a34cdd9d212787bb9816de397b287f78"
     },
     {
       "path": "images/assembly-guide.pdf",
-      "bytes": 645216,
-      "sha256": "f77c37065c153a33a4a84a2257d81553d11448cf124b82d6d0e5dd09860aed5b"
+      "bytes": 645258,
+      "sha256": "9f6e72d7b153df1c27bd30b645889dc5fbba6140821e3a3d5d4278890d9f4707"
     },
     {
-      "path": "print/V11_Button.stl",
-      "bytes": 21884,
-      "sha256": "b2c196bdcc23985a3fa8abc7ca59dab2e4d5cb4f6d833ad2a3ca6b32697339a8"
+      "path": "images/button-r2-comparison.png",
+      "bytes": 112362,
+      "sha256": "9c8b37135272e6a5d44f162146319512568bbce54dd07545e018ccdee08bfe97"
+    },
+    {
+      "path": "print/V11_Button_R2.stl",
+      "bytes": 20284,
+      "sha256": "b6b797a7b1a86a77e8c763374199ac2075d61ba0d59d0d275dde2c31138a2bd3"
     },
     {
       "path": "print/V11_Cup.stl",
@@ -66,18 +73,28 @@
     },
     {
       "path": "README.md",
-      "bytes": 4100,
-      "sha256": "5b64a921d7d7ef66689858635f7da2ea02db2c3ce125d5ade418c91c306cca95"
+      "bytes": 5663,
+      "sha256": "760150020684a6e2234379ed33ac2784ec93c03e72d84b9696d0d5b2dfe21d58"
     },
     {
-      "path": "SHA256SUMS.txt",
-      "bytes": 1685,
-      "sha256": "75be69d91586d878d93c753972dc99416171e84e51897f217f34f0dc14694bf4"
+      "path": "verification/button-r2-mesh.json",
+      "bytes": 390,
+      "sha256": "38d3a95834c3961423dd663cf9e08e949a4259ac6d33f64fe6f1960cdbb38b56"
+    },
+    {
+      "path": "verification/button-r2-packaging.json",
+      "bytes": 3544,
+      "sha256": "69b533ac36644ae1490af5121fea205bd32aee9c085f1e217448cd86f4450d85"
+    },
+    {
+      "path": "verification/button-r2.json",
+      "bytes": 5144,
+      "sha256": "8e97a9015bd7c5292f42a6ef9255e9202cf7e419bedac96ba8f89c54eeb293fc"
     },
     {
       "path": "verification/publication-summary.json",
-      "bytes": 3470,
-      "sha256": "1a0e8daae5e5b2b709fc95fa069e44a458481bfedece0bd5cda5649e54879078"
+      "bytes": 5071,
+      "sha256": "6a95e088c04945d59443f4531f617384a000399efafab2be81f9809607ea869d"
     },
     {
       "path": "verification/source-bonding_check.json",
