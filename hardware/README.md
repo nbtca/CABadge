@@ -17,7 +17,7 @@
 | [V1 归档](pcb/archive/V1_c7c59dff/README.md) | 首板 KiCad 源文件、符号库、封装库和本地模型 | 历史源文件；与冻结制造快照分别保存 |
 | [bom](bom/README.md) | 原 BOM、采购表、料号列表、版本对比及交互式 BOM | CSV 为已有 V1 / V2.1 KiCad 用量记录；交互式 BOM 为 V1 快照，元器件核对已停止 |
 | [冻结制造包](fabrication/JXBadge_EVT_20260909_c7c59dff/下单说明.md) | 首板 Gerber、钻孔、钢网及导出核验源快照 | 本次保持路径与全部文件字节不变 |
-| [V11 外壳](enclosure/releases/V11_V2_1_20261020/README.md) | V2.1 配套打印件、装配模型与说明；当前按钮为 R2 | 2026-10-28 修正按钮发布包，杯壳及限位件不变；几何检查对应说明中的 KiCad PCB；[V6](enclosure/releases/V6_20260930/README.md)为历史外壳 |
+| [V11 外壳](enclosure/releases/V11_V2_1_20261020/README.md) | V2.1 配套打印件、装配模型与说明；当前按钮为 R2 | 2026-10-29 按实际装配更新为 Cup + Button 两件打印方案，不装 Keeper，杯壳与 R2 按帽几何保持；几何检查对应说明中的 KiCad PCB；[V6](enclosure/releases/V6_20260930/README.md)为历史外壳 |
 
 ## 采购、装配与验证
 

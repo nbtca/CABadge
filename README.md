@@ -46,7 +46,7 @@ GIF/视频需先在电脑端转换为 EAF，设备不直接播放 GIF/视频。O
 | 测试固件 | v1.3.0-rc.1 / 7.9.23-timetiles-fix | [测试 Release](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)，新功能仍有待测项 |
 | 公开源码 | [7.9.23-timetiles-fix](firmware-v7/version.json) | `main` 分支；[自行编译](docs/BUILD.md) |
 | 当前 PCB | V2.1 GEK100 / 星火计划 | [工程说明](hardware/pcb/current/README.md)：[嘉立创EDA原生重画版](hardware/pcb/current/easyeda/CABadge_V2_1_GEK100.epro2)（2026-10-27）与 [KiCad 原工程](hardware/pcb/current/kicad/CABadge_V2_1.kicad_pro)（2026-10-20），两者不自动同步 |
-| 配套外壳 | V11 一体杯壳 + V11_Button_R2 | [打印件与装配](hardware/enclosure/releases/V11_V2_1_20261020/README.md)、[SolidWorks / STEP](https://github.com/nbtca/CABadge/releases/tag/enclosure-v11-button-r2-20261028)；R2 打印装配与手感待验证 |
+| 配套外壳 | V11 一体杯壳 + V11_Button_R2 | [打印件与装配](hardware/enclosure/releases/V11_V2_1_20261020/README.md)、[SolidWorks / STEP](https://github.com/nbtca/CABadge/releases/tag/enclosure-v11-no-keeper-20261029)；仅 Cup + Button，按键专项待验证 |
 | 历史硬件 | V1 首板 c7c59dff，仅 KiCad | [V1 归档](hardware/pcb/archive/V1_c7c59dff/README.md)；冻结制造包属于此版 |
 
 **自行编译请使用 `main`。** `v1.3.0-rc.1` 标签的自动 `Source code (zip)` 是旧源码快照，与其 7.9.23 固件附件不对应；[下载说明](docs/REPRODUCE.md#1-下载固件与配套硬件)解释各文件的用途。

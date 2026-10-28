@@ -1,0 +1,141 @@
+{
+  "updated_at": "2026-10-29",
+  "assembly_revision": "NO_KEEPER_20261029",
+  "assembly_variant": "CUP_BUTTON_ONLY",
+  "user_feedback": {
+    "source": "User message in this task",
+    "text": "外壳装配时我只用到了cup和button，keeper没用到",
+    "print_parts_used": [
+      "Cup",
+      "Button"
+    ],
+    "keeper_used": false,
+    "button_physical_revision_confirmed": false,
+    "scope": "Printing part usage only; no additional switch, force, travel or long-run acceptance supplied"
+  },
+  "part_geometry_changed": false,
+  "keeper_included": false,
+  "print_files": [
+    "print/V11_Cup.stl",
+    "print/V11_Button_R2.stl"
+  ],
+  "preserved_print_sha256": {
+    "print/V11_Cup.stl": "95edfb94aef2894de189daf03e3f17c5dafdcc599bde935e03f9709567fd91e1",
+    "print/V11_Button_R2.stl": "b6b797a7b1a86a77e8c763374199ac2075d61ba0d59d0d275dde2c31138a2bd3"
+  },
+  "preserved_native_sha256": {
+    "V11_BackLiner.SLDPRT": "bb390baad69efbf164a31051987d4f66804a4baf8a08d3239ebf66fc4a0f8ab0",
+    "V11_Battery.SLDPRT": "76f5da0471dbf89552ce955099bb00e599cb6278a980e1a4dfceb2ae91555e45",
+    "V11_Button_R2.SLDPRT": "eb3414b59a8692568ecaf4f9ebc76d487eb58be599793a019f51152d7679ad88",
+    "V11_Cup.SLDPRT": "c92f340e5ab25f17bc58fc84ac8e4321afdd5fbad051be5123a92cd6bc5a53b7",
+    "V11_Insulator.SLDPRT": "94114eab9c2a12836032bf3707ce9c7fe2c396540d9ca78dda76e8d172a2088d",
+    "V11_PCB_reference.SLDPRT": "8187e336b7c2d06f9fbe5c1d4162ed5eaa002c789c6bfcab905f7386541f70b3",
+    "V11_Screen.SLDPRT": "3d364086b9ec706aa608c3d7f306dfd01b237ab46ba0a111116ad2b736883a3d"
+  },
+  "native": {
+    "button_revision": "R2",
+    "native_part_reopened": true,
+    "valid_button_solids": 1,
+    "button_features": 28,
+    "feature_errors_or_warnings": 0,
+    "assembly_reopened": true,
+    "components": [
+      {
+        "file": "V11_Battery.SLDPRT",
+        "resolved": true,
+        "fixed": true,
+        "placement_verified": true
+      },
+      {
+        "file": "V11_Button_R2.SLDPRT",
+        "resolved": true,
+        "fixed": true,
+        "placement_verified": true
+      },
+      {
+        "file": "V11_Cup.SLDPRT",
+        "resolved": true,
+        "fixed": true,
+        "placement_verified": true
+      },
+      {
+        "file": "V11_Screen.SLDPRT",
+        "resolved": true,
+        "fixed": true,
+        "placement_verified": true
+      },
+      {
+        "file": "V11_Insulator.SLDPRT",
+        "resolved": true,
+        "fixed": true,
+        "placement_verified": true
+      },
+      {
+        "file": "V11_BackLiner.SLDPRT",
+        "resolved": true,
+        "fixed": true,
+        "placement_verified": true
+      },
+      {
+        "file": "V11_PCB_reference.SLDPRT",
+        "resolved": true,
+        "fixed": true,
+        "placement_verified": true
+      }
+    ],
+    "physical_acceptance": false
+  },
+  "step": {
+    "button_revision": "R2",
+    "button_step_sha256": "d4007d50771d56459364d0505e461ed83eb29c5a83733bfad7693a2dbdd6defd",
+    "six_other_step_sources_unchanged": true,
+    "keeper_included": false,
+    "assembly_components": 7,
+    "assembly_revision": "NO_KEEPER_20261029",
+    "source_sha256": {
+      "Cup": "d9546406187deac6cf5e7a3d526da990536db52f62d3104c4a0b4d311415290f",
+      "Button": "d4007d50771d56459364d0505e461ed83eb29c5a83733bfad7693a2dbdd6defd",
+      "Screen": "802db73db8988b4f9a3de7a754f2e28fcb141365df99d29d5e82c73943dfa58e",
+      "Battery": "7f8cca53f4f64b1dd334deb67b6bcb6066fa80308c049679b16961b3c334b4af",
+      "Insulator": "6f6f3523742570ee1606352b06f8ce7e9a12c8bd82bb57aaca0fb030956296c8",
+      "BackLiner": "41926f021fd9cb9287168ffe574505e787862bfe25f69dc13da9788b7afa43e3",
+      "PCB": "ea1d983ad0a1bcd79d3a2ccf4ee83f861596a4df2faa61f5eede20ad60dcb57d"
+    },
+    "step_assembly_reimport": "PASS",
+    "step_assembly_solids": 572,
+    "step_assembly_bounds_mm": [
+      -32.600000099999995,
+      -31.0000001,
+      0.6999998999976723,
+      30.714327165451,
+      31.0000001,
+      13.9
+    ],
+    "physical_acceptance": false
+  },
+  "drawing_components": [
+    "Cup",
+    "Button",
+    "Screen",
+    "Battery",
+    "Insulator",
+    "BackLiner",
+    "PCB"
+  ],
+  "removed_current_files": [
+    "print/V11_Keeper.stl",
+    "images/button-r2-comparison.png"
+  ],
+  "historical_report_scope": "button-r2*.json and source-*.json retain their original Keeper-based checks; travel and four-way-stop claims do not certify the current variant",
+  "physical_acceptance": false,
+  "evidence_grade": {
+    "user_print_part_usage": "user-confirmed",
+    "native_and_step_packaging": "tool-verified",
+    "drawings": "self-checked",
+    "switch_and_force_acceptance": "not-run"
+  },
+  "assembly_sha256": {
+    "CABadge_V11_V2_1.SLDASM": "a5be3c1700d0b93102f4b477e4a0ebf3c6e066b217e28448687963c3e3bf9266",
+    "CABadge_V11_V2_1_Assembly.step": "850e93ddf240ab0246593d9bbb587e20b3795cdf18fd91ffbf06b1344931fa32"
+  }
+}

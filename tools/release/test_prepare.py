@@ -28,14 +28,16 @@ class ReleaseChecks(unittest.TestCase):
         (self.release / 'cad').mkdir()
         self.stl, self.step, self.native = b'R2 STL', b'R2 STEP', b'R2 native'
         (self.release / 'print/V11_Button_R2.stl').write_bytes(self.stl)
+        (self.release / 'print/V11_Cup.stl').write_bytes(b'cup mesh')
         self.zip('SolidWorks', {
             'CABadge_V11_V2_1.SLDASM': b'assembly',
             'V11_Button_R2.SLDPRT': self.native,
-            **{f'V11_{name}.SLDPRT': b'unchanged' for name in ['Cup', 'Keeper', 'Screen', 'Battery', 'Insulator', 'BackLiner', 'PCB_reference']},
+            **{f'V11_{name}.SLDPRT': b'unchanged' for name in ['Cup', 'Screen', 'Battery', 'Insulator', 'BackLiner', 'PCB_reference']},
         })
-        self.zip('STEP', {'CABadge_V11_V2_1_Assembly.step': b'assembly', 'V11_Button_R2.step': self.step, 'V11_Cup.step': b'cup', 'V11_Keeper.step': b'keeper'})
+        self.zip('STEP', {'CABadge_V11_V2_1_Assembly.step': b'assembly', 'V11_Button_R2.step': self.step, 'V11_Cup.step': b'cup'})
         proof = {'status': 'BUTTON_CAD_PASS_PRINTED_FIT_PENDING', 'physical_acceptance': False, 'input_sha256': {'V11_Button_R2.stl': digest(self.stl), 'V11_Button_R2.step': digest(self.step), 'V11_Button_R2.SLDPRT': digest(self.native)}}
         (self.release / 'verification/button-r2.json').write_text(json.dumps(proof))
+        (self.release / 'verification/assembly-no-keeper.json').write_text(json.dumps({'assembly_sha256': {'CABadge_V11_V2_1.SLDASM': digest(b'assembly'), 'CABadge_V11_V2_1_Assembly.step': digest(b'assembly')}}))
         self.rehash()
 
     def zip(self, kind, members):
@@ -46,11 +48,48 @@ class ReleaseChecks(unittest.TestCase):
     def rehash(self):
         files = [{'path': p.relative_to(self.release).as_posix(), 'bytes': p.stat().st_size, 'sha256': digest(p.read_bytes())} for p in sorted(self.release.rglob('*')) if p.is_file() and p.relative_to(self.release).as_posix() not in ['MANIFEST.json', 'SHA256SUMS.txt']]
         manifest = self.release / 'MANIFEST.json'
-        manifest.write_text(json.dumps({'button_revision': 'R2', 'files': files}))
+        manifest.write_text(json.dumps({'button_revision': 'R2', 'assembly_variant': 'CUP_BUTTON_ONLY', 'files': files}))
         (self.release / 'SHA256SUMS.txt').write_text(''.join(f"{p['sha256']}  {p['path']}\n" for p in files) + digest(manifest.read_bytes()) + '  MANIFEST.json\n')
 
     def test_valid_r2_retains_pending_physical_acceptance(self):
         self.assertFalse(prepare.verify_enclosure(self.release)['physical_acceptance'])
+
+    def test_cup_button_only_assembly_contract(self):
+        result = prepare.verify_enclosure(self.release)
+        self.assertEqual(result['assembly_components'], 7)
+        self.assertEqual(result['assembly_variant'], 'CUP_BUTTON_ONLY')
+
+    def test_rehashed_historical_composite_assembly_is_rejected(self):
+        for kind, name in [('SolidWorks', 'CABadge_V11_V2_1.SLDASM'), ('STEP', 'CABadge_V11_V2_1_Assembly.step')]:
+            with self.subTest(kind=kind):
+                path = self.release / f'cad/CABadge_V11_V2_1-{kind}.zip'
+                with zipfile.ZipFile(path) as archive:
+                    members = {n: archive.read(n) for n in archive.namelist()}
+                self.zip(kind, dict(members, **{name: b'historical composite still includes Keeper'}))
+                self.rehash()
+                with self.assertRaisesRegex(ValueError, 'assembly fingerprint'):
+                    prepare.verify_enclosure(self.release)
+                self.zip(kind, members)
+                self.rehash()
+
+    def test_rehashed_keeper_print_is_rejected(self):
+        (self.release / 'print/V11_Keeper.stl').write_bytes(b'obsolete keeper')
+        self.rehash()
+        with self.assertRaisesRegex(ValueError, 'Keeper'):
+            prepare.verify_enclosure(self.release)
+
+    def test_rehashed_keeper_cad_part_is_rejected(self):
+        for kind, name in [('SolidWorks', 'V11_Keeper.SLDPRT'), ('STEP', 'V11_Keeper.step')]:
+            with self.subTest(kind=kind):
+                path = self.release / f'cad/CABadge_V11_V2_1-{kind}.zip'
+                with zipfile.ZipFile(path) as archive:
+                    members = {n: archive.read(n) for n in archive.namelist()}
+                self.zip(kind, dict(members, **{name: b'obsolete keeper'}))
+                self.rehash()
+                with self.assertRaisesRegex(ValueError, 'Incomplete'):
+                    prepare.verify_enclosure(self.release)
+                self.zip(kind, members)
+                self.rehash()
 
     def test_rehashed_wrong_native_revision_is_rejected(self):
         with zipfile.ZipFile(self.release / 'cad/CABadge_V11_V2_1-SolidWorks.zip') as z:

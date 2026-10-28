@@ -15,7 +15,7 @@
 
 ## 采购与装配
 
-3D打印外壳：[V11 正式外壳（配套 V2.1）](../../../enclosure/releases/V11_V2_1_20261020/README.md)，包含三个打印件、STEP / SolidWorks 装配及装配图。装入顺序见[装配说明](../../../enclosure/releases/V11_V2_1_20261020/ASSEMBLY.md)；[V6](../../../enclosure/releases/V6_20260930/README.md)保留为首板历史版本。
+3D打印外壳：[V11 正式外壳（配套 V2.1）](../../../enclosure/releases/V11_V2_1_20261020/README.md)，包含 Cup 与 Button 两个打印件、STEP / SolidWorks 装配及装配图。装入顺序见[装配说明](../../../enclosure/releases/V11_V2_1_20261020/ASSEMBLY.md)；[V6](../../../enclosure/releases/V6_20260930/README.md)保留为首板历史版本。
 
 首板换装 J1 为 FFC/FPC 0.5 mm、18P、抽屉式上接触。厂家精确型号及尺寸图仍待提供；[J1 连接器更正](../../../../docs/J1-CONNECTOR.md) 优先于原理图/库/交互式 BOM 中的旧采购标识，不可直接将原 C2856802 当成已验证替代。
 

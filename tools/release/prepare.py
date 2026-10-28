@@ -60,6 +60,12 @@ def verify_enclosure(directory):
 def verify_enclosure_revision(directory, manifest):
     if manifest.get('button_revision') != 'R2':
         raise ValueError('Expected button revision R2')
+    if manifest.get('assembly_variant') != 'CUP_BUTTON_ONLY':
+        raise ValueError('Expected the current Cup + Button assembly variant')
+    print_parts = {p.name for p in (directory / 'print').iterdir() if p.is_file() and p.suffix.lower() == '.stl'}
+    if print_parts != {'V11_Cup.stl', 'V11_Button_R2.stl'}:
+        raise ValueError('Expected exactly Cup and R2 Button print files; Keeper must be absent')
+    assembly_hashes = read_json(directory / 'verification/assembly-no-keeper.json')['assembly_sha256']
     proof = read_json(directory / 'verification/button-r2.json')
     expected = proof['input_sha256']
     if digest(payload(directory, 'print/V11_Button_R2.stl')) != expected['V11_Button_R2.stl']:
@@ -67,14 +73,14 @@ def verify_enclosure_revision(directory, manifest):
     if (directory / 'print/V11_Button.stl').exists():
         raise ValueError('Old standalone button is still present')
     for kind, part, label, count in [
-        ('SolidWorks', 'V11_Button_R2.SLDPRT', 'native', 9),
-        ('STEP', 'V11_Button_R2.step', 'STEP', 4),
+        ('SolidWorks', 'V11_Button_R2.SLDPRT', 'native', 8),
+        ('STEP', 'V11_Button_R2.step', 'STEP', 3),
     ]:
         if kind == 'SolidWorks':
             required = {'CABadge_V11_V2_1.SLDASM', 'V11_Button_R2.SLDPRT'}
-            required.update(f'V11_{name}.SLDPRT' for name in ['Cup', 'Keeper', 'Screen', 'Battery', 'Insulator', 'BackLiner', 'PCB_reference'])
+            required.update(f'V11_{name}.SLDPRT' for name in ['Cup', 'Screen', 'Battery', 'Insulator', 'BackLiner', 'PCB_reference'])
         else:
-            required = {'CABadge_V11_V2_1_Assembly.step', 'V11_Button_R2.step', 'V11_Cup.step', 'V11_Keeper.step'}
+            required = {'CABadge_V11_V2_1_Assembly.step', 'V11_Button_R2.step', 'V11_Cup.step'}
         try:
             with zipfile.ZipFile(directory / f'cad/CABadge_V11_V2_1-{kind}.zip') as archive:
                 names = archive.namelist()
@@ -87,9 +93,11 @@ def verify_enclosure_revision(directory, manifest):
                 assembly = 'CABadge_V11_V2_1.SLDASM' if kind == 'SolidWorks' else 'CABadge_V11_V2_1_Assembly.step'
                 if assembly not in names:
                     raise ValueError(f'Missing {kind} assembly')
+                if digest(archive.read(assembly)) != assembly_hashes.get(assembly):
+                    raise ValueError(f'{kind} assembly fingerprint differs from no-Keeper verification')
         except (zipfile.BadZipFile, KeyError) as exc:
             raise ValueError(f'Invalid {kind} archive: {exc}') from exc
-    return {'kind': 'enclosure', 'button_revision': 'R2', 'status': proof['status'], 'physical_acceptance': proof['physical_acceptance']}
+    return {'kind': 'enclosure', 'assembly_variant': 'CUP_BUTTON_ONLY', 'assembly_components': 7, 'button_revision': 'R2', 'status': proof['status'], 'physical_acceptance': proof['physical_acceptance']}
 
 
 def refresh_manifest(directory):

@@ -20,7 +20,7 @@
 |所选 Release 的 `debug.zip`|与该版固件匹配的 ELF、有效构建配置，仅排查问题时需要|
 |[V2.1 KiCad 工程](../hardware/pcb/current/kicad/CABadge_V2_1.kicad_pro)|当前 V2.1 的 KiCad 格式，保留 2026-10-20 原文件，需连同库和模型下载|
 |[V2.1 嘉立创EDA原生重画工程](../hardware/pcb/current/easyeda/CABadge_V2_1_GEK100.epro2)|2026-10-27 最新专业版 V4 工程，含五张复用原理图及原生重画 PCB|
-|[V11 正式配套外壳](../hardware/enclosure/releases/V11_V2_1_20261020/README.md)|三个打印 STL、装配模型、爆炸图及剖面图，与 V2.1 PCB 配套|
+|[V11 正式配套外壳](../hardware/enclosure/releases/V11_V2_1_20261020/README.md)|Cup 与 Button 两个打印 STL、装配模型、爆炸图及剖面图，与 V2.1 PCB 配套|
 |[v1.0 的硬件附件](https://github.com/nbtca/CABadge/releases/tag/v1.0)|仅用于复刻旧首板 c7c59dff，不作为 V2.1 生产包|
 
 V2.1 同时提供两种格式：EDA 用户下载上述 `.epro2`，在专业版“导入专业版”入口导入；KiCad 用户从 `main` 分支的 **Code → Download ZIP** 下载工程并保留 `hardware/pcb/current/kicad/` 的目录结构。EDA 已换为 2026-10-27 原生重画版，KiCad 原文件保持，两种格式不自动同步；详见[当前版本说明](../hardware/pcb/current/README.md)。
@@ -45,7 +45,7 @@ V2.1 同时提供两种格式：EDA 用户下载上述 `.epro2`，在专业版�
 
 ### 4. 分阶段焊接与首次上电
 
-外壳使用 [V11 正式配套包](../hardware/enclosure/releases/V11_V2_1_20261020/README.md)，按[装配图与顺序](../hardware/enclosure/releases/V11_V2_1_20261020/ASSEMBLY.md)准备杯壳、按帽和隐藏限位件，电路调试完成后再合屏固定。
+外壳使用 [V11 正式配套包](../hardware/enclosure/releases/V11_V2_1_20261020/README.md)，按[装配图与顺序](../hardware/enclosure/releases/V11_V2_1_20261020/ASSEMBLY.md)准备杯壳与按帽，不安装 Keeper，电路调试完成后再合屏固定。
 
 按 [焊接与分阶段上电检查](../焊接与分阶段上电检查_首板.md) 分组完成：USB 输入 → 3.3 V 电源 → 主控与 USB 下载 → 屏幕与触摸 → 电池与充电。
 
