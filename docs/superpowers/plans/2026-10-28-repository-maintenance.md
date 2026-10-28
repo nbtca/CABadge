@@ -45,9 +45,9 @@ Files: AGENTS.md、README.md、docs/INDEX.md、docs/BUILD.md、docs/architecture
 
 - [x] 移动架构与仓库检查，修复全部受跟踪链接和命令；保留历史记录原意。
 - [x] 修复维护入口，记录源码/附件/PCB/外壳各自版本与历史标签例外。
-- [ ] CI 运行仓库自检、仓库回归、发布工具测试及可离线检查，权限仅 contents:read。
-- [ ] 独立代码审查后修复问题，核对全差异和保护集合，提交并推送 main。
-- [ ] 确认线上 CI、下载指纹与主分支提交，写完整总结，核对原工作区 589 份文件指纹。
+- [x] CI 运行仓库自检、仓库回归、发布工具测试及可离线检查，权限仅 contents:read。
+- [x] 独立代码审查后修复问题，核对全差异和保护集合，提交并推送 main。
+- [x] 确认线上 CI、下载指纹与主分支提交，写完整总结，核对原工作区 589 份文件指纹。
 
 ## Verification commands
 
@@ -61,3 +61,7 @@ pwsh -NoProfile -File firmware-v7/usb_screen/build.ps1
 ```
 
 其他宿主测试逐个从 firmware-v7/tests/host 运行；构建使用隔离暂存和输出，报告保留失败及复测证据。
+
+## 完成记录
+
+2026-10-29：实施 2c03557，CI 修正 229f360 / cf40069；干净提交构建、发布检查与线上运行 40740181027 通过。详细证据、原工作区保护及下载复核限制见 [完成总结](../../REPOSITORY-MAINTENANCE-20261028.md)。

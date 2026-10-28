@@ -7,6 +7,7 @@
 |从哪里开始|[项目说明](../README.md)|
 |下载和烧录|[v1.2.0 正式版](RELEASE-v1.2.0.md)、[v1.3.0-rc.1 测试版](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)|
 |自行编译与并行开发|[BUILD](BUILD.md)、[分支与构建变体](DEVELOPMENT.md)|
+|本轮仓库整理结果|[完成内容、验证与交付总结](REPOSITORY-MAINTENANCE-20261028.md)|
 |验证与发布文件|[发布工具](../tools/release/README.md)、[自动检查](../.github/workflows/repository.yml)|
 |当前板卡与历史版本|[V2.1 双格式工程](../hardware/pcb/current/README.md)、[V1 KiCad 归档](../hardware/pcb/archive/V1_c7c59dff/README.md)|
 |采购、PCB 与装配|[硬件](../hardware/README.md)、[J1 更正](J1-CONNECTOR.md)、[焊接检查](../焊接与分阶段上电检查_首板.md)|
