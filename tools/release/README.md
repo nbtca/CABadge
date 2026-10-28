@@ -9,7 +9,7 @@ python tools/release/prepare.py enclosure hardware/enclosure/releases/V11_V2_1_2
 python tools/release/prepare.py enclosure hardware/enclosure/releases/V11_V2_1_20261020 --output outputs/releases/CABadge_V11_Button_R2.zip
 ```
 
-工具检查完整 MANIFEST / SHA256SUMS、归档 CRC、原验证记录中的 STL / STEP / SLDPRT 指纹、七部件原生装配、两件打印清单、已核验装配文件指纹、旧按钮和 Keeper 残留。不能仅重算清单就把旧按钮作为 R2 发布。新 ZIP 固定成员顺序和时间戳，同时生成 `.zip.sha256`；不覆盖已有输出，也不允许输出落入输入目录。
+工具检查完整 MANIFEST / SHA256SUMS、归档 CRC、原验证记录中的 STL / STEP / SLDPRT 指纹、七部件原生装配、两件打印清单、已核验装配文件指纹、文件清单一致性。不能仅重算清单就把旧按钮作为 R2 发布。新 ZIP 固定成员顺序和时间戳，同时生成 `.zip.sha256`；不覆盖已有输出，也不允许输出落入输入目录。
 
 维护下载说明或增加说明文件后，使用 `python tools/release/prepare.py enclosure hardware/enclosure/releases/V11_V2_1_20261020 --refresh-manifest` 更新清单。工具先核对 R2 设计指纹和归档成员，错误修订不能通过重算清单变为已核验版本。
 
@@ -31,7 +31,7 @@ python tools/release/prepare.py firmware <构建输出目录> --source-ref HEAD 
 
 ## 大型 CAD 附件
 
-当前 V11 CAD ZIP 的首选入口为 [Cup + Button 两件打印方案](https://github.com/nbtca/CABadge/releases/tag/enclosure-v11-no-keeper-20261029)，与仓库当前 ZIP 对应，不含独立 Keeper。2026-10-28 的八部件 R2 Release 保留历史含义；使用旧提交的工具检查旧方案，不把两套装配混用。
+当前 V11 CAD ZIP 的首选入口为 [Cup + Button 两件打印方案](https://github.com/nbtca/CABadge/releases/tag/enclosure-v11-cup-button-20261029)，与仓库当前 ZIP 对应。
 
 新版本发布前先执行上述检查，使用明确的新标签和附件名，上传后重新下载核对指纹。复用已有标签前先核对附件，禁止用无条件覆盖选项替换未知文件。
 

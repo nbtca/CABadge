@@ -37,7 +37,7 @@ class ReleaseChecks(unittest.TestCase):
         self.zip('STEP', {'CABadge_V11_V2_1_Assembly.step': b'assembly', 'V11_Button_R2.step': self.step, 'V11_Cup.step': b'cup'})
         proof = {'status': 'BUTTON_CAD_PASS_PRINTED_FIT_PENDING', 'physical_acceptance': False, 'input_sha256': {'V11_Button_R2.stl': digest(self.stl), 'V11_Button_R2.step': digest(self.step), 'V11_Button_R2.SLDPRT': digest(self.native)}}
         (self.release / 'verification/button-r2.json').write_text(json.dumps(proof))
-        (self.release / 'verification/assembly-no-keeper.json').write_text(json.dumps({'assembly_sha256': {'CABadge_V11_V2_1.SLDASM': digest(b'assembly'), 'CABadge_V11_V2_1_Assembly.step': digest(b'assembly')}}))
+        (self.release / 'verification/assembly-cup-button.json').write_text(json.dumps({'assembly_sha256': {'CABadge_V11_V2_1.SLDASM': digest(b'assembly'), 'CABadge_V11_V2_1_Assembly.step': digest(b'assembly')}}))
         self.rehash()
 
     def zip(self, kind, members):
@@ -65,26 +65,26 @@ class ReleaseChecks(unittest.TestCase):
                 path = self.release / f'cad/CABadge_V11_V2_1-{kind}.zip'
                 with zipfile.ZipFile(path) as archive:
                     members = {n: archive.read(n) for n in archive.namelist()}
-                self.zip(kind, dict(members, **{name: b'historical composite still includes Keeper'}))
+                self.zip(kind, dict(members, **{name: b'historical composite with an extra component'}))
                 self.rehash()
                 with self.assertRaisesRegex(ValueError, 'assembly fingerprint'):
                     prepare.verify_enclosure(self.release)
                 self.zip(kind, members)
                 self.rehash()
 
-    def test_rehashed_keeper_print_is_rejected(self):
-        (self.release / 'print/V11_Keeper.stl').write_bytes(b'obsolete keeper')
+    def test_rehashed_extra_print_is_rejected(self):
+        (self.release / 'print/UnusedPart.stl').write_bytes(b'unexpected part')
         self.rehash()
-        with self.assertRaisesRegex(ValueError, 'Keeper'):
+        with self.assertRaisesRegex(ValueError, 'exactly Cup'):
             prepare.verify_enclosure(self.release)
 
-    def test_rehashed_keeper_cad_part_is_rejected(self):
-        for kind, name in [('SolidWorks', 'V11_Keeper.SLDPRT'), ('STEP', 'V11_Keeper.step')]:
+    def test_rehashed_extra_cad_part_is_rejected(self):
+        for kind, name in [('SolidWorks', 'UnusedPart.SLDPRT'), ('STEP', 'UnusedPart.step')]:
             with self.subTest(kind=kind):
                 path = self.release / f'cad/CABadge_V11_V2_1-{kind}.zip'
                 with zipfile.ZipFile(path) as archive:
                     members = {n: archive.read(n) for n in archive.namelist()}
-                self.zip(kind, dict(members, **{name: b'obsolete keeper'}))
+                self.zip(kind, dict(members, **{name: b'unexpected part'}))
                 self.rehash()
                 with self.assertRaisesRegex(ValueError, 'Incomplete'):
                     prepare.verify_enclosure(self.release)

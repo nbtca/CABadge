@@ -45,7 +45,7 @@ V2.1 同时提供两种格式：EDA 用户下载上述 `.epro2`，在专业版�
 
 ### 4. 分阶段焊接与首次上电
 
-外壳使用 [V11 正式配套包](../hardware/enclosure/releases/V11_V2_1_20261020/README.md)，按[装配图与顺序](../hardware/enclosure/releases/V11_V2_1_20261020/ASSEMBLY.md)准备杯壳与按帽，不安装 Keeper，电路调试完成后再合屏固定。
+外壳使用 [V11 正式配套包](../hardware/enclosure/releases/V11_V2_1_20261020/README.md)，按[装配图与顺序](../hardware/enclosure/releases/V11_V2_1_20261020/ASSEMBLY.md)准备杯壳与按帽，电路调试完成后再合屏固定。
 
 按 [焊接与分阶段上电检查](../焊接与分阶段上电检查_首板.md) 分组完成：USB 输入 → 3.3 V 电源 → 主控与 USB 下载 → 屏幕与触摸 → 电池与充电。
 

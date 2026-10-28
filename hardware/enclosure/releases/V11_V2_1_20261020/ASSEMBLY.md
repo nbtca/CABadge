@@ -1,6 +1,6 @@
 # V11 / V2.1 GEK100 装配说明
 
-当前装配使用 **Cup + Button_R2 两个打印件，不使用 Keeper**。依据为 2026-10-29 用户实际装配反馈；[两页装配图](images/assembly-guide.pdf)与下表 01～07 对应。
+当前装配使用 **Cup + Button_R2 两个打印件**。依据为 2026-10-29 用户实际装配反馈；[两页装配图](images/assembly-guide.pdf)与下表 01～07 对应。
 
 ## 准备零件
 
@@ -18,7 +18,7 @@
 
 ## 装入顺序
 
-1. **空壳装按帽。** 按帽从壳内向侧孔外推入，挡肩留在内部；不安装 Keeper，按帽不能粘在 PCB 开关上。
+1. **空壳装按帽。** 按帽从壳内向侧孔外推入，挡肩留在内部；按帽不能粘在 PCB 开关上。
 2. **准备 PCB 固定面。** 放置底部绝缘粘接层，核对焊脚、Type-C、按帽推杆与板边位置。0.3 mm 为衬片与两面胶合计厚度；先干装确认，不强压落座。
 3. **PCB 板边先入，再转平。** 将 PCB 近乎立起，板边先进入屏幕口，再在壳内转平。屏幕与电池可先连接并置于壳外，排线自然松弛；确认位置后再粘接固定 PCB。
 4. **整理绝缘、电池与连接。** 在电池与器件之间放好绝缘片，收好导线；FPC 座在可操作时锁好。不要把屏幕当铰链反复掀动或牵拉排线根部。
@@ -34,13 +34,13 @@
 - 按帽不粘接在开关上；实际 1 秒开机、3 秒关机按整机功能验证。
 - 屏幕显示、触摸及 FPC 连接正常，固定后没有顶压屏幕边缘。
 
-R2 按面 9.6 × 2.6 mm 与原孔 10.4 × 3.4 mm 保持，按面单边名义间隙为 0.4 mm。图中按帽为原 CAD 参考位置；不沿用带 Keeper 结构的总行程、四向止挡或回位验证结论。
+R2 按面 9.6 × 2.6 mm 与原孔 10.4 × 3.4 mm 保持，按面单边名义间隙为 0.4 mm。图中按帽为原 CAD 参考位置；触发与释放按实际装配检查。
 
 ![整机半剖及按帽与开关位置](images/assembly-details.png)
 
 ## 模型与验证范围
 
-SolidWorks 包为一个 SLDASM 加七个 SLDPRT，解压后保持同目录；仅保留 Cup、Button_R2、Screen、Battery、Insulator、BackLiner 和 PCB_reference。STEP 包为完整七部件装配加 Cup、Button_R2 两个独立 STEP，不含 Keeper 文件或组件。
+SolidWorks 包为一个 SLDASM 加七个 SLDPRT，解压后保持同目录；仅保留 Cup、Button_R2、Screen、Battery、Insulator、BackLiner 和 PCB_reference。STEP 包为完整七部件装配加 Cup、Button_R2 两个独立 STEP。
 
 PCB 参考件在原生装配中沿 Z 放置 +1.8 mm；其余部件保持原装配坐标。STEP 完整装配已包含位置，不再次叠加偏移。Cup 和 Button_R2 的原生、STEP 与 STL 文件保持既有版本。
 

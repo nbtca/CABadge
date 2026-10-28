@@ -64,8 +64,8 @@ def verify_enclosure_revision(directory, manifest):
         raise ValueError('Expected the current Cup + Button assembly variant')
     print_parts = {p.name for p in (directory / 'print').iterdir() if p.is_file() and p.suffix.lower() == '.stl'}
     if print_parts != {'V11_Cup.stl', 'V11_Button_R2.stl'}:
-        raise ValueError('Expected exactly Cup and R2 Button print files; Keeper must be absent')
-    assembly_hashes = read_json(directory / 'verification/assembly-no-keeper.json')['assembly_sha256']
+        raise ValueError('Expected exactly Cup and R2 Button print files')
+    assembly_hashes = read_json(directory / 'verification/assembly-cup-button.json')['assembly_sha256']
     proof = read_json(directory / 'verification/button-r2.json')
     expected = proof['input_sha256']
     if digest(payload(directory, 'print/V11_Button_R2.stl')) != expected['V11_Button_R2.stl']:
@@ -94,7 +94,7 @@ def verify_enclosure_revision(directory, manifest):
                 if assembly not in names:
                     raise ValueError(f'Missing {kind} assembly')
                 if digest(archive.read(assembly)) != assembly_hashes.get(assembly):
-                    raise ValueError(f'{kind} assembly fingerprint differs from no-Keeper verification')
+                    raise ValueError(f'{kind} assembly fingerprint differs from current assembly verification')
         except (zipfile.BadZipFile, KeyError) as exc:
             raise ValueError(f'Invalid {kind} archive: {exc}') from exc
     return {'kind': 'enclosure', 'assembly_variant': 'CUP_BUTTON_ONLY', 'assembly_components': 7, 'button_revision': 'R2', 'status': proof['status'], 'physical_acceptance': proof['physical_acceptance']}

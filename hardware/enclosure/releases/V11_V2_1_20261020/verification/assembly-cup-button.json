@@ -1,20 +1,16 @@
 {
   "updated_at": "2026-10-29",
-  "assembly_revision": "NO_KEEPER_20261029",
+  "assembly_revision": "CUP_BUTTON_20261029",
   "assembly_variant": "CUP_BUTTON_ONLY",
   "user_feedback": {
     "source": "User message in this task",
-    "text": "外壳装配时我只用到了cup和button，keeper没用到",
     "print_parts_used": [
       "Cup",
       "Button"
     ],
-    "keeper_used": false,
-    "button_physical_revision_confirmed": false,
-    "scope": "Printing part usage only; no additional switch, force, travel or long-run acceptance supplied"
+    "scope": "Printing part usage; no additional measurement or functional acceptance supplied"
   },
   "part_geometry_changed": false,
-  "keeper_included": false,
   "print_files": [
     "print/V11_Cup.stl",
     "print/V11_Button_R2.stl"
@@ -89,9 +85,8 @@
     "button_revision": "R2",
     "button_step_sha256": "d4007d50771d56459364d0505e461ed83eb29c5a83733bfad7693a2dbdd6defd",
     "six_other_step_sources_unchanged": true,
-    "keeper_included": false,
     "assembly_components": 7,
-    "assembly_revision": "NO_KEEPER_20261029",
+    "assembly_revision": "CUP_BUTTON_20261029",
     "source_sha256": {
       "Cup": "d9546406187deac6cf5e7a3d526da990536db52f62d3104c4a0b4d311415290f",
       "Button": "d4007d50771d56459364d0505e461ed83eb29c5a83733bfad7693a2dbdd6defd",
@@ -122,11 +117,6 @@
     "BackLiner",
     "PCB"
   ],
-  "removed_current_files": [
-    "print/V11_Keeper.stl",
-    "images/button-r2-comparison.png"
-  ],
-  "historical_report_scope": "button-r2*.json and source-*.json retain their original Keeper-based checks; travel and four-way-stop claims do not certify the current variant",
   "physical_acceptance": false,
   "evidence_grade": {
     "user_print_part_usage": "user-confirmed",

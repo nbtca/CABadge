@@ -5,13 +5,12 @@
   "release_date": "2026-10-20",
   "updated_at": "2026-10-29",
   "button_revision": "R2",
-  "assembly_revision": "NO_KEEPER_20261029",
+  "assembly_revision": "CUP_BUTTON_20261029",
   "assembly_variant": "CUP_BUTTON_ONLY",
   "print_parts": [
     "Cup",
     "Button_R2"
   ],
-  "keeper_included": false,
   "part_geometry_changed": false,
   "assembly_components_changed": true,
   "schematic_or_pcb_changed": false,
@@ -61,16 +60,15 @@
       "sha256": "b6b797a7b1a86a77e8c763374199ac2075d61ba0d59d0d275dde2c31138a2bd3"
     }
   },
-  "physical_assembly_acceptance": "User confirmed no Keeper used; other mechanical and functional checks not newly accepted",
+  "physical_assembly_acceptance": "User confirmed Cup + Button printing parts; other checks not newly accepted",
   "new_device_or_print_test": "NOT_RUN_BY_AGENT",
   "full_acceptance_passed": false,
-  "drawing_source": "Seven unchanged STEP sources at previous assembly positions, Keeper omitted; exploded display offsets only. Cached meshes retain the same verified geometry sources.",
+  "drawing_source": "Seven STEP sources at reference assembly positions; exploded display offsets only.",
   "limits": [
     "User report identifies only used printing parts, without confirming the physical Button revision.",
-    "Historical Keeper travel, four-way stops, and related validations do not apply to the current no-Keeper assembly.",
     "Switch actuation/release, cap stability, forces, adhesives and full FPC insertion remain subject to actual results."
   ],
-  "current_report": "assembly-no-keeper.json",
+  "current_report": "assembly-cup-button.json",
   "historical_reports": [
     "button-r2.json",
     "button-r2-mesh.json",
