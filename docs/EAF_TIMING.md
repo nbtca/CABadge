@@ -16,7 +16,7 @@ Automatically validates/uploads the adjacent .eaf.timing using the existing USB 
 
 Direct stream prepare returns the duration of the decoded frame. Worker adds it to the absolute deadline, subtracts work already spent and waits only the remaining time. An overrun preserves sequential frames and rebases the deadline, avoiding busy catch-up; timing targets faster than the hardware are not guaranteed. Resume resets the clock and starts at the retained current frame. No renderer/DMA/ownership changes. Only the legacy fallback remains fixed30 in the formal backend; the untouched optional emote prototype still uses30FPS.
 
-Software check: `python firmware-v7/test_eaf_timing.py`. Board results: outputs/cabadge-v7.9.15-eaf-timing/basic-check.json and root 首板测试记录.md R81. Fixed30 and variable80/180/420ms, pause/resume, static switch, reboot persistence and legacy playback passed USB checks; visual artifacts/physical gestures require user confirmation. Test resources removed; originalSTATIC ID9 restored.
+Software check: `python firmware-v7/tests/host/test_eaf_timing.py`. Board results: outputs/cabadge-v7.9.15-eaf-timing/basic-check.json and root 首板测试记录.md R81. Fixed30 and variable80/180/420ms, pause/resume, static switch, reboot persistence and legacy playback passed USB checks; visual artifacts/physical gestures require user confirmation. Test resources removed; originalSTATIC ID9 restored.
 
 Luo Xiaohei: original video nominal30FPS (actual33/34ms timestamps). The existing conversion is20FPS,210 frames/10.5s per EAF part. Matching50,000us sidecars are in F:/CABadgeBuild/wallpapers/luoxiaohei; old deviceID18 was not rewritten and still uses legacy30 until reimported with metadata. EAF alone cannot recover the original timing.
 

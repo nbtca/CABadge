@@ -14,7 +14,7 @@ void badge_ui_battery_sample(int mv);
 #define UI_ACCENT 0x365B86
 #define UI_SELECTED 0xDEE8F5
 #define UI_LINE 0xDCE3EC
-#define UI_VERSION "7.9.23-timetiles-fix"
+#include "cabadge_build.h"
 typedef struct {
     int brightness;
     bool reduced_motion;

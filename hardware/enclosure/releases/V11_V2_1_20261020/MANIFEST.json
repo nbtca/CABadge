@@ -27,6 +27,11 @@
       "sha256": "e9dbc0c08fc6a267ecb3e3fd9e1e8d30e21f633bb575eb2e26382d96192f8a7b"
     },
     {
+      "path": "cad/README.md",
+      "bytes": 578,
+      "sha256": "99ac02e6bd76dda8a0cb033d96877e6451a5203e160e144f8029297417fb31bc"
+    },
+    {
       "path": "images/assembly-details.png",
       "bytes": 500635,
       "sha256": "e4ad3800d83c1685de1cabe1cf8b022c1df765368261ff31b6f07a5600473abf"
@@ -73,8 +78,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 5663,
-      "sha256": "760150020684a6e2234379ed33ac2784ec93c03e72d84b9696d0d5b2dfe21d58"
+      "bytes": 6151,
+      "sha256": "0bc6417d171c14a9036434ecc5936abc0cc42b6c80399b8593cc431f30f71521"
     },
     {
       "path": "verification/button-r2-mesh.json",

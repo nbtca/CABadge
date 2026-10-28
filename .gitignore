@@ -8,6 +8,7 @@
 !/firmware-v7/
 !/hardware/
 !/tools/
+!/.github/
 !/首板测试记录.md
 !/焊接与分阶段上电检查_首板.md
 !/DESIGN.md
@@ -66,3 +67,7 @@ simulator-settings.json
 !/tools/install_wallpapers.py
 !/tools/upload_eaf.py
 !/tools/eaf_timing.py
+!/tools/bootstrap.ps1
+!/tools/requirements-dev.txt
+!/tools/release/
+!/tools/repository/

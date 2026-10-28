@@ -46,10 +46,10 @@ if (!hr.stale) {
 ## 可重复检查
 
 ```powershell
-& firmware-v7/.venv/Scripts/python.exe firmware-v7/test_heart_rate.py
+& F:/CABadgeBuild/venv/Scripts/python.exe firmware-v7/tests/host/test_heart_rate.py
 & firmware-v7/usb_screen/build.ps1
-& firmware/bringup/.venv/Scripts/python.exe firmware-v7/usb_screen/heart_rate_probe.py --action scan
-& firmware/bringup/.venv/Scripts/python.exe firmware-v7/usb_screen/heart_rate_probe.py --action connect --name "Xiaomi" --seconds 12 --output F:/CABadgeBuild/logs/heart-rate-board.json
+& F:/CABadgeBuild/venv/Scripts/python.exe firmware-v7/usb_screen/heart_rate_probe.py --action scan
+& F:/CABadgeBuild/venv/Scripts/python.exe firmware-v7/usb_screen/heart_rate_probe.py --action connect --name "Xiaomi" --seconds 12 --output F:/CABadgeBuild/logs/heart-rate-board.json
 ```
 
 PC 单测编译实际生产解析/状态/GAP/GATT 函数，仅模拟 radio/RTOS 边界；不代表射频/屏幕验收。实板工具沿用现有 USB 协议，只有**唯一名称匹配且广播 HRS、可连接**的设备才发起测试连接；失败不会输出通过。不会改壁纸库、制造假测量或自动连接第一个陌生设备。

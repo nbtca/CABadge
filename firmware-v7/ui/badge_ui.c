@@ -526,7 +526,7 @@ void badge_ui_create(lv_obj_t *parent,badge_state_t *state,void (*save)(void)){
     center(home[1],"NBTCA",116,43,128,&font18,UI_ACCENT);
     lv_obj_t *card=box(home[1],31,96,298,181,0x124689,25);lv_obj_set_style_clip_corner(card,true,0);
     for(int i=0;i<3;i++){lv_obj_t *arc=box(card,183+i*17,-33+i*8,180,235,0x124689,110);lv_obj_set_style_bg_opa(arc,0,0);lv_obj_set_style_border_color(arc,lv_color_hex(0x5685C3),0);lv_obj_set_style_border_width(arc,1,0);}
-    text(card,"NBTCA / MEMBER",21,17,209,&font14,0xBFD5F4);text(card,"Egger",19,56,183,&font56,0xFFFFFF);text(card,"计算机协会",23,137,174,&font18,0xE0ECFF);
+    text(card,"NBTCA / MEMBER",21,17,209,&font14,0xBFD5F4);lv_obj_t *member_name=text(card,CABADGE_MEMBER_NAME,19,strlen(CABADGE_MEMBER_NAME)>5?68:56,183,strlen(CABADGE_MEMBER_NAME)>5?&font36:&font56,0xFFFFFF);if(strlen(CABADGE_MEMBER_NAME)>5)lv_obj_set_style_text_letter_space(member_name,-2,0);text(card,"计算机协会",23,137,174,&font18,0xE0ECFF);
     lv_obj_t *mark=lv_image_create(card);lv_image_set_src(mark,&badge_logo);lv_image_set_pivot(mark,0,0);lv_image_set_scale(mark,126);lv_obj_set_pos(mark,211,72);lv_obj_remove_flag(mark,LV_OBJ_FLAG_CLICKABLE);
     center(home[1],"COMPUTER ASSOCIATION",74,293,212,&font14,UI_MUTED);
     /* Keep real widgets: the shared transition cache owns the only raster copy. */

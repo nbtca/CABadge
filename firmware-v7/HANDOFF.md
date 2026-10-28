@@ -1,3 +1,9 @@
+## 2026-10-29 仓库维护整理（公开源码仍为 7.9.23-timetiles-fix）
+
+版本定义集中到 `version.json`；板端构建按工作树和变体隔离暂存与输出，并记录源码提交、脏状态和输入指纹。环境由根目录 `tools/bootstrap.ps1` 安装，宿主检查迁至 `tests/host/`。开发、构建和发布入口见 [docs/INDEX](../docs/INDEX.md)。
+
+这次整理保留公开固件功能、正式 v1.2.0 和既有测试附件；原工作区的 7.9.25 / m1ngsama 未发布开发工作保持独立。编译和离线检查不构成新的实板验收；没有连接、烧录设备，也没有改写首板测试记录。
+
 ## 2026-10-21 当前公开源码：7.9.23-timetiles-fix
 
 按用户要求将本地最新开发源码同步到 main，包含 TimeTiles、FluidBox、标准 BLE 心率、SC7A20 动作、所需资源、测试与操作文档。正式安装包和 Workbench 默认仍为 v1.2.0 / 7.9.16；v1.3.0-rc.1 二进制附件及既有标签不变。该标签的自动源码 ZIP 保留原快照，最新版源码从 main 下载。
@@ -142,7 +148,7 @@ EAF上限已扩至3MiB，连续空槽分配，流式Flash上传，无整文件PS
 
 ## 接手先读
 
-1. [当前产品规范](../DESIGN.md)、[实际架构](../UI_ARCHITECTURE_V7.md)。
+1. [当前产品规范](../docs/architecture/DESIGN.md)、[实际架构](../docs/architecture/UI_ARCHITECTURE_V7.md)。
 2. [安装与构建](../docs/BUILD.md)、[发布说明](../docs/RELEASE-v1.1.0.md)。
 3. [首板测试记录](../首板测试记录.md) R63/R64、[已知限制](../docs/KNOWN_ISSUES.md)。
 

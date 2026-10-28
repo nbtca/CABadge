@@ -6,17 +6,24 @@ CABadge 是为计算机协会设计的可自定义电子徽章。项目希望将
 
 这里收录硬件设计、固件源码、配套电脑工具和实板测试记录，供复刻、改进和协作开发使用。
 
-**当前正式版本：v1.2.0 / 内部固件 7.9.16-eaf-transition。** 包含统一缓存位图转场、Direct Compositor 和内存优化。已完成编译、烧录及基本功能检查；长期稳定性与完整人工验收仍在完善。
+## 版本与资料对应
 
-**最新测试版本：[v1.3.0-rc.1 / 7.9.23-timetiles-fix](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)。** 新增 TimeTiles、FluidBox、标准 BLE 心率和动作控制更新；已确认烧录与启动，最新手势、画面及长期稳定性仍待实屏验收。对应开发源码现已同步到 `main`，构建方法见 [BUILD](docs/BUILD.md)。
+固件、PCB 和外壳分别选择版本，当前入口如下。公开固件功能沿用现有基线，构建与发布维护不会自动改变工作台默认或实板验收状态。
 
-**当前板卡：[V2.1 GEK100 / 星火计划](hardware/pcb/current/README.md)。** 同时提供 [KiCad 工程](hardware/pcb/current/kicad/CABadge_V2_1.kicad_pro)与[嘉立创EDA工程](hardware/pcb/current/easyeda/CABadge_V2_1_GEK100.epro2)。KiCad 保留 2026-10-20 的原文件，EDA 已替换为 2026-10-27 原生重画版，包含五张复用原理图、重画 PCB、原版连线与正面丝印及底部星火计划 Logo。旧的转换版 EDA 已移除；[V1 首板 KiCad](hardware/pcb/archive/V1_c7c59dff/README.md)归档保存。
+| 资料 | 当前版本 | 使用入口 |
+| --- | --- | --- |
+| 正式固件 | v1.2.0 / 7.9.16-eaf-transition | [正式附件](https://github.com/nbtca/CABadge/releases/tag/v1.2.0)；工作台默认安装此版 |
+| 测试固件附件 | v1.3.0-rc.1 / 7.9.23-timetiles-fix | [测试附件](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)；新功能与长稳仍有待测项 |
+| 当前公开源码 | [version.json](firmware-v7/version.json)，功能基线 7.9.23 | `main`；[构建说明](docs/BUILD.md)、[开发分支与变体](docs/DEVELOPMENT.md) |
+| 当前 PCB | V2.1 GEK100 / 星火计划 | [双格式工程](hardware/pcb/current/README.md)：[KiCad](hardware/pcb/current/kicad/CABadge_V2_1.kicad_pro)保留 2026-10-20 原文件；[EDA](hardware/pcb/current/easyeda/CABadge_V2_1_GEK100.epro2)为 2026-10-27 原生重画版 |
+| 当前外壳 | V11 一体杯壳 + V11_Button_R2 | [打印件、图纸与装配](hardware/enclosure/releases/V11_V2_1_20261020/README.md)、[大型 CAD 附件](https://github.com/nbtca/CABadge/releases/tag/enclosure-v11-button-r2-20261028) |
+| 历史硬件 | V1 首板 c7c59dff，仅 KiCad | [V1 工程归档](hardware/pcb/archive/V1_c7c59dff/README.md)；冻结制造包保留原有范围 |
 
-**当前正式外壳：[V11 一体杯壳，配套 V2.1 GEK100](hardware/enclosure/releases/V11_V2_1_20261020/README.md)。** 当前按钮为 [V11_Button_R2](hardware/enclosure/releases/V11_V2_1_20261020/print/V11_Button_R2.stl)，2026-10-28 已同步修正 STL、STEP、SolidWorks 装配及图纸；杯壳和隐藏限位件不变。提供三个打印件、模型包、[装配图 PDF](hardware/enclosure/releases/V11_V2_1_20261020/images/assembly-guide.pdf)及[装配说明](hardware/enclosure/releases/V11_V2_1_20261020/ASSEMBLY.md)。PCB 采用板边先入、壳内转平，屏幕最后落座；按钮打印配合及整机实物装配仍待验证。
+**历史源码例外：** `v1.3.0-rc.1` 标签建立时的源码仍为 7.9.16，自动生成的 `Source code (zip)` 不对应其 7.9.23 固件附件。复刻当前公开固件请下载 `main`；既有标签和附件保持历史含义。后续发布按[发布门禁](tools/release/README.md)记录准确源码提交，标签与附件对应同一提交。
 
-[下载 v1.2.0](https://github.com/nbtca/CABadge/releases/tag/v1.2.0) · [发布与升级说明](docs/RELEASE-v1.2.0.md) · [已知问题](docs/KNOWN_ISSUES.md) · [实板测试记录](首板测试记录.md)
+本地未发布的 7.9.25 / 个人定制构建保留在独立开发分支，不包含在上表公开源码或附件中。V2.1 的旧转换版 EDA 已删除；当前原生重画版复用五张原理图，PCB 保留原版连线与正面丝印，底部使用星火计划 Logo。
 
-当前 `main` 源码版本为 **7.9.23-timetiles-fix**，已同步本地最新的 TimeTiles 时钟、FluidBox 五模式流体、标准 BLE 心率及 SC7A20 动作控制，保留 BlueMap、统一壁纸库、EAF Direct 与逐资源 timing。源码包含所需资源、测试及第三方来源说明；构建方法见 [BUILD](docs/BUILD.md)，功能与验证范围见 [APPS](firmware-v7/APPS.md) 和 [HANDOFF](firmware-v7/HANDOFF.md)。v1.2.0 正式固件仍为 7.9.16，最新测试附件为 v1.3.0-rc.1 / 7.9.23。
+[完整文档索引](docs/INDEX.md) · [实板测试记录](首板测试记录.md) · [已知问题](docs/KNOWN_ISSUES.md)
 
 ## 可以做什么
 

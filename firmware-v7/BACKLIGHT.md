@@ -29,7 +29,7 @@
 
 ## 验证与回退
 
-`python -B firmware-v7/test_physical_display.py` 使用生产函数，覆盖亮度端点、钳制、10～100 严格递增、息屏为零，以及已有传屏、DMA 生命周期、错误处理和触摸边界。
+`python -B firmware-v7/tests/host/test_physical_display.py` 使用生产函数，覆盖亮度端点、钳制、10～100 严格递增、息屏为零，以及已有传屏、DMA 生命周期、错误处理和触摸边界。
 
 `python -B firmware-v7/backlight_probe.py` 读取 COM3 上的 7.6.3-light，对照 10/25/50/75/100/20 六档 LEDC duty，检查息屏、恢复及图库保持。原始结果见 `outputs/cabadge-v7-light-20260923/hardware-verification.json`。这是寄存器/软件读回，不是示波器、光学或 LED 电流测量；实体滑条手感仍需用户复测。
 

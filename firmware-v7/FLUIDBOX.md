@@ -39,7 +39,7 @@
 
 ## 验证与复测
 
-`python firmware-v7/test_fluidbox.py` 检查实际生产求解器/渲染器：1,200 个粒子、六个重力方向、圆形/深度边界、数值有限、加速度转换、摇动/自由落体退化、无陀螺仪、五模式、360px 带窗口及帧缓冲 canary。这是代码检查，不生成模拟器画面，也不作为实屏验收。
+`python firmware-v7/tests/host/test_fluidbox.py` 检查实际生产求解器/渲染器：1,200 个粒子、六个重力方向、圆形/深度边界、数值有限、加速度转换、摇动/自由落体退化、无陀螺仪、五模式、360px 带窗口及帧缓冲 canary。这是代码检查，不生成模拟器画面，也不作为实屏验收。
 
 实板脚本 `firmware-v7/usb_screen/fluidbox_probe.py --port COM3 --seconds 10 --output <证据文件>` 使用现有管理协议；type41/sub1 页14 打开，sub12 模式0..4 / reset5。分别记录 GUI 图片交接率及 runtime 最后块 DMA 完成率、求解频率、各模式耗时和内存，检查休眠/恢复、六次开关应用、返回原 EAF 播放及库 CRC/设置保持。真实 tilt、触摸、颜色、撕裂和长时间稳定性须实物反馈，计数不代替目视。
 

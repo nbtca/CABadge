@@ -3,6 +3,7 @@ import argparse
 from datetime import datetime,timezone,timedelta
 import json
 from pathlib import Path
+import sys
 import struct
 import subprocess
 import time
@@ -96,9 +97,7 @@ def main():
         board.exchange(41,b'\x01\x00',42)  # Close saves an actual remaining-time checkpoint.
         evidence['checkpoint']=settled(board,lambda s:not s['timetiles']['active'] and s['timetiles']['store_error']==0)
         board.wire.close()
-        py=Path(__file__).resolve().parents[2]/'firmware/bringup/.venv/Scripts/python.exe'
-        tool=Path('F:/CABadgeBuild/platformio/idf61/packages/tool-esptoolpy/esptool.py')
-        reboot=subprocess.run([str(py),str(tool),'--chip','esp32s3','--port',args.port,'--before','default_reset','--after','hard_reset','chip_id'],capture_output=True,text=True)
+        reboot=subprocess.run([sys.executable,'-m','esptool','--chip','esp32s3','--port',args.port,'--before','default_reset','--after','hard_reset','chip_id'],capture_output=True,text=True)
         evidence['reboot_output']=reboot.stdout+reboot.stderr;assert reboot.returncode==0
         board=connect(args.port)
         evidence['reboot']=settled(board,lambda s:s['timetiles']['countdown_status']==2)

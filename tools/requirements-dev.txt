@@ -1,0 +1,5 @@
+platformio==6.2.0
+ziglang==0.14.1
+pyserial==3.5
+esptool==5.4.0
+Pillow==12.3.0

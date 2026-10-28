@@ -1,38 +1,78 @@
-﻿$ErrorActionPreference = 'Stop'
-$env:TEMP = $env:TMP = 'F:\CABadgeBuild\temp'
-$env:PLATFORMIO_CORE_DIR = 'F:\CABadgeBuild\platformio\idf61'
-$env:IDF_TOOLS_PATH = 'F:\CABadgeBuild\platformio\idf61\tools'
-$env:IDF_COMPONENT_CACHE_PATH = 'F:\CABadgeBuild\platformio\idf61\.cache\components'
-$env:PIP_CACHE_DIR = 'F:\CABadgeBuild\platformio\idf61\.cache\pip'
-New-Item -ItemType Directory -Force -Path $env:TEMP | Out-Null
+param(
+    [string]$BuildVariant = '',
+    [AllowEmptyString()][string]$MemberName = 'Egger',
+    [switch]$ConfigurationOnly
+)
+$ErrorActionPreference = 'Stop'
 $firmware = Split-Path $PSScriptRoot
-$stage = 'F:\CABadgeBuild\staging\usb-screen-v7-idf61'
-$export = [IO.Path]::GetFullPath((Join-Path $firmware '..\outputs\cabadge-v7.9.23-timetiles-fix'))
-if ($env:CABADGE_DISPLAY_PERF -eq '1') { $export = Join-Path $firmware '..\outputs\cabadge-v7.9.23-timetiles-fix-diagnostic' }
-if ($env:CABADGE_EAF_EMOTE -eq '1') { $export += '-emote-prototype' }
-if ($env:CABADGE_EAF_INTERPOLATE -eq '1') {
-    if ($env:CABADGE_EAF_EMOTE -eq '1') { throw 'Interpolation experiment requires the Direct EAF backend.' }
-    $export = Join-Path $firmware '..\outputs\cabadge-eaf-interpolation-20261006\firmware'
+$repository = Split-Path $firmware
+$buildRoot = if ($env:CABADGE_BUILD_ROOT) { [IO.Path]::GetFullPath($env:CABADGE_BUILD_ROOT) } else { 'F:\CABadgeBuild' }
+$baseVersion = (Get-Content -Raw -LiteralPath (Join-Path $firmware 'version.json') | ConvertFrom-Json).version
+if ($baseVersion -notmatch '^\d+\.\d+\.\d+(?:-[a-z0-9-]+)?$') { throw 'Invalid firmware version.' }
+if ($BuildVariant -and ($BuildVariant -cnotmatch '^[a-z0-9][a-z0-9-]{0,47}$' -or $BuildVariant -match '^(default|con|prn|aux|nul|com[0-9]|lpt[0-9])$')) { throw 'Use a safe lowercase build variant (1..48 letters, digits, hyphens).' }
+$version = if ($BuildVariant) { $baseVersion + '-' + $BuildVariant } else { $baseVersion }
+if ($version.Length -gt 31) { throw 'The version including BuildVariant must fit the ESP-IDF 31-byte version limit.' }
+if ($MemberName -notmatch '^[\x20-\x21\x23-\x5b\x5d-\x7e]{1,32}$' -or -not $MemberName.Trim()) { throw 'MemberName must be 1..32 printable ASCII characters without quotes or backslashes.' }
+if ($MemberName -cne 'Egger' -and -not $BuildVariant) { throw 'A custom member requires an explicit BuildVariant.' }
+if ($env:CABADGE_EAF_INTERPOLATE -eq '1' -and $env:CABADGE_EAF_EMOTE -eq '1') { throw 'Interpolation experiment requires the Direct EAF backend.' }
+$flags = [ordered]@{}
+foreach ($name in 'CABADGE_DISPLAY_PERF','CABADGE_EAF_EMOTE','CABADGE_EAF_INTERPOLATE','CABADGE_TRANSITION_CACHE_DEBUG') { $flags[$name] = ([Environment]::GetEnvironmentVariable($name) -eq '1') }
+$checkoutId = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($repository.ToLowerInvariant()))).Substring(0,12).ToLowerInvariant()
+$configuration = if ($BuildVariant) { $BuildVariant + '-' + [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($MemberName))).Substring(0,8).ToLowerInvariant() } else { 'default' }
+if ($flags.CABADGE_DISPLAY_PERF) { $configuration += '-diagnostic' }
+if ($flags.CABADGE_EAF_EMOTE) { $configuration += '-emote-prototype' }
+if ($flags.CABADGE_EAF_INTERPOLATE) { $configuration += '-interpolation' }
+if ($flags.CABADGE_TRANSITION_CACHE_DEBUG) { $configuration += '-cache-debug' }
+$buildId = (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '-' + [guid]::NewGuid().ToString('N').Substring(0,8)
+# Fresh sources per invocation prevent deleted files from surviving into a later build.
+$stage = Join-Path $buildRoot "staging\$checkoutId\usb-screen-$configuration\build-$buildId"
+$export = Join-Path $repository "outputs\builds\$checkoutId\cabadge-v$version-$configuration-$buildId"
+$python = Join-Path $buildRoot 'venv\Scripts\python.exe'
+if ($ConfigurationOnly) {
+    [ordered]@{version=$version;base_version=$baseVersion;build_variant=$BuildVariant;member_name=$MemberName;build_root=$buildRoot;stage=$stage;export=$export;python=$python;build_flags=$flags} | ConvertTo-Json
+    return
 }
-New-Item -ItemType Directory -Force -Path $stage,$export,(Join-Path $stage 'src\ui'),(Join-Path $stage 'components\lvgl') | Out-Null
-Copy-Item -Path (Join-Path $PSScriptRoot 'device\*') -Destination $stage -Recurse -Force
+if (-not (Test-Path -LiteralPath $python)) { throw "Run tools/bootstrap.ps1 first; Python is missing: $python" }
+$sourceCommit = (& git -C $repository rev-parse HEAD).Trim()
+if ($LASTEXITCODE -ne 0) { throw 'Cannot identify source commit.' }
+$sourceDirty = [bool](& git -C $repository status --porcelain --untracked-files=normal)
+if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect source status.' }
+$env:TEMP = $env:TMP = Join-Path $buildRoot 'temp'
+$env:PLATFORMIO_CORE_DIR = Join-Path $buildRoot 'platformio\idf61'
+$env:IDF_TOOLS_PATH = Join-Path $env:PLATFORMIO_CORE_DIR 'tools'
+$env:IDF_COMPONENT_CACHE_PATH = Join-Path $env:PLATFORMIO_CORE_DIR '.cache\components'
+$env:PIP_CACHE_DIR = Join-Path $buildRoot 'pip-cache'
+New-Item -ItemType Directory -Force -Path $env:TEMP,$stage,(Join-Path $stage 'src\ui'),(Join-Path $stage 'components\lvgl') | Out-Null
+# One manifest owns both staging and the recorded input fingerprints.
+$copy = [ordered]@{}
+foreach ($file in Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot 'device') -File -Recurse | Sort-Object FullName) { $copy[$file.FullName] = [IO.Path]::GetRelativePath((Join-Path $PSScriptRoot 'device'),$file.FullName) }
+foreach ($name in 'ui_transition_cache.c','ui_transition_cache.h','ui_transition_compositor.c','ui_transition_compositor.h','badge_ui.c','badge_ui.h','heart_rate.h','battery_policy.h','wifi_panel.c','assets.c','apps.c','apps.h','motion.h','miner.c','miner.h','app_assets.c','grok.c','grok.h','grok_data.h','fluidbox.c','fluidbox.h','timetiles.c','timetiles.h') { $copy[(Join-Path $firmware "ui\$name")] = "src\ui\$name" }
+foreach ($directory in 'timetiles','fluidbox') {
+    foreach ($file in Get-ChildItem -LiteralPath (Join-Path $firmware "ui\$directory") -File -Recurse | Sort-Object FullName) { $copy[$file.FullName] = 'src\ui\' + [IO.Path]::GetRelativePath((Join-Path $firmware 'ui'),$file.FullName) }
+}
+foreach ($name in 'protocol.h','shake_detector.h','wallpaper_timing.h','wallpaper_store.h','wallpaper_store.c','management_protocol.h','bridge_protocol.h','perf_stats.h') { $copy[(Join-Path $PSScriptRoot $name)] = "src\$name" }
+$copy[(Join-Path $firmware 'lv_conf.h')] = 'lv_conf.h'
+$copy[(Join-Path $firmware 'version.json')] = 'version.json'
+$copy[$PSCommandPath] = 'cabadge-build.ps1'
+foreach ($file in Get-ChildItem -LiteralPath (Join-Path $firmware 'vendor\lvgl-9.4.0') -File -Recurse | Sort-Object FullName) { $copy[$file.FullName] = 'components\lvgl\lvgl\' + [IO.Path]::GetRelativePath((Join-Path $firmware 'vendor\lvgl-9.4.0'),$file.FullName) }
+$inputHashes = [ordered]@{}
+foreach ($path in $copy.Keys) {
+    $relative = $copy[$path]
+    $destination = Join-Path $stage $relative
+    New-Item -ItemType Directory -Force -Path (Split-Path $destination) | Out-Null
+    Copy-Item -LiteralPath $path -Destination $destination -Force
+    $inputHashes[[IO.Path]::GetRelativePath($repository,$path).Replace('\','/')] = (Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash.ToLowerInvariant()
+}
+$sourceFiles = @($copy.Values)
+$sourceFingerprint = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes(($inputHashes | ConvertTo-Json -Compress)))).ToLowerInvariant()
+[IO.File]::WriteAllText((Join-Path $stage 'src/ui/cabadge_build.h'), "#ifndef CABADGE_BUILD_H`n#define CABADGE_BUILD_H`n#define UI_VERSION `"$version`"`n#define CABADGE_MEMBER_NAME `"$MemberName`"`n#endif`n", [Text.UTF8Encoding]::new($false))
+[IO.File]::WriteAllText((Join-Path $stage 'version.cmake'), "set(PROJECT_VER `"$version`")`n", [Text.UTF8Encoding]::new($false))
 if ($env:CABADGE_EAF_EMOTE -eq '1') {
     Add-Content -LiteralPath (Join-Path $stage 'src\idf_component.yml') -Value '  espressif2022/esp_emote_gfx: "3.0.5"'
     Add-Content -LiteralPath (Join-Path $stage 'sdkconfig.defaults') -Value "`n# CONFIG_GFX_EAF_JPEG_DECODE_SUPPORT is not set`n# CONFIG_GFX_EAF_HEATSHRINK_SUPPORT is not set`n# CONFIG_GFX_FONT_FREETYPE_SUPPORT is not set"
 }
 $html = [IO.File]::ReadAllBytes((Join-Path $PSScriptRoot 'device\src\wallpaper.html'))
 [IO.File]::WriteAllText((Join-Path $stage 'src\wallpaper_html.h'), 'static const unsigned char wallpaper_html[]={' + ($html -join ',') + ',0};')
-foreach ($name in 'ui_transition_cache.c','ui_transition_cache.h','ui_transition_compositor.c','ui_transition_compositor.h','badge_ui.c','badge_ui.h','heart_rate.h','battery_policy.h','wifi_panel.c','assets.c','apps.c','apps.h','motion.h','miner.c','miner.h','app_assets.c','grok.c','grok.h','grok_data.h','fluidbox.c','fluidbox.h','timetiles.c','timetiles.h') {
-    Copy-Item -LiteralPath (Join-Path $firmware "ui\$name") -Destination (Join-Path $stage "src\ui\$name") -Force
-}
-Copy-Item -LiteralPath (Join-Path $firmware 'ui\timetiles') -Destination (Join-Path $stage 'src\ui') -Recurse -Force
-Copy-Item -LiteralPath (Join-Path $firmware 'ui\fluidbox') -Destination (Join-Path $stage 'src\ui') -Recurse -Force
-Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'protocol.h') -Destination (Join-Path $stage 'src\protocol.h') -Force
-Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'shake_detector.h') -Destination (Join-Path $stage 'src\shake_detector.h') -Force
-foreach ($name in 'wallpaper_timing.h','wallpaper_store.h','wallpaper_store.c','management_protocol.h','bridge_protocol.h','perf_stats.h') { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination (Join-Path $stage "src\$name") -Force }
-Copy-Item -LiteralPath (Join-Path $firmware 'lv_conf.h') -Destination (Join-Path $stage 'lv_conf.h') -Force
-& robocopy (Join-Path $firmware 'vendor\lvgl-9.4.0') (Join-Path $stage 'components\lvgl\lvgl') /E /NFL /NDL /NJH /NJS /NP | Out-Null
-if ($LASTEXITCODE -ge 8) { throw 'Cannot stage LVGL sources.' }
 $pngSource = Join-Path $stage 'components\lvgl\lvgl\src\libs\lodepng\lodepng.c'
 $pngCode = [IO.File]::ReadAllText($pngSource)
 if (-not $pngCode.Contains('CABadge adaptation: bounded PSRAM')) {
@@ -58,9 +98,10 @@ $env:PYTHONUTF8 = '1'
 $env:LVGL_VERSION = '9.4.0'
 $env:PLATFORMIO_BUILD_DIR = Join-Path $stage '.pio\build'
 $ErrorActionPreference = 'Continue'
-& (Join-Path $firmware '..\firmware\bringup\.venv\Scripts\python.exe') -m platformio run --project-dir $stage
+& $python -m platformio run --project-dir $stage
 $ErrorActionPreference = 'Stop'
 if ($LASTEXITCODE -ne 0) { throw 'USB screen firmware build failed.' }
+New-Item -ItemType Directory -Force -Path $export | Out-Null
 $hashes = [ordered]@{}
 foreach ($name in 'bootloader.bin','partitions.bin','firmware.bin','firmware.elf') {
     Copy-Item -LiteralPath (Join-Path $env:PLATFORMIO_BUILD_DIR "usb-screen\$name") -Destination (Join-Path $export $name) -Force
@@ -68,23 +109,11 @@ foreach ($name in 'bootloader.bin','partitions.bin','firmware.bin','firmware.elf
 }
 Copy-Item -LiteralPath (Join-Path $env:PLATFORMIO_BUILD_DIR 'usb-screen\config\sdkconfig.h') -Destination (Join-Path $export 'sdkconfig.verified.h') -Force
 $sources = [ordered]@{}
-foreach ($name in 'ui_transition_cache.c','ui_transition_cache.h','ui_transition_compositor.c','ui_transition_compositor.h','badge_ui.c','badge_ui.h','heart_rate.h','battery_policy.h','wifi_panel.c','assets.c','apps.c','apps.h','motion.h','miner.c','miner.h','app_assets.c','grok.c','grok.h','grok_data.h','fluidbox.c','fluidbox.h','timetiles.c','timetiles.h') {
-    $sources[$name] = (Get-FileHash -LiteralPath (Join-Path $stage "src\ui\$name") -Algorithm SHA256).Hash.ToLowerInvariant()
+foreach ($relative in $sourceFiles) {
+    $sources[$relative.Replace('\','/')] = (Get-FileHash -LiteralPath (Join-Path $stage $relative) -Algorithm SHA256).Hash.ToLowerInvariant()
 }
-foreach ($name in 'sim.c','sim.h','render.c','render.h','config.h','display.h','input.h','LICENSE','NOTICE') {
-    $sources["fluidbox/$name"] = (Get-FileHash -LiteralPath (Join-Path $stage "src\ui\fluidbox\$name") -Algorithm SHA256).Hash.ToLowerInvariant()
-}
-foreach ($name in 'core.c','core.h','raster.c','raster.h','effects.c','effects.h','readable_timer_helpers.c','readable_timer_helpers.h','timetiles_assets.h') {
-    $sources["timetiles/$name"] = (Get-FileHash -LiteralPath (Join-Path $stage "src\ui\timetiles\$name") -Algorithm SHA256).Hash.ToLowerInvariant()
-}
-$sources['lodepng.c'] = (Get-FileHash -LiteralPath $pngSource -Algorithm SHA256).Hash.ToLowerInvariant()
-$sources['app_service.c'] = (Get-FileHash -LiteralPath (Join-Path $stage 'src\app_service.c') -Algorithm SHA256).Hash.ToLowerInvariant()
-$sources['motion_service.c'] = (Get-FileHash -LiteralPath (Join-Path $stage 'src\motion_service.c') -Algorithm SHA256).Hash.ToLowerInvariant()
-$sources['ble_service.c'] = (Get-FileHash -LiteralPath (Join-Path $stage 'src\ble_service.c') -Algorithm SHA256).Hash.ToLowerInvariant()
-$sources['management.c'] = (Get-FileHash -LiteralPath (Join-Path $stage 'src\management.c') -Algorithm SHA256).Hash.ToLowerInvariant()
-foreach ($name in 'main.c','eaf_wallpaper.h','wallpaper_timing.h','wallpaper_service.c','wallpaper_store.c','eaf_wallpaper.c','eaf_emote.c','eaf_validate.h') {
-    $sources[$name] = (Get-FileHash -LiteralPath (Join-Path $stage "src\$name") -Algorithm SHA256).Hash.ToLowerInvariant()
-}
+$sources['src/ui/cabadge_build.h'] = (Get-FileHash -LiteralPath (Join-Path $stage 'src/ui/cabadge_build.h') -Algorithm SHA256).Hash.ToLowerInvariant()
+$sources['components/lvgl/lvgl/src/libs/lodepng/lodepng.c'] = (Get-FileHash -LiteralPath $pngSource -Algorithm SHA256).Hash.ToLowerInvariant()
 New-Item -ItemType Directory -Force (Join-Path $export 'assets\wallpapers') | Out-Null
 Copy-Item -LiteralPath (Join-Path $firmware 'assets\wallpapers\live_test.eaf') -Destination (Join-Path $export 'assets\wallpapers\live_test.eaf') -Force
 Copy-Item -LiteralPath (Join-Path $firmware 'assets\wallpapers\live_test.eaf.timing') -Destination (Join-Path $export 'assets\wallpapers\live_test.eaf.timing') -Force
@@ -103,7 +132,14 @@ Copy-Item -LiteralPath (Join-Path $firmware 'assets\wallpapers\live_test.eaf.tim
     render_optimization='ESP-IDF performance -O2; unified Flash wallpaper library; opaque 180px RGB565 thumbnail LRU; dynamic EAF home excluded from raster cache; other transition parameters unchanged'
     hardware_test='PENDING; not flashed or physically verified'
     product='CABadge'
-    firmware_version='7.9.23-timetiles-fix'
+    firmware_version=$version
+    base_version=$baseVersion
+    build_variant=$BuildVariant
+    member_name=$MemberName
+    source_commit=$sourceCommit
+    source_dirty=$sourceDirty
+    source_fingerprint=$sourceFingerprint
+    build_flags=$flags
     sdk='ESP-IDF 6.1; PlatformIO espressif32 7.1.3; framework-espidf 4.60100.0'
     memory='Octal PSRAM 80 MHz; data cache 32 KB / 64-byte line; PSRAM boot memtest enabled; official SPI DMA queue depth 2, maximum chunk 32 rows'
     ui='Native horizontal wallpaper paging; blue member card; interruptible navigation; down control/up functions'
@@ -120,6 +156,7 @@ Copy-Item -LiteralPath (Join-Path $firmware 'assets\wallpapers\live_test.eaf.tim
     eaf_interpolation='Experimental USB type41/sub11 OFF/ON, nonpersistent and default OFF; adjacent native RGB565 50/50 channel blend; 2 extra PSRAM source frames (518400 bytes); one inserted frame per gap, split original duration, no version bump; source decode/blend/staging/submit/final-DMA/work and completed-frame interval measured separately; no optical flow, unchanged 40MHz QSPI/16-row DMA path'
     eaf='esp_lv_eaf_player 0.3.0; official block decoder -> single RGB565 frame -> shared Direct Compositor worker with per-resource absolute deadlines; JXWT v1 CONSTANT/PER_FRAME metadata (legacy 33333us); frozen LVGL image only during handoff; RLE8 up to 3MiB/360 frames/24 rows per block; contiguous shared library slots; streamed Flash upload; Flash mmap source; PSRAM-only decoder allocations; software JPEG disabled'
     hashes=$hashes
-    shared_ui_sources=$sources
+    staged_sources=$sources
+    source_inputs=$inputHashes
 } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $export 'verification.json') -Encoding UTF8
 Write-Host "Exported: $export"

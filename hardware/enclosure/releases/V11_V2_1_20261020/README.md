@@ -11,13 +11,15 @@
 | [V11_Cup.stl](print/V11_Cup.stl) | 一体杯壳，打印 1 件；侧壁与底部是一个主体 |
 | [V11_Button_R2.stl](print/V11_Button_R2.stl) | R2 侧面按帽，打印 1 件；已替换误上传的旧按钮 |
 | [V11_Keeper.stl](print/V11_Keeper.stl) | 壳内按帽限位件，打印 1 件 |
-| [STEP 模型包](cad/CABadge_V11_V2_1-STEP.zip) | 含 R2 按钮的完整八部件装配 STEP，以及三个打印件各自的 STEP |
-| [SolidWorks 模型包](cad/CABadge_V11_V2_1-SolidWorks.zip) | 已更新为 R2 按钮的原生 SLDASM 与全部 8 个配套 SLDPRT，解压后保持同目录 |
+| [STEP 模型包](https://github.com/nbtca/CABadge/releases/download/enclosure-v11-button-r2-20261028/CABadge_V11_V2_1-STEP.zip) | 含 R2 按钮的完整八部件装配 STEP，以及三个打印件各自的 STEP |
+| [SolidWorks 模型包](https://github.com/nbtca/CABadge/releases/download/enclosure-v11-button-r2-20261028/CABadge_V11_V2_1-SolidWorks.zip) | 已更新为 R2 按钮的原生 SLDASM 与全部 8 个配套 SLDPRT，解压后保持同目录 |
 | [装配图 PDF](images/assembly-guide.pdf) | 已同步 R2 的两页 A3 横向图：爆炸图、整机半剖及按键限位细节 |
 | [装配说明](ASSEMBLY.md) | 零件清单、装入顺序、固定方式与干装检查 |
 | [SHA256SUMS.txt](SHA256SUMS.txt) | 发布文件校验值 |
 
 三个 STL 的单位为 mm，切片保持 100% 比例。屏幕、电池、绝缘片和 PCB 不是打印件。V6 的拨片不适用；V11 是按帽配隐藏限位件的按键结构。
+
+大型 CAD 包优先从[专用 Release](https://github.com/nbtca/CABadge/releases/tag/enclosure-v11-button-r2-20261028)下载，附件固定到原 R2 提交 `80ebcf2`，与原仓库 ZIP 逐字节相同。[仓库内兼容下载](cad/README.md)继续保留。后续发布采用新附件版本，不覆盖这些已核验文件。
 
 STEP 装配包含 PCB、屏幕和电池参考模型；SolidWorks 装配为固定位置参考，不是带驱动配合的运动装配。PCB 图形参考不包含完整柔性排线或实际焊锡，装配时以实物干装结果为准。
 

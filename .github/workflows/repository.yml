@@ -1,0 +1,46 @@
+name: Repository checks
+
+on:
+  push:
+    branches: [main, 'codex/**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repository-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-checks:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONIOENCODING: utf-8
+      CABADGE_BUILD_ROOT: ${{ runner.temp }}/cabadge
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.10'
+      - name: Install workbench test dependencies
+        run: python -m pip install pyserial==3.5 esptool==5.4.0
+      - name: Repository integrity
+        run: python tools/repository/check_repository.py
+      - name: Repository regression tests
+        run: python tools/repository/test_repository.py
+      - name: Release contracts
+        run: python tools/release/test_prepare.py
+      - name: Current enclosure revision
+        run: python tools/release/prepare.py enclosure hardware/enclosure/releases/V11_V2_1_20261020 --check
+      - name: Build configuration boundaries
+        run: python firmware-v7/tests/host/test_build_config.py
+      - name: Workbench contracts
+        run: python firmware-v7/tests/host/test_workbench.py
+      - name: USB framing without device access
+        run: python firmware-v7/usb_screen/framing.py

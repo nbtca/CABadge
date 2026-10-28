@@ -24,7 +24,7 @@ BlueMap 使用 16 KiB HTTP + Pngle 流式采样，不创建整张 RGBA；用户�
 
 板端入口：`usb_screen/build.ps1`；[完整构建说明](../docs/BUILD.md)。源码路径：`ui/` 为页面/cache/compositor，`usb_screen/device/src/` 为驱动与服务。`usb_screen` 是沿用的目录名。
 
-最小检查：`test_map_stream.py`、`test_physical_display.py`、`test_transition_compositor.py`。实板检查记录见 [R63/R64](../首板测试记录.md)，软件检查不能替代目视验收。
+最小检查：`tests/host/test_map_stream.py`、`tests/host/test_physical_display.py`、`tests/host/test_transition_compositor.py`。实板检查记录见 [R63/R64](../首板测试记录.md)，软件检查不能替代目视验收。
 
 旧桌面模拟器、像素投屏与废弃测试已移出当前树。保留内存/DMA/compositor、地图、EAF、动作、心率、FluidBox、TimeTiles 检查和工作台 USB framing 自检；历史工具可从 Git 旧提交恢复。板端构建仍使用 `usb_screen/build.ps1`。
 

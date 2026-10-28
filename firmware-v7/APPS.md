@@ -14,7 +14,7 @@
 
 这是 UI/背光息屏，不是整机断电或 ESP 深睡；电源开关断电后不能靠传感器启动。未新增任务或改显示 DMA。芯片 400Hz、±2g、HR/BDU，应用约每 10ms 读取最新 XYZ；双击只对 CLICK 使用高通滤波，XYZ 保留重力。读取硬件 CLICK_SRC，不是软件猜测双敲，但没有启用 GPIO 中断唤醒。默认双击阈值约 250mg、脉冲最长 80ms、间隔窗口约 80–480ms。首轮仅 Z 轴/100Hz 的装壳侧面和底面双敲未唤醒，已参考 V6 SW 装配修订；侧/底壳短复测均有用户亮屏及硬件Y/Z双击记录，底敲同期一次摇动，独立归因和长期误唤醒仍待测，不能把寄存器配置成功当作实际敲击通过。
 
-参数集中在 `ui/motion.h`，屏幕轴向映射在 `usb_screen/device/src/motion_service.c`；游戏校准是软件零点，未写芯片永久校准区。只读 USB/HTTP 状态新增 `motion`（raw_mg、screen_mg、fresh、samples、errors、各事件计数；last_click_source 保留最近一次 IA 事件，便于区分硬件双敲与原触摸唤醒）。运行 `python firmware-v7/test_motion.py` 检查动作/物理、生产 Grok 交互和模拟 I²C 服务边界；实体轴向、敲击手感、误触和显示目视仍须实板验收，见根目录主测试记录 R83。
+参数集中在 `ui/motion.h`，屏幕轴向映射在 `usb_screen/device/src/motion_service.c`；游戏校准是软件零点，未写芯片永久校准区。只读 USB/HTTP 状态新增 `motion`（raw_mg、screen_mg、fresh、samples、errors、各事件计数；last_click_source 保留最近一次 IA 事件，便于区分硬件双敲与原触摸唤醒）。运行 `python firmware-v7/tests/host/test_motion.py` 检查动作/物理、生产 Grok 交互和模拟 I²C 服务边界；实体轴向、敲击手感、误触和显示目视仍须实板验收，见根目录主测试记录 R83。
 
 下面保留 v1.1.0 / 7.9.2-memory 原说明的历史含义。
 
@@ -58,7 +58,7 @@
 ## 验证
 
 矿工历史规则测试保存在 Git 历史中；当前复刻树保留正式玩法源码与原始资源，不自动运行旧应用探针。
-当前瓦片回归：`python firmware-v7/test_map_stream.py`，验证碎片输入、RGB565 采样、CRC 和截断拒绝；可传入保存的真实瓦片 PNG。旧 LodePNG 解码检查已随过时工具清理，历史记录仍可追溯。
+当前瓦片回归：`python firmware-v7/tests/host/test_map_stream.py`，验证碎片输入、RGB565 采样、CRC 和截断拒绝；可传入保存的真实瓦片 PNG。旧 LodePNG 解码检查已随过时工具清理，历史记录仍可追溯。
 
 本版实板一次基本检查：地图四瓦片、一玩家、error0，Grok 进出及返回主页；矿工未在 R63 新增完整玩法回归。来源见根首板测试记录 R63。旧自动导航工具已移除。新包在 `outputs/cabadge-v7.9.2-memory`，旧应用发布包仅保留历史含义。
 软件计数不是屏幕扫描帧率或触摸手感证据；实体拖动、按键命中和目视撕裂由用户检查。

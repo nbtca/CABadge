@@ -1,45 +1,55 @@
-# 安装与构建（main：7.9.23-timetiles-fix）
+# 安装与构建
 
-当前 `main` 源码为 **7.9.23-timetiles-fix**，包含 TimeTiles、FluidBox、标准 BLE 心率与动作控制的完整适配源码、资源和宿主测试。最新测试固件附件是 [v1.3.0-rc.1](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)；其标签在源码同步前建立，自动生成的源码 ZIP 仍是旧快照，编译最新版请下载 `main`。
+当前公开源码版本由 [version.json](../firmware-v7/version.json) 定义；正式附件、测试附件及旧标签源码例外见[项目版本表](../README.md#版本与资料对应)。工作台继续默认安装 v1.2.0，不会因这次构建工具整理改变默认固件。
 
-正式固件仍为 **v1.2.0 / 7.9.16-eaf-transition**，下载与烧录地址、旧版分区升级方法见 [正式版发布说明](RELEASE-v1.2.0.md)。工作台默认安装该正式版：发布 ZIP 解压到 `outputs/cabadge-v7.9.16-eaf-transition/`，使三个 BIN 与 verification.json 直接位于该目录。自行编译的 7.9.23 与工作台默认安装包分别保存，不因源码更新自动重刷设备。
+## Windows 环境
 
-## Windows 工作台
+使用 Python 3.10 或更新版本（含 Tkinter）和 PowerShell 7。从仓库根目录执行：
 
-系统 Python 需含 Tkinter、pyserial、esptool；运行 `firmware-v7/run.cmd`，使用当前固件安装与诊断入口。壁纸管理使用设备本地网页。当前没有 USB 实板画面镜像；直接看 LCD。`tools/flasher/app.py` 的校验/烧录逻辑仍被复用，但旧独立窗口的诊断预设不是当前安装入口。
+```powershell
+pwsh -NoProfile -File tools/bootstrap.ps1 -Python python
+F:\CABadgeBuild\venv\Scripts\python.exe firmware-v7/setup_deps.py
+```
+
+依赖固定在 [requirements-dev.txt](../tools/requirements-dev.txt)：PlatformIO、Zig、pyserial、esptool、Pillow。bootstrap 将环境安装到 `F:\CABadgeBuild\venv`，不再使用旧 `firmware/bringup/.venv`。`setup_deps.py` 获取 LVGL 9.4.0 和 OFL 字体到本工作树的 vendor；已有生成资源已入库，普通板端编译无需重新生成字库。
+
+`CABADGE_BUILD_ROOT` 可覆盖工具根目录，默认保留 F 盘约定；TEMP、缓存、宿主测试和按工作树隔离的构建暂存均由它派生。源码与导出包留在项目 F 盘目录。依赖版本已固定，不承诺不同系统的逐字节固件复现；生成资源使用的上游字体仍须按任务核对。
 
 ## 板端构建
 
-现有环境使用 Windows、PowerShell 7（`pwsh`）、F 盘与 PlatformIO。未验证全新机器一键构建或字节级复现；下面是实际脚本约定。
-
-1. 用 Python 3.10 创建 `firmware/bringup/.venv` 并安装 PlatformIO 6.2.0；只需这个虚拟环境，不需要旧 firmware 源码。构建脚本固定调用其中的 Python。
-2. 用支持 tarfile 安全解包的 Python 运行 `firmware-v7/setup_deps.py`，获取 LVGL 9.4.0 与字体到 vendor。不再下载已删除模拟器使用的 SDL2；现有生成资源已入库，板端构建不必重新生成图片/字库。
-3. 在仓库根目录运行：
-
 ```powershell
-$env:TEMP = $env:TMP = 'F:\CABadgeBuild\temp'
 $env:CABADGE_DISPLAY_PERF = '0'
 $env:CABADGE_TRANSITION_CACHE_DEBUG = '0'
 $env:CABADGE_EAF_EMOTE = '0'
 $env:CABADGE_EAF_INTERPOLATE = '0'
-pwsh -NoProfile -ExecutionPolicy Bypass -File firmware-v7/usb_screen/build.ps1
+pwsh -NoProfile -File firmware-v7/usb_screen/build.ps1
 ```
 
-脚本固定 PlatformIO 核心目录 `F:/CABadgeBuild/platformio/idf61`、暂存 `F:/CABadgeBuild/staging/usb-screen-v7-idf61`。`platformio.ini` 固定 espressif32 7.1.3、framework-espidf 4.60100.0（ESP-IDF 6.1.0）；组件清单固定 LVGL 9.4.0、Adapter 0.7.1、ST77916 2.0.2，锁定信息在 `device/dependencies.lock`。
+脚本先解析唯一版本配置，生成 UI 与 CMake 版本，再按一份源清单复制和计算输入指纹。每次构建使用全新暂存目录，避免已删除的源文件残留参与编译；先前构建暂存保留供追查。`source_commit`、`source_dirty`、变体和构建参数写入输出 `verification.json`。输出为本工作树 `outputs/builds/<工作树标识>/` 下的独立时间戳目录，包含三个 BIN、ELF、有效 sdkconfig、壁纸测试资源和清单，不覆盖旧固件包。
 
-当前源码导出到 `outputs/cabadge-v7.9.23-timetiles-fix/`，包含三个 BIN、ELF、有效 sdkconfig 和 verification.json。构建会覆盖同名本地产物，先另存已下载的 Release 附件；v1.2.0 工作台目录不受影响。详细显示诊断开关为 1 时导出 diagnostic 后缀目录，不与默认构建混用。emote 和插帧是可选实验，以上命令明确关闭，保持本版 Direct EAF 默认路径。
+PlatformIO 固定 espressif32 7.1.3、framework-espidf 4.60100.0（ESP-IDF 6.1.0）；LVGL 9.4.0、Adapter 0.7.1、ST77916 2.0.2 等组件由清单和 dependencies.lock 约束。详细诊断、emote 与插帧构建使用独立配置目录，不能作为默认版本混用。
 
-## 检查边界
+`-ConfigurationOnly` 仅输出解析结果，不创建暂存或编译；定制姓名必须指定独立 `-BuildVariant`，示例见[开发约定](DEVELOPMENT.md)。
 
-宿主检查依赖脚本所示的本地 Zig 工具（`firmware-v7/.venv/Lib/site-packages/ziglang/zig.exe`），首次恢复环境需在该虚拟环境安装 ziglang；脚本中的缓存与临时目录均在 F 盘。这些检查调用生产 C 或测试桩，不启动 UI 模拟器或访问实板。
+## 宿主和仓库检查
 
-可运行 `test_motion.py`、`test_heart_rate.py`、`test_fluidbox.py` 与四个 `test_timetiles_*.py`，检查新功能；显示、转场、地图、壁纸及 EAF 检查继续保留。完整运行入口为 `python firmware-v7/对应脚本.py`，工作台回归为 `python firmware-v7/test_workbench.py`。USB 探针 `*_probe.py` 会访问设备，只有安排实板测试时再运行。
+```powershell
+F:\CABadgeBuild\venv\Scripts\python.exe tools/repository/check_repository.py
+F:\CABadgeBuild\venv\Scripts\python.exe tools/repository/test_repository.py
+F:\CABadgeBuild\venv\Scripts\python.exe tools/release/test_prepare.py
+F:\CABadgeBuild\venv\Scripts\python.exe firmware-v7/tests/host/test_build_config.py
+F:\CABadgeBuild\venv\Scripts\python.exe firmware-v7/tests/host/test_workbench.py
+```
 
-新功能操作与待测项见 [TimeTiles](../firmware-v7/TIMETILES.md)、[FluidBox](../firmware-v7/FLUIDBOX.md)、[BLE 心率](../firmware-v7/HEART_RATE.md)及[已知问题](KNOWN_ISSUES.md)。源码公开与构建通过不改变尚未完成的实屏手势、撕裂、异常重连和长期稳定性验收。
+其他固件宿主检查位于 `firmware-v7/tests/host/`，逐个运行需要的 `test_*.py`。它们使用中央环境中的 Zig；`CABADGE_ZIG` 可显式覆盖 Zig 可执行文件。保留原生产 C/测试桩检查，不启动 UI 模拟器，不连接实板。USB 探针会访问设备，仅在明确安排实板测试时运行。
 
-旧桌面 CMake、模拟器、像素投屏和过时测试已删除，板端唯一构建入口是 `firmware-v7/usb_screen/build.ps1`。现有工作台使用 `usb_screen/framing.py` 的 USB 编解码；`python firmware-v7/usb_screen/framing.py` 可运行无设备自检。实体画面验收仍需要实际烧录版本。
+GitHub Actions 自动运行仓库完整性、回归、发布修订、构建配置、工作台和 framing 离线检查。完整板端编译和全部依赖 C 的宿主检查仍按任务在本地运行；CI 不替代显示、手势、撕裂、无线或长稳验收。
 
-项目源码/附件放 F:/计协吧唧，工具缓存与 TEMP/TMP 放 F:/CABadgeBuild。未上传的 outputs、vendor、虚拟环境不会随 GitHub 源码 ZIP 提供。
+## 工作台与发布
+
+`firmware-v7/run.cmd` 使用中央环境打开原生工作台。按[正式发布说明](RELEASE-v1.2.0.md)准备原正式包，工作台默认目录仍为 `outputs/cabadge-v7.9.16-eaf-transition/`；三个 BIN 与 verification.json 应直接位于该目录。壁纸管理使用设备本地网页。
+
+新交付包通过[发布工具](../tools/release/README.md)核对源码身份和指纹后生成。脏源码开发构建会明确标记，不能通过正式发布门禁。检查、编译和生成交付包均不自动烧录设备。
 
 ## BlueMap USB 耗时诊断（7.9.3-mapdiag 起）
 
@@ -58,7 +68,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File firmware-v7/usb_screen/build.ps1
 - 7.9.3原版为串行且每次close。7.9.4最多两路独立HTTP连接；完整响应后按服务器keep-alive保留连接，损坏的空闲连接只重连一次。connects记录真正的新连接事件，reused记录本次请求是否实际复用了已有socket，不能仅凭配置开关判断。
 - 7.9.7起Tile失败有独立错误码：-10 HTTP、-11 READ、-12 TIMEOUT、-13 CONNECTION、-14 PNG_PARSE、-15 CRC、-16 DECODE、-17 SIZE、-18 OTHER；JSON另带`error_category`、`error_detail`和`http_errno`。-2仍是取消，-3是第二路内存回退，-4是分配失败。完整HTTP body后才允许Keep-Alive复用。
 
-最小离线检查：`python tools/map_perf_monitor.py --self-test`；`python firmware-v7/test_map_perf.py` 验证实际C端历史队列、覆盖与JSON边界。
+最小离线检查：`python tools/map_perf_monitor.py --self-test`；`python firmware-v7/tests/host/test_map_perf.py` 验证实际C端历史队列、覆盖与JSON边界。
 
 ### 7.9.6 BlueMap加载与内存边界
 
@@ -67,6 +77,6 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File firmware-v7/usb_screen/build.ps1
 - 新建第二路时按尚未分配的任务/HTTP资源预留，最严门槛Internal≥56 KiB、DMA≥48 KiB、Internal最大块≥12 KiB、PSRAM≥1.5 MiB；运行安全底线Internal32 KiB/DMA24 KiB。低内存时停止额外请求并可回退单路。已开始的旧Tile若仍在同world/LOD、距新视野中心不超过2格且PSRAM大于1 MiB，就允许下载完成并入缓存；旧serial的patch不会写入当前画布。
 - GUI继续持有原有一张360×360画布；下载线程只传最多16行RGB565 patch（≤11520 B），队列1条，不分配第二张完整地图。GUI修改像素并invalidate局部区域；按住拖动时暂停接收，序列号丢弃旧视口patch。
 - 协调任务的临时结果移到约3 KiB PSRAM，避免在HTTP/解码调用栈中叠加大结构；退出释放。保留小队列用于下次复用。
-- 附加最小检查：`python firmware-v7/test_map_cache.py`，覆盖LRU/pin和六档缩放、负坐标的区域采样。
+- 附加最小检查：`python firmware-v7/tests/host/test_map_cache.py`，覆盖LRU/pin和六档缩放、负坐标的区域采样。
 
 7.9.7仅调整地图HTTP链路：大Tile总时限从12秒改为30秒并单独报告TIMEOUT；lwIP TCP接收窗口5760→11520 B、接收邮箱6→10，HTTP client内部接收缓冲2048→4096 B，读取任务仍按8 KiB送入双槽，Pngle仍使用16 KiB输入。TLS输入缓冲保持16 KiB。一次实板LOD2/3检查见主记录R70；全局TCP缓冲增加可能占用额外内存，原低水位单路降级仍在。
