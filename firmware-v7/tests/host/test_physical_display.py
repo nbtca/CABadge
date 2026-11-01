@@ -30,6 +30,12 @@ typedef void *esp_lcd_panel_io_handle_t;
 typedef int esp_lcd_panel_io_event_data_t;
 static void *panel,*panel_io,*display;
 static atomic_bool painted,completed,transition_owner,notify_flush;
+typedef int BaseType_t;
+#define pdFALSE 0
+#define pdTRUE 1
+typedef int *SemaphoreHandle_t;
+static int transition_given;static SemaphoreHandle_t transition_done=&transition_given;
+static BaseType_t xSemaphoreGiveFromISR(SemaphoreHandle_t s,BaseType_t *woken){(*s)++;*woken=pdFALSE;return pdTRUE;}
 static uint8_t block_a[11520],block_b[11520],reference[259200];
 static uint8_t *staging[2]={block_a,block_b};
 static const uint8_t *inflight;static int inflight_y,inflight_rows;
@@ -78,7 +84,7 @@ int main(void){
  atomic_store(&transition_owner,true);
  owned_refresh(&timer);assert(timer.paused&&refresh_calls==1);
  assert(physical_display_draw(0,0,360,360,pixels)==ESP_ERR_INVALID_STATE);
- color_done(NULL,NULL,NULL);assert(notified==1&&!physical_display_complete(&us));
+ color_done(NULL,NULL,NULL);assert(notified==1&&!physical_display_complete(&us)&&transition_given==1);
  atomic_store(&transition_owner,false);
  int before=drained;draw_error=7;assert(physical_display_draw(0,0,360,360,pixels)==7);
  assert(drained==before+2&&display_error==7&&notified==1);

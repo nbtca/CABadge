@@ -21,6 +21,10 @@ unsigned physical_display_backlight_duty(void);
 bool physical_display_transition_acquire(void);
 esp_err_t physical_display_transition_draw(int x1,int y1,int x2,int y2,const void *pixels);
 esp_err_t physical_display_transition_drain(void);
+/* One window per frame: RAMWR, then RAMWRC chunks; each chunk completion feeds transition_wait. */
+esp_err_t physical_display_transition_window(int x1,int y1,int x2,int y2);
+esp_err_t physical_display_transition_write(const void *pixels,size_t bytes,bool first);
+bool physical_display_transition_wait(void);
 void physical_display_transition_release(void);
 bool physical_display_transition_active(void);
 /* One shared pool. LVGL and compositor ownership are mutually exclusive. */
