@@ -606,7 +606,9 @@ void app_service_init(void){
 }
 bool app_service_map_busy(void){return atomic_load(&map_busy);}
 void app_service_poll(void){
-    if(lane_memory(false,false,NULL)){
+    static uint32_t checked;uint32_t now=(uint32_t)(esp_timer_get_time()/1000);
+    bool due=now-checked>=100;if(due)checked=now;
+    if(due&&lane_memory(false,false,NULL)){
         bool already=atomic_exchange(&shed_secondary,true);
         if(!already&&worker&&!app_service_map_busy())xTaskNotifyGive(worker);
     }
@@ -619,7 +621,7 @@ void app_service_poll(void){
         if(!accepted)reply.perf.result=-2;
         if(reply.perf.refresh)map_perf_publish(&reply.perf);
     }
-    if(heap_caps_get_free_size(MALLOC_CAP_SPIRAM)<1536*1024)ui_memory_pressure_set(UI_MEMORY_CRITICAL);
+    if(due&&heap_caps_get_free_size(MALLOC_CAP_SPIRAM)<1536*1024)ui_memory_pressure_set(UI_MEMORY_CRITICAL);
     if(pending_request&&!app_service_map_busy()&&!badge_ui_transition_active()&&!physical_display_transition_active()){
         /* The GUI remains responsive while waiting for actual display ownership and RAM. */
         if(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)<40*1024||heap_caps_get_free_size(MALLOC_CAP_DMA|MALLOC_CAP_INTERNAL)<32*1024)return;
@@ -627,5 +629,5 @@ void app_service_poll(void){
         xQueueOverwrite(requests,&pending_job);xTaskNotifyGive(worker);
     }
     int page,loading,error,tiles_count,players_count;badge_apps_status(&page,&loading,&error,&tiles_count,&players_count);
-    if((page<1||page==2||page==4)&&!app_service_map_busy()&&!pending_request&&heap_caps_get_free_size(MALLOC_CAP_SPIRAM)>2*1024*1024&&ui_memory_pressure_get()!=UI_MEMORY_NORMAL)ui_memory_pressure_set(UI_MEMORY_NORMAL);
+    if(due&&(page<1||page==2||page==4)&&!app_service_map_busy()&&!pending_request&&heap_caps_get_free_size(MALLOC_CAP_SPIRAM)>2*1024*1024&&ui_memory_pressure_get()!=UI_MEMORY_NORMAL)ui_memory_pressure_set(UI_MEMORY_NORMAL);
 }
