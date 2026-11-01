@@ -100,8 +100,8 @@ static void run(void *arg){
         esp_err_t rc=ESP_OK;uint64_t prep_before=perf.prep;int submitted_rows=0;int64_t lcd_start=0;perf.attempts++;
         for(int y=0;y<f.height&&(streaming||!atomic_load(&cancelled));y+=BLOCK_ROWS){
             int rows=minimum(BLOCK_ROWS,f.height-y);uint8_t *block=blocks[(y/BLOCK_ROWS)&1];
-            /* draw_bitmap's next address command drains the preceding transfer.
-             * Alternating blocks allows packing B while DMA still reads A. */
+            /* Two chunks may be queued; block k+2 reuses block k's buffer. */
+            if(y>=2*BLOCK_ROWS&&!physical_display_transition_wait()){rc=ESP_ERR_TIMEOUT;break;}
             int64_t clock_at=streaming?esp_timer_get_time():0;
             int64_t at=perf_now();size_t copied=ui_transition_compositor_rows(&f,y,rows,block);
             if(streaming)packed+=esp_timer_get_time()-clock_at;
@@ -109,7 +109,8 @@ static void run(void *arg){
             perf.copy+=copied;at=perf_now();
             if(!lcd_start)lcd_start=at;
             clock_at=streaming?esp_timer_get_time():0;
-            rc=physical_display_transition_draw(f.x,f.y+y,f.x+f.width,f.y+y+rows,block);
+            if(!y)rc=physical_display_transition_window(f.x,f.y,f.x+f.width,f.y+f.height);
+            if(rc==ESP_OK)rc=physical_display_transition_write(block,(size_t)f.width*rows*2,!y);
             if(streaming){submitted+=esp_timer_get_time()-clock_at;stream_tx++;}
             perf.submit+=perf_now()-at;perf.transactions++;perf.bytes+=(uint64_t)f.width*rows*2;
             if(rc!=ESP_OK)break;

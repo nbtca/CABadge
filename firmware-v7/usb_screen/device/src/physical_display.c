@@ -13,6 +13,7 @@
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/semphr.h"
 #include "panel_init.h"
 #include <stdatomic.h>
 #include <string.h>
@@ -29,8 +30,11 @@ static int64_t transfer_start;
 static uint32_t transfer_us;
 static uint8_t *staging[2];
 static atomic_bool notify_flush;
+static SemaphoreHandle_t transition_done;
 static bool IRAM_ATTR color_done(esp_lcd_panel_io_handle_t io,esp_lcd_panel_io_event_data_t *event,void *ctx){
-    if(atomic_load_explicit(&transition_owner,memory_order_acquire)){atomic_store(&painted,true);return false;}
+    if(atomic_load_explicit(&transition_owner,memory_order_acquire)){
+        atomic_store(&painted,true);BaseType_t woken=pdFALSE;xSemaphoreGiveFromISR(transition_done,&woken);return woken==pdTRUE;
+    }
     if(!atomic_load_explicit(&notify_flush,memory_order_acquire))return false;
     frame_trace(5,0);(void)io;(void)event;(void)ctx;
     transfer_us=(uint32_t)(esp_timer_get_time()-transfer_start);
@@ -110,6 +114,20 @@ esp_err_t physical_display_transition_draw(int x1,int y1,int x2,int y2,const voi
 esp_err_t physical_display_transition_drain(void){
     return esp_lcd_panel_io_tx_param(panel_io,-1,NULL,0);
 }
+esp_err_t physical_display_transition_window(int x1,int y1,int x2,int y2){
+    if(!physical_display_transition_active())return ESP_ERR_INVALID_STATE;
+    /* Vendor QSPI opcodes; tx_param drains every queued chunk before addressing. */
+    uint8_t column[4]={x1>>8,x1&255,(x2-1)>>8,(x2-1)&255},row[4]={y1>>8,y1&255,(y2-1)>>8,(y2-1)&255};
+    esp_err_t err=esp_lcd_panel_io_tx_param(panel_io,0x02<<24|0x2A<<8,column,4);
+    if(err==ESP_OK)err=esp_lcd_panel_io_tx_param(panel_io,0x02<<24|0x2B<<8,row,4);
+    while(xSemaphoreTake(transition_done,0)==pdTRUE){}
+    return err;
+}
+esp_err_t physical_display_transition_write(const void *pixels,size_t bytes,bool first){
+    if(!physical_display_transition_active())return ESP_ERR_INVALID_STATE;
+    return esp_lcd_panel_io_tx_color(panel_io,0x32<<24|(first?0x2C:0x3C)<<8,pixels,bytes);
+}
+bool physical_display_transition_wait(void){return xSemaphoreTake(transition_done,pdMS_TO_TICKS(100))==pdTRUE;}
 void physical_display_transition_release(void){
     if(!physical_display_transition_active())return;
     /* Caller has joined the worker. Drain also reclaims SPI descriptors before
@@ -130,6 +148,8 @@ void physical_display_init(void){
     esp_lcd_panel_io_spi_config_t io=ST77916_PANEL_IO_QSPI_CONFIG(10,NULL,NULL);
     io.pclk_hz=40000000;io.trans_queue_depth=2;io.cs_ena_pretrans=1;io.cs_ena_posttrans=1;
     ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)SPI2_HOST,&io,&panel_io));
+    transition_done=xSemaphoreCreateCounting(4,0);
+    ESP_ERROR_CHECK(transition_done?ESP_OK:ESP_ERR_NO_MEM);
     for(unsigned i=0;i<2;i++){
         staging[i]=heap_caps_malloc(360*PHYSICAL_STAGING_ROWS*2,MALLOC_CAP_INTERNAL|MALLOC_CAP_DMA);
         ESP_ERROR_CHECK(staging[i]?ESP_OK:ESP_ERR_NO_MEM);
