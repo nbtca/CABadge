@@ -34,6 +34,7 @@ GIF/视频需先在电脑端转换为 EAF，设备不直接播放 GIF/视频。O
 | --- | --- |
 | 已有设备，安装或使用固件 | [正式固件](https://github.com/nbtca/CABadge/releases/tag/v1.2.0)、[测试固件](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)、[安装步骤](docs/REPRODUCE.md#5-烧录所选版本固件)、[无线与壁纸管理](firmware-v7/usb_screen/README.md) |
 | 自己制作一块 CABadge | [V2.1 PCB](hardware/pcb/current/README.md)、[BOM 与采购资料](hardware/bom/README.md)、[V11 外壳与装配](hardware/enclosure/releases/V11_V2_1_20261020/README.md)、[完整复刻流程](docs/REPRODUCE.md) |
+| 查看单个应用源码 | [应用源码目录](apps/README.md)：宝可梦、TimeTiles、Grok、MC 实时地图，各自单独保存 |
 | 修改源码或参与开发 | [构建环境](docs/BUILD.md)、[开发约定](docs/DEVELOPMENT.md)、[界面架构](docs/architecture/UI_ARCHITECTURE_V7.md) |
 
 ## 版本与资料对应
