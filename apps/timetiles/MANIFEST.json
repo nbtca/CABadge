@@ -1,0 +1,138 @@
+{
+  "application": "timetiles",
+  "snapshot": "7.9.25-poke-duel",
+  "packaged_on": "2026-11-02",
+  "kind": "application-source-snapshot-not-standalone-firmware",
+  "files": [
+    {
+      "path": "LICENSE",
+      "bytes": 1063,
+      "sha256": "8609c0ccc482c783d9ca130ab9955db467f46eb279a09f6ec1ac141755b48a4b",
+      "source": "LICENSE"
+    },
+    {
+      "path": "NOTICE.md",
+      "bytes": 612,
+      "sha256": "8a44106fed7c2db2be294691e5a928c91f1a9133effd37c80df0635503777ffa"
+    },
+    {
+      "path": "README.md",
+      "bytes": 2773,
+      "sha256": "107efcba97972470119d41571f22d34f24a158a6ea3e2e31cf2513533130c5e9"
+    },
+    {
+      "path": "tests/host/host_support.py",
+      "bytes": 832,
+      "sha256": "27610adcb19f23441f2de7a3477d8b4f2a4b06df5ec70b8674017351296704b9",
+      "source": ".worktrees/app-sources-20261102/firmware-v7/tests/host/host_support.py"
+    },
+    {
+      "path": "tests/host/test_timetiles_core.py",
+      "bytes": 9620,
+      "sha256": "63a9e6713d5b600d098522eec76088a606b457ce3bb54bb13ac0a73ff9567dba",
+      "source": "firmware-v7/tests/host/test_timetiles_core.py (test location/tool paths adapted; assertions preserved)"
+    },
+    {
+      "path": "tests/host/test_timetiles_effects.py",
+      "bytes": 5772,
+      "sha256": "95c68a7fe81df14567fa76cb743d658142c855dc8f7140e7a7401fa767ab1afb",
+      "source": "firmware-v7/tests/host/test_timetiles_effects.py (test location/tool paths adapted; assertions preserved)"
+    },
+    {
+      "path": "tests/host/test_timetiles_integration.py",
+      "bytes": 23919,
+      "sha256": "716a10e2a94e1fe9f1476e5bee21ae20f457e8368361e4aa9139cf7ea6be9429",
+      "source": "firmware-v7/tests/host/test_timetiles_integration.py (test location/tool paths adapted; assertions preserved)"
+    },
+    {
+      "path": "tests/host/test_timetiles_raster.py",
+      "bytes": 7167,
+      "sha256": "23cf91e7088a804c60455c675360b0498712af325bb6bed3ec88749efdfe9393",
+      "source": "firmware-v7/tests/host/test_timetiles_raster.py (test location/tool paths adapted; assertions preserved)"
+    },
+    {
+      "path": "ui/apps.h",
+      "bytes": 1080,
+      "sha256": "fccf04b8dfda8c12ea944ebc813949ab71eeeba581b754ec66b6260c9cdec93b",
+      "source": "firmware-v7/ui/apps.h"
+    },
+    {
+      "path": "ui/badge_ui.h",
+      "bytes": 5565,
+      "sha256": "75fc79500addfb6604f83dc26b422383b4e7b29c4b8a6d3b7939bf8a59224721",
+      "source": "outputs/member-m1ngsama-20261028/before/firmware-v7/ui/badge_ui.h"
+    },
+    {
+      "path": "ui/heart_rate.h",
+      "bytes": 1701,
+      "sha256": "690187272b0bb9e39c7eda7e2d463ddd0e1fc8521a5130389926612d205fddd8",
+      "source": "firmware-v7/ui/heart_rate.h"
+    },
+    {
+      "path": "ui/timetiles/core.c",
+      "bytes": 9103,
+      "sha256": "a6038f2a197465a3021c96dabf07ab489dd153f01c843ab795e0f8b7d5914703",
+      "source": "firmware-v7/ui/timetiles/core.c"
+    },
+    {
+      "path": "ui/timetiles/core.h",
+      "bytes": 1623,
+      "sha256": "0bcbf0e09b489fdeacc3f61e8bd2f0020936b116b1808e2adcffaac7a33a2b35",
+      "source": "firmware-v7/ui/timetiles/core.h"
+    },
+    {
+      "path": "ui/timetiles/effects.c",
+      "bytes": 8018,
+      "sha256": "ffe6d7861336b6f6f31f5e6255bd3081cd2d8fae8d7b8fca8bf469fc2f89b1ac",
+      "source": "firmware-v7/ui/timetiles/effects.c"
+    },
+    {
+      "path": "ui/timetiles/effects.h",
+      "bytes": 1196,
+      "sha256": "b33c9aa4864a928135630adf7bfb16e1a8f8230172a80339a16248597fed13f2",
+      "source": "firmware-v7/ui/timetiles/effects.h"
+    },
+    {
+      "path": "ui/timetiles/raster.c",
+      "bytes": 6209,
+      "sha256": "75d13daa9ea5e7c36ad3380b1d440b3c2545d91d8162df9be77217dd75281bce",
+      "source": "firmware-v7/ui/timetiles/raster.c"
+    },
+    {
+      "path": "ui/timetiles/raster.h",
+      "bytes": 942,
+      "sha256": "4b169ac82d6aa6fecd1c85e7c5342db6d832acaa27a216392f89b5fe431e0d39",
+      "source": "firmware-v7/ui/timetiles/raster.h"
+    },
+    {
+      "path": "ui/timetiles/readable_timer_helpers.c",
+      "bytes": 1435,
+      "sha256": "e436610b94c75529c11331810c749b77b49c3a7e6191ebb55dfe0b1b31a4b022",
+      "source": "firmware-v7/ui/timetiles/readable_timer_helpers.c"
+    },
+    {
+      "path": "ui/timetiles/readable_timer_helpers.h",
+      "bytes": 1313,
+      "sha256": "df74f9238da8ea9b538a989826a821a28ce259330d9be1affea08995f1249a30",
+      "source": "firmware-v7/ui/timetiles/readable_timer_helpers.h"
+    },
+    {
+      "path": "ui/timetiles/timetiles_assets.h",
+      "bytes": 1069823,
+      "sha256": "02eb9e8dd0995ead290cc64a4d7c0cda20fc4e1a71521fa5882d1c0aa3847ad8",
+      "source": "firmware-v7/ui/timetiles/timetiles_assets.h"
+    },
+    {
+      "path": "ui/timetiles.c",
+      "bytes": 26815,
+      "sha256": "e5e0e314e5bcc90e9c1f248fe8306ef9ce0db08062a61f414084f9d49692f6d5",
+      "source": "firmware-v7/ui/timetiles.c"
+    },
+    {
+      "path": "ui/timetiles.h",
+      "bytes": 372,
+      "sha256": "92b227791ac142d76ce9184d8c1161f5b62ae4dac69b84db9838610adcd798a9",
+      "source": "firmware-v7/ui/timetiles.h"
+    }
+  ]
+}
