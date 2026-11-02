@@ -1,0 +1,74 @@
+{
+  "application": "grok",
+  "snapshot": "7.9.25-poke-duel",
+  "packaged_on": "2026-11-02",
+  "kind": "application-source-snapshot-not-standalone-firmware",
+  "files": [
+    {
+      "path": "LICENSE",
+      "bytes": 1063,
+      "sha256": "8609c0ccc482c783d9ca130ab9955db467f46eb279a09f6ec1ac141755b48a4b",
+      "source": "LICENSE"
+    },
+    {
+      "path": "README.md",
+      "bytes": 1550,
+      "sha256": "88acefaca337f3cbba8b8a18f808bd9eef99f572ac95b9c0789634d3af5f7c88"
+    },
+    {
+      "path": "ui/badge_ui.h",
+      "bytes": 5565,
+      "sha256": "75fc79500addfb6604f83dc26b422383b4e7b29c4b8a6d3b7939bf8a59224721",
+      "source": "firmware-v7/ui/badge_ui.h",
+      "source_snapshot": "Generic 7.9.25-poke-duel header before member-card customization"
+    },
+    {
+      "path": "ui/generate_grok.py",
+      "bytes": 1306,
+      "sha256": "24fdbb5928d942d3574de29cddf7287655a3f1bb7539f82cb2f52a3cbd2fa5c2",
+      "source": "firmware-v7/ui/generate_grok.py"
+    },
+    {
+      "path": "ui/grok.c",
+      "bytes": 11356,
+      "sha256": "0e87ff99929d8ebbbb34dafb6203e07d6954fc76034bbaaaba1cf5fdd9b3e5dd",
+      "source": "firmware-v7/ui/grok.c"
+    },
+    {
+      "path": "ui/grok.h",
+      "bytes": 242,
+      "sha256": "bdec87aefce7c8502c18d26ff6bcd8bcc3b63a8b44b693450d3816206f9829a9",
+      "source": "firmware-v7/ui/grok.h"
+    },
+    {
+      "path": "ui/grok_data.h",
+      "bytes": 34271,
+      "sha256": "79aaf900aeca787d656e3fd03cb8d303bc5fb1076ea02e9a12b10cfbd644094e",
+      "source": "firmware-v7/ui/grok_data.h"
+    },
+    {
+      "path": "ui/grok_source/data.json",
+      "bytes": 53863,
+      "sha256": "f6215e92552910bc90c9fc70857a891cf5c386e562469063b3adf44ce31d0312",
+      "source": "firmware-v7/ui/grok_source/data.json"
+    },
+    {
+      "path": "ui/grok_source/LICENSE",
+      "bytes": 1086,
+      "sha256": "628de66f2b2ea320fa234e8bdfe1818c9f1f9ae57f6dcdf7424d5b3f0405c9c4",
+      "source": "firmware-v7/ui/grok_source/LICENSE"
+    },
+    {
+      "path": "ui/grok_source/source.json",
+      "bytes": 270,
+      "sha256": "56d853f6180df3d1ac270c95817876cfb898ffaf05809effe30b810dc86fb732",
+      "source": "firmware-v7/ui/grok_source/source.json"
+    },
+    {
+      "path": "ui/heart_rate.h",
+      "bytes": 1701,
+      "sha256": "690187272b0bb9e39c7eda7e2d463ddd0e1fc8521a5130389926612d205fddd8",
+      "source": "firmware-v7/ui/heart_rate.h"
+    }
+  ]
+}

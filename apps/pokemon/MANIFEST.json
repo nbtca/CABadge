@@ -1,0 +1,164 @@
+{
+  "application": "pokemon",
+  "snapshot": "7.9.25-poke-duel",
+  "packaged_on": "2026-11-02",
+  "kind": "application-source-snapshot-not-standalone-firmware",
+  "files": [
+    {
+      "path": "generate_pokemon_assets.py",
+      "bytes": 1522,
+      "sha256": "20e28cb82c0611038d40a57a1fc8bf7814ed2789f966710fc44e818c4655af05",
+      "source": "firmware-v7/generate_pokemon_assets.py"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1063,
+      "sha256": "8609c0ccc482c783d9ca130ab9955db467f46eb279a09f6ec1ac141755b48a4b",
+      "source": "LICENSE"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3139,
+      "sha256": "232200df7af70d25b9426f0a49768cde37de6ca747d444f1104d3a362225e552"
+    },
+    {
+      "path": "tests/host/host_support.py",
+      "bytes": 832,
+      "sha256": "27610adcb19f23441f2de7a3477d8b4f2a4b06df5ec70b8674017351296704b9",
+      "source": "firmware-v7/tests/host/host_support.py"
+    },
+    {
+      "path": "tests/host/test_pokemon.py",
+      "bytes": 10739,
+      "sha256": "057b59531e90f372c37dd547d4a31460b99c0820004ad465b92e2ed268f74277",
+      "source": "firmware-v7/test_pokemon.py (test location/tool paths adapted; assertions preserved)"
+    },
+    {
+      "path": "ui/badge_ui.h",
+      "bytes": 5565,
+      "sha256": "75fc79500addfb6604f83dc26b422383b4e7b29c4b8a6d3b7939bf8a59224721",
+      "source": "firmware-v7/ui/badge_ui.h",
+      "source_snapshot": "Generic 7.9.25-poke-duel header before member-card customization"
+    },
+    {
+      "path": "ui/heart_rate.h",
+      "bytes": 1701,
+      "sha256": "690187272b0bb9e39c7eda7e2d463ddd0e1fc8521a5130389926612d205fddd8",
+      "source": "firmware-v7/ui/heart_rate.h"
+    },
+    {
+      "path": "ui/peer_link.h",
+      "bytes": 688,
+      "sha256": "7696703183e4052e2da1b2524b9cf43aa9eefc8f74b82b66d036d8d40844d8c0",
+      "source": "firmware-v7/ui/peer_link.h"
+    },
+    {
+      "path": "ui/pokemon.c",
+      "bytes": 18732,
+      "sha256": "e8a644cdd067d8d7d41f2d099780b240d4a733cf50c58f31acf20299fc5a6db8",
+      "source": "firmware-v7/ui/pokemon.c"
+    },
+    {
+      "path": "ui/pokemon.h",
+      "bytes": 237,
+      "sha256": "127d82e7c1844b940bffd49bb3b400420ab398728e8f8e15418dbe266234e77f",
+      "source": "firmware-v7/ui/pokemon.h"
+    },
+    {
+      "path": "ui/pokemon_art.c",
+      "bytes": 464059,
+      "sha256": "6214a290e8abfeb578c6e3c0cf2f4ebe70cca5edaecf49397741b65d741baa42",
+      "source": "firmware-v7/ui/pokemon_art.c"
+    },
+    {
+      "path": "ui/pokemon_art.h",
+      "bytes": 161,
+      "sha256": "5f6514d0500b2557c9ce49e65664be336b51db8c2d9beb708dc608334d52d30f",
+      "source": "firmware-v7/ui/pokemon_art.h"
+    },
+    {
+      "path": "ui/pokemon_core.h",
+      "bytes": 9465,
+      "sha256": "80d3c451a839394b352bb880fe01baa098a9cea43b9103f3aa7631f9ef0703f1",
+      "source": "firmware-v7/ui/pokemon_core.h"
+    },
+    {
+      "path": "ui/pokemon_sprites/1_back.png",
+      "bytes": 554,
+      "sha256": "86c9f369b71e831de04ce6964bc9b62a6b8a82cad5309c0fa0fdbd96c3acb805",
+      "source": "firmware-v7/ui/pokemon_sprites/1_back.png"
+    },
+    {
+      "path": "ui/pokemon_sprites/1_front.png",
+      "bytes": 558,
+      "sha256": "523c5d50a673c3a46a68a96bd32a63fcfae9192637fb6407198a43746c38f7e3",
+      "source": "firmware-v7/ui/pokemon_sprites/1_front.png"
+    },
+    {
+      "path": "ui/pokemon_sprites/25_back.png",
+      "bytes": 587,
+      "sha256": "0c0f50a5be4074b7fffbc04359449a264b4700f27160db8a013dd6153a22cecc",
+      "source": "firmware-v7/ui/pokemon_sprites/25_back.png"
+    },
+    {
+      "path": "ui/pokemon_sprites/25_front.png",
+      "bytes": 600,
+      "sha256": "49e9816a16c0c886233e25d9b91f7ee86ac5083c93aa973a9b210528555f72ec",
+      "source": "firmware-v7/ui/pokemon_sprites/25_front.png"
+    },
+    {
+      "path": "ui/pokemon_sprites/4_back.png",
+      "bytes": 543,
+      "sha256": "e5753a2daeb132a71971b93b1abf4efd653816825138b53fb866ec05fabfcaa1",
+      "source": "firmware-v7/ui/pokemon_sprites/4_back.png"
+    },
+    {
+      "path": "ui/pokemon_sprites/4_front.png",
+      "bytes": 566,
+      "sha256": "0235fcad1ca309f303947ae1688d7564636971c30a0c707b6ee123e697f76022",
+      "source": "firmware-v7/ui/pokemon_sprites/4_front.png"
+    },
+    {
+      "path": "ui/pokemon_sprites/7_back.png",
+      "bytes": 484,
+      "sha256": "97d8ea70ffad0a9d189388c600f1c3f979cc6733ee5d03672b95f860c2976d1b",
+      "source": "firmware-v7/ui/pokemon_sprites/7_back.png"
+    },
+    {
+      "path": "ui/pokemon_sprites/7_front.png",
+      "bytes": 543,
+      "sha256": "30d6413a70495a23d4af23a941bae57f5373f7b6fec1e05eb8ef78a0636898bc",
+      "source": "firmware-v7/ui/pokemon_sprites/7_front.png"
+    },
+    {
+      "path": "ui/pokemon_sprites/CREDITS.md",
+      "bytes": 1112,
+      "sha256": "fdf5e6918251c4b923366d8aaa43fc2adc54ebdecd68d271bf6653b887c8ae52",
+      "source": "firmware-v7/ui/pokemon_sprites/CREDITS.md"
+    },
+    {
+      "path": "ui/pokemon_sprites/sources.json",
+      "bytes": 2873,
+      "sha256": "0ff7319d7094f1b55dfef1596e40bfa338081cb4872a4b59bb65cc5217a5d9bf",
+      "source": "firmware-v7/ui/pokemon_sprites/sources.json"
+    },
+    {
+      "path": "usb_screen/device/src/ble_service.c",
+      "bytes": 36154,
+      "sha256": "cef580efc0de82e8d8982d143378683b7803961b3983f45560fed7051aa26719",
+      "source": "firmware-v7/usb_screen/device/src/ble_service.c"
+    },
+    {
+      "path": "usb_screen/device/src/management.h",
+      "bytes": 1055,
+      "sha256": "44d7864e1f86c1ae6fcc904036e1ea905cde87b5e9021fed3580aa4f087a9f6d",
+      "source": "firmware-v7/usb_screen/device/src/management.h"
+    },
+    {
+      "path": "usb_screen/management_protocol.h",
+      "bytes": 2093,
+      "sha256": "4e2bab3484c0a647e127377872326cc03bdc85db840b24e6a105254d710f40cd",
+      "source": "firmware-v7/usb_screen/management_protocol.h"
+    }
+  ]
+}
