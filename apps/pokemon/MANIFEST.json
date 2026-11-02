@@ -25,7 +25,7 @@
       "path": "tests/host/host_support.py",
       "bytes": 832,
       "sha256": "27610adcb19f23441f2de7a3477d8b4f2a4b06df5ec70b8674017351296704b9",
-      "source": ".worktrees/app-sources-20261102/firmware-v7/tests/host/host_support.py"
+      "source": "firmware-v7/tests/host/host_support.py"
     },
     {
       "path": "tests/host/test_pokemon.py",
@@ -37,7 +37,8 @@
       "path": "ui/badge_ui.h",
       "bytes": 5565,
       "sha256": "75fc79500addfb6604f83dc26b422383b4e7b29c4b8a6d3b7939bf8a59224721",
-      "source": "outputs/member-m1ngsama-20261028/before/firmware-v7/ui/badge_ui.h"
+      "source": "firmware-v7/ui/badge_ui.h",
+      "source_snapshot": "Generic 7.9.25-poke-duel header before member-card customization"
     },
     {
       "path": "ui/heart_rate.h",
