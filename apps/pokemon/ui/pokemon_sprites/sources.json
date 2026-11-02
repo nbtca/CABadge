@@ -1,0 +1,50 @@
+{
+  "1_front.png": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/1dd55c0436d2a5b6e324c0b780e1b1b416fbfb64/sprites/pokemon/versions/generation-iii/firered-leafgreen/1.png",
+    "commit": "1dd55c0436d2a5b6e324c0b780e1b1b416fbfb64",
+    "sha256": "523c5d50a673c3a46a68a96bd32a63fcfae9192637fb6407198a43746c38f7e3",
+    "bytes": 558
+  },
+  "1_back.png": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/1dd55c0436d2a5b6e324c0b780e1b1b416fbfb64/sprites/pokemon/versions/generation-iii/firered-leafgreen/back/1.png",
+    "commit": "1dd55c0436d2a5b6e324c0b780e1b1b416fbfb64",
+    "sha256": "86c9f369b71e831de04ce6964bc9b62a6b8a82cad5309c0fa0fdbd96c3acb805",
+    "bytes": 554
+  },
+  "4_front.png": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/1dd55c0436d2a5b6e324c0b780e1b1b416fbfb64/sprites/pokemon/versions/generation-iii/firered-leafgreen/4.png",
+    "commit": "1dd55c0436d2a5b6e324c0b780e1b1b416fbfb64",
+    "sha256": "0235fcad1ca309f303947ae1688d7564636971c30a0c707b6ee123e697f76022",
+    "bytes": 566
+  },
+  "4_back.png": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/1dd55c0436d2a5b6e324c0b780e1b1b416fbfb64/sprites/pokemon/versions/generation-iii/firered-leafgreen/back/4.png",
+    "commit": "1dd55c0436d2a5b6e324c0b780e1b1b416fbfb64",
+    "sha256": "e5753a2daeb132a71971b93b1abf4efd653816825138b53fb866ec05fabfcaa1",
+    "bytes": 543
+  },
+  "7_front.png": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/1dd55c0436d2a5b6e324c0b780e1b1b416fbfb64/sprites/pokemon/versions/generation-iii/firered-leafgreen/7.png",
+    "commit": "1dd55c0436d2a5b6e324c0b780e1b1b416fbfb64",
+    "sha256": "30d6413a70495a23d4af23a941bae57f5373f7b6fec1e05eb8ef78a0636898bc",
+    "bytes": 543
+  },
+  "7_back.png": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/1dd55c0436d2a5b6e324c0b780e1b1b416fbfb64/sprites/pokemon/versions/generation-iii/firered-leafgreen/back/7.png",
+    "commit": "1dd55c0436d2a5b6e324c0b780e1b1b416fbfb64",
+    "sha256": "97d8ea70ffad0a9d189388c600f1c3f979cc6733ee5d03672b95f860c2976d1b",
+    "bytes": 484
+  },
+  "25_front.png": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/1dd55c0436d2a5b6e324c0b780e1b1b416fbfb64/sprites/pokemon/versions/generation-iii/firered-leafgreen/25.png",
+    "commit": "1dd55c0436d2a5b6e324c0b780e1b1b416fbfb64",
+    "sha256": "49e9816a16c0c886233e25d9b91f7ee86ac5083c93aa973a9b210528555f72ec",
+    "bytes": 600
+  },
+  "25_back.png": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/1dd55c0436d2a5b6e324c0b780e1b1b416fbfb64/sprites/pokemon/versions/generation-iii/firered-leafgreen/back/25.png",
+    "commit": "1dd55c0436d2a5b6e324c0b780e1b1b416fbfb64",
+    "sha256": "0c0f50a5be4074b7fffbc04359449a264b4700f27160db8a013dd6153a22cecc",
+    "bytes": 587
+  }
+}
