@@ -241,13 +241,18 @@ static esp_err_t response(httpd_req_t *req,int result){
     httpd_resp_set_status(req,status);httpd_resp_set_type(req,"application/json");httpd_resp_set_hdr(req,"Cache-Control","no-store");
     char text[40];snprintf(text,sizeof(text),"{\"result\":%d}",result);return httpd_resp_sendstr(req,text);
 }
+static bool own_host(const char *host){
+    char ip[24];size_t n=strcspn(host,":");
+    if(host[n]&&strcmp(host+n,":80"))return false;
+    wifi_wallpaper_address(ip,sizeof(ip));
+    return (*ip&&strlen(ip)==n&&!strncmp(host,ip,n))||(wifi_wallpaper_hotspot_active()&&n==11&&!strncmp(host,"192.168.4.1",n));
+}
 static bool web_request(httpd_req_t *req,uint32_t *generation){
     char origin[96],host[72],expected[80];
-    /* Requests from a browser must come from this origin. Native GATT/USB and
-     * explicit header-based HTTP clients do not depend on browser cookies. */
+    /* A DNS-rebound page sends its own name as Host and Origin, so Host must be this device's address. */
+    if(httpd_req_get_hdr_value_str(req,"Host",host,sizeof(host))!=ESP_OK||!own_host(host))return false;
     if(httpd_req_get_hdr_value_len(req,"Origin")){
-        if(httpd_req_get_hdr_value_str(req,"Origin",origin,sizeof(origin))!=ESP_OK||
-           httpd_req_get_hdr_value_str(req,"Host",host,sizeof(host))!=ESP_OK)return false;
+        if(httpd_req_get_hdr_value_str(req,"Origin",origin,sizeof(origin))!=ESP_OK)return false;
         snprintf(expected,sizeof(expected),"http://%s",host);if(strcmp(expected,origin))return false;
     }
     return management_begin_request(generation);
