@@ -17,8 +17,8 @@
     },
     {
       "path": "tests/host/host_support.py",
-      "bytes": 832,
-      "sha256": "27610adcb19f23441f2de7a3477d8b4f2a4b06df5ec70b8674017351296704b9",
+      "bytes": 1012,
+      "sha256": "830fe80f9fd5f1e1e06c9107055fda6b40c3addfc8619b251789397442a251f3",
       "source": "firmware-v7/tests/host/host_support.py"
     },
     {

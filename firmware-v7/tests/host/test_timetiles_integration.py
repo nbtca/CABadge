@@ -89,6 +89,8 @@ static int nvs_set_blob(nvs_handle_t h,const char *key,const void *data,size_t s
 }
 static int nvs_commit(nvs_handle_t h){assert(h==NVS_READWRITE);commits++;return mock_commit_error;}
 static void nvs_close(nvs_handle_t h){(void)h;closes++;}
+#define time_t mock_time_t
+#define timeval mock_timeval
 typedef int64_t time_t;
 struct timeval { time_t tv_sec;int64_t tv_usec; };
 struct tm {int tm_year,tm_mon,tm_mday,tm_hour,tm_min,tm_sec,tm_wday;};
@@ -349,7 +351,7 @@ commands = [
      str(sources/'core.c'), str(sources/'readable_timer_helpers.c'), str(sources/'effects.c'), str(sources/'raster.c'), '-o', str(exe)],
     [str(exe)],
 ]
-log = root.parent/'outputs/timetiles-gestures-20261015/integration-check.log'
+log = TEST_TEMP/'timetiles-integration-test/integration-check.log'
 log.parent.mkdir(parents=True, exist_ok=True)
 with log.open('w', encoding='utf-8') as stream:
     for command in commands:

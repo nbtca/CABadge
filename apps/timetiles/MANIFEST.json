@@ -22,8 +22,8 @@
     },
     {
       "path": "tests/host/host_support.py",
-      "bytes": 832,
-      "sha256": "27610adcb19f23441f2de7a3477d8b4f2a4b06df5ec70b8674017351296704b9",
+      "bytes": 1012,
+      "sha256": "830fe80f9fd5f1e1e06c9107055fda6b40c3addfc8619b251789397442a251f3",
       "source": "firmware-v7/tests/host/host_support.py"
     },
     {
@@ -40,8 +40,8 @@
     },
     {
       "path": "tests/host/test_timetiles_integration.py",
-      "bytes": 23919,
-      "sha256": "716a10e2a94e1fe9f1476e5bee21ae20f457e8368361e4aa9139cf7ea6be9429",
+      "bytes": 23975,
+      "sha256": "df09f77803387077e47d28304e92ae5d57cb0b956313a2d5082a836f85bb5006",
       "source": "firmware-v7/tests/host/test_timetiles_integration.py (test location/tool paths adapted; assertions preserved)"
     },
     {

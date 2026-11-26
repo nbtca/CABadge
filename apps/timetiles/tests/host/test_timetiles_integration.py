@@ -89,6 +89,8 @@ static int nvs_set_blob(nvs_handle_t h,const char *key,const void *data,size_t s
 }
 static int nvs_commit(nvs_handle_t h){assert(h==NVS_READWRITE);commits++;return mock_commit_error;}
 static void nvs_close(nvs_handle_t h){(void)h;closes++;}
+#define time_t mock_time_t
+#define timeval mock_timeval
 typedef int64_t time_t;
 struct timeval { time_t tv_sec;int64_t tv_usec; };
 struct tm {int tm_year,tm_mon,tm_mday,tm_hour,tm_min,tm_sec,tm_wday;};

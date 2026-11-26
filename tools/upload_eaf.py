@@ -9,7 +9,7 @@ from eaf_timing import read
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('file', type=Path)
-    parser.add_argument('--port', default='COM3')
+    parser.add_argument('--port', help='Optional explicit port; detected by USB ID by default')
     args = parser.parse_args()
     raw = args.file.read_bytes()
     if not 24 <= len(raw) <= 3145728 or raw[:4] != b'\x89EAF':

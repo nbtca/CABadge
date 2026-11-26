@@ -15,7 +15,14 @@ concurrency:
 
 jobs:
   offline-checks:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: pwsh
     timeout-minutes: 15
     env:
       PYTHONDONTWRITEBYTECODE: '1'
@@ -31,8 +38,11 @@ jobs:
           python-version: '3.10'
       - name: Configure build tool directory
         run: '"CABADGE_BUILD_ROOT=$env:RUNNER_TEMP/cabadge" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append'
-      - name: Install workbench test dependencies
-        run: python -m pip install pyserial==3.5 esptool==5.4.0
+      - name: Install test dependencies
+        run: python -m pip install pyserial==3.5 esptool==5.4.0 ziglang==0.14.1 Pillow==12.3.0
+      - name: Install Tkinter
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y python3-tk
       - name: Repository integrity
         run: python tools/repository/check_repository.py
       - name: Repository regression tests
@@ -47,3 +57,11 @@ jobs:
         run: python firmware-v7/tests/host/test_workbench.py
       - name: USB framing without device access
         run: python firmware-v7/usb_screen/framing.py
+      - name: C host checks
+        run: |
+          $env:CABADGE_ZIG = python -c "import ziglang, pathlib; print(next(pathlib.Path(ziglang.__file__).parent.glob('zig*')))"
+          $skip = 'test_build_config.py','test_workbench.py','test_heart_rate.py','test_eaf_direct.py'
+          foreach ($test in Get-ChildItem firmware-v7/tests/host/test_*.py, apps/*/tests/host/test_*.py | Where-Object Name -notin $skip) {
+            python $test.FullName
+            if ($LASTEXITCODE) { throw "$($test.FullName) failed" }
+          }
