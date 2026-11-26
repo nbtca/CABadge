@@ -5,19 +5,19 @@
 [固件下载](https://github.com/nbtca/CABadge/releases/tag/v1.2.0) · [PCB 工程](hardware/pcb/current/README.md) · [外壳文件](hardware/enclosure/releases/V11_V2_1_20261020/README.md) · [使用与复刻](docs/REPRODUCE.md)
 
 <p align="center">
-  <a href="docs/images/cabadge-front.jpg"><img src="docs/images/cabadge-front.jpg" width="340" alt="CABadge 手持正面，圆屏显示蓝色计协图案" /></a>
+  <a href="docs/images/cabadge-front.webp"><img src="docs/images/cabadge-front.webp" width="340" alt="CABadge 手持正面，圆屏显示蓝色计协图案" /></a>
   <br />
   <sub>圆屏亮屏实物 · 计协图案</sub>
 </p>
 
 <table align="center">
   <tr>
-    <td align="center"><a href="docs/images/cabadge-button.jpg"><img src="docs/images/cabadge-button.jpg" width="200" alt="CABadge 斜侧视角，展示白色外壳、蓝色边框与侧边按键" /></a><br /><sub>侧边按键与边框</sub></td>
-    <td align="center"><a href="docs/images/cabadge-profile.jpg"><img src="docs/images/cabadge-profile.jpg" width="200" alt="CABadge 侧面实物，展示白色外壳的机身轮廓" /></a><br /><sub>侧面轮廓</sub></td>
+    <td align="center"><a href="docs/images/cabadge-button.webp"><img src="docs/images/cabadge-button.webp" width="200" alt="CABadge 斜侧视角，展示白色外壳、蓝色边框与侧边按键" /></a><br /><sub>侧边按键与边框</sub></td>
+    <td align="center"><a href="docs/images/cabadge-profile.webp"><img src="docs/images/cabadge-profile.webp" width="200" alt="CABadge 侧面实物，展示白色外壳的机身轮廓" /></a><br /><sub>侧面轮廓</sub></td>
   </tr>
 </table>
 
-照片展示外观与亮屏效果，点击可查看原图；设计版本与验证状态见[下方版本表](#版本与资料对应)。
+照片展示外观与亮屏效果，点击可查看大图；设计版本与验证状态见[下方版本表](#版本与资料对应)。
 
 ## 可以做什么
 
