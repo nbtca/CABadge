@@ -2,7 +2,6 @@
 from pathlib import Path
 import hashlib
 import json
-import os
 import subprocess
 import tempfile
 import unittest
@@ -17,9 +16,7 @@ def digest(data):
 
 class ReleaseChecks(unittest.TestCase):
     def setUp(self):
-        temp_root = Path(os.environ.get('CABADGE_BUILD_ROOT', 'F:/CABadgeBuild')) / 'temp/release-tests'
-        temp_root.mkdir(parents=True, exist_ok=True)
-        self.temp = tempfile.TemporaryDirectory(dir=temp_root)
+        self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.release = self.root / 'V11'

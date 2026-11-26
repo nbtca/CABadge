@@ -203,8 +203,8 @@ def self_test():
                 if kind==39 and value==b'\x00': self.cancelled=True
             return len(data)
         def read(self, count): data=bytes(self.pending[:count]);del self.pending[:count];return data
-    with tempfile.TemporaryDirectory(prefix='probe-check-',dir='F:/CABadgeBuild/temp') as temp:
-        base=Path(temp).resolve();assert base.is_relative_to(Path('F:/CABadgeBuild/temp').resolve())
+    with tempfile.TemporaryDirectory(prefix='probe-check-') as temp:
+        base=Path(temp).resolve()
         source=base/'source';(source/'build').mkdir(parents=True)
         wire=Wire()
         with patch('serial.Serial',return_value=wire),patch.dict(globals(),ROOT=source,LATEST=source/'build/probe-latest.json'):

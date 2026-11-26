@@ -73,7 +73,7 @@ def upload(link, raw, eaf=False, timing=b''):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--port', default='COM3')
+    parser.add_argument('--port', help='Optional explicit port; detected by USB ID by default')
     parser.add_argument('--select', choices=['sunny', 'ribbons'], help='Select imported artwork instead of restoring current selection')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1] / 'firmware-v7/resources/wallpapers'

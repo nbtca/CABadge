@@ -2,18 +2,18 @@
 
 当前公开源码版本由 [version.json](../firmware-v7/version.json) 定义；正式附件、测试附件及旧标签源码例外见[项目版本表](../README.md#版本与资料对应)。工作台继续默认安装 v1.2.0，不会因这次构建工具整理改变默认固件。
 
-## Windows 环境
+## 环境
 
-使用 Python 3.10 或更新版本（含 Tkinter）和 PowerShell 7。从仓库根目录执行：
+Windows、macOS 和 Linux 都使用 Python 3.10 或更新版本（含 Tkinter）和 PowerShell 7。从仓库根目录执行：
 
 ```powershell
-pwsh -NoProfile -File tools/bootstrap.ps1 -Python python
-F:\CABadgeBuild\venv\Scripts\python.exe firmware-v7/setup_deps.py
+pwsh -NoProfile -File tools/bootstrap.ps1 -Python python3
+<工具目录>/venv/bin/python firmware-v7/setup_deps.py
 ```
 
-依赖固定在 [requirements-dev.txt](../tools/requirements-dev.txt)：PlatformIO、Zig、pyserial、esptool、Pillow。bootstrap 将环境安装到 `F:\CABadgeBuild\venv`，不再使用旧 `firmware/bringup/.venv`。`setup_deps.py` 获取 LVGL 9.4.0 和 OFL 字体到本工作树的 vendor；已有生成资源已入库，普通板端编译无需重新生成字库。
+工具目录由 `CABADGE_BUILD_ROOT` 指定。未设置时，Windows 默认使用 `F:\CABadgeBuild`，macOS 和 Linux 默认使用 `~/.cache/cabadge`。Windows 的解释器位于 `<工具目录>\venv\Scripts\python.exe`。TEMP、缓存、宿主测试和按工作树隔离的构建暂存都放在这个目录下。
 
-`CABADGE_BUILD_ROOT` 可覆盖工具根目录，默认保留 F 盘约定；TEMP、缓存、宿主测试和按工作树隔离的构建暂存均由它派生。源码与导出包留在项目 F 盘目录。依赖版本已固定，不承诺不同系统的逐字节固件复现；生成资源使用的上游字体仍须按任务核对。
+依赖固定在 [requirements-dev.txt](../tools/requirements-dev.txt)，包括 PlatformIO、Zig、pyserial、esptool 和 Pillow。`setup_deps.py` 把 LVGL 9.4.0 和固定提交的 OFL 字体下载到本工作树的 vendor 目录，并校验 SHA-256。生成资源已经入库，普通板端编译不需要重新生成字库。依赖版本固定后，仍不保证不同系统编译出逐字节相同的固件。
 
 ## 板端构建
 
@@ -34,28 +34,28 @@ PlatformIO 固定 espressif32 7.1.3、framework-espidf 4.60100.0（ESP-IDF 6.1.0
 ## 宿主和仓库检查
 
 ```powershell
-F:\CABadgeBuild\venv\Scripts\python.exe tools/repository/check_repository.py
-F:\CABadgeBuild\venv\Scripts\python.exe tools/repository/test_repository.py
-F:\CABadgeBuild\venv\Scripts\python.exe tools/release/test_prepare.py
-F:\CABadgeBuild\venv\Scripts\python.exe firmware-v7/tests/host/test_build_config.py
-F:\CABadgeBuild\venv\Scripts\python.exe firmware-v7/tests/host/test_workbench.py
+<工具目录>/venv/bin/python tools/repository/check_repository.py
+<工具目录>/venv/bin/python tools/repository/test_repository.py
+<工具目录>/venv/bin/python tools/release/test_prepare.py
+<工具目录>/venv/bin/python firmware-v7/tests/host/test_build_config.py
+<工具目录>/venv/bin/python firmware-v7/tests/host/test_workbench.py
 ```
 
-其他固件宿主检查位于 `firmware-v7/tests/host/`，逐个运行需要的 `test_*.py`。它们使用中央环境中的 Zig；`CABADGE_ZIG` 可显式覆盖 Zig 可执行文件。保留原生产 C/测试桩检查，不启动 UI 模拟器，不连接实板。USB 探针会访问设备，仅在明确安排实板测试时运行。
+其他固件宿主检查位于 `firmware-v7/tests/host/`，逐个运行需要的 `test_*.py`。它们使用工具目录中的 Zig，`CABADGE_ZIG` 可以显式指定 Zig 可执行文件。`test_heart_rate.py` 需要 PlatformIO 下载的 ESP-IDF 头文件，`test_eaf_direct.py` 需要一次完成的板端构建暂存，所以要先运行一次板端构建。保留原生产 C/测试桩检查，不启动 UI 模拟器，不连接实板。USB 探针会访问设备，仅在明确安排实板测试时运行。
 
-GitHub Actions 自动运行仓库完整性、回归、发布修订、构建配置、工作台和 framing 离线检查。完整板端编译和全部依赖 C 的宿主检查仍按任务在本地运行；CI 不替代显示、手势、撕裂、无线或长稳验收。
+GitHub Actions 在 Windows 和 Ubuntu 上自动运行仓库完整性、回归、发布修订、构建配置、工作台、framing 和不依赖构建暂存的 C 宿主检查。完整板端编译以及 `test_heart_rate.py`、`test_eaf_direct.py` 仍按任务在本地运行；CI 不替代显示、手势、撕裂、无线或长稳验收。
 
 ## 工作台与发布
 
-`firmware-v7/run.cmd` 使用中央环境打开原生工作台。按[正式发布说明](RELEASE-v1.2.0.md)准备原正式包，工作台默认目录仍为 `outputs/cabadge-v7.9.16-eaf-transition/`；三个 BIN 与 verification.json 应直接位于该目录。壁纸管理使用设备本地网页。
+Windows 上 `firmware-v7/run.cmd` 使用中央环境打开原生工作台，其他系统运行 `<工具目录>/venv/bin/python firmware-v7/workbench.py`。按[正式发布说明](RELEASE-v1.2.0.md)准备原正式包，工作台默认目录仍为 `outputs/cabadge-v7.9.16-eaf-transition/`；三个 BIN 与 verification.json 应直接位于该目录。壁纸管理使用设备本地网页。
 
 新交付包通过[发布工具](../tools/release/README.md)核对源码身份和指纹后生成。脏源码开发构建会明确标记，不能通过正式发布门禁。检查、编译和生成交付包均不自动烧录设备。
 
 ## BlueMap USB 耗时诊断（7.9.3-mapdiag 起）
 
-在项目根目录运行 `python tools/map_perf_monitor.py`。使用现有 pyserial；自动识别 CABadge USB，必要时加 `--port COM3`。先关闭工作台的连接、miniterm 等占用串口的程序。工具不会切页面；手动打开地图，等待加载，拖动一次，再缩放一次。Ctrl+C 停止。
+在项目根目录运行 `python tools/map_perf_monitor.py`。工具使用现有 pyserial，按 USB ID 自动识别 CABadge，必要时用 `--port` 指定端口，例如 `COM3` 或 `/dev/cu.usbmodem1101`。先关闭工作台的连接、miniterm 等占用串口的程序。工具不会切页面；手动打开地图，等待加载，拖动一次，再缩放一次。Ctrl+C 停止。
 
-日志保存在 `F:/CABadgeBuild/logs/bluemap-时间.log`，同名 `.jsonl` 保留原始记录。设备保留最近64条 Tile/Refresh 记录，读取不清空；历史覆盖会报告 lost。调试存储约14 KiB PSRAM，无逐帧或逐chunk输出，不启用 ESP_LOG/UART console。
+日志默认保存在系统临时目录的 `cabadge-logs/bluemap-时间.log`，可用 `--log-dir` 指定，同名 `.jsonl` 保留原始记录。设备保留最近64条 Tile/Refresh 记录，读取不清空；历史覆盖会报告 lost。调试存储约14 KiB PSRAM，无逐帧或逐chunk输出，不启用 ESP_LOG/UART console。
 
 协议复用 JXUI 帧：BR_READY capability 32；query type41 的 payload 为 `0x0a + uint32_le(after_seq)`；type42 返回带 map_perf=1 的 JSON 记录封装。原有诊断接口不变。`available=false` 表示诊断存储分配失败。
 

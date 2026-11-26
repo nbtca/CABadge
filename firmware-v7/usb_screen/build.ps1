@@ -6,7 +6,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $firmware = Split-Path $PSScriptRoot
 $repository = Split-Path $firmware
-$buildRoot = if ($env:CABADGE_BUILD_ROOT) { [IO.Path]::GetFullPath($env:CABADGE_BUILD_ROOT) } else { 'F:\CABadgeBuild' }
+$buildRoot = if ($env:CABADGE_BUILD_ROOT) { [IO.Path]::GetFullPath($env:CABADGE_BUILD_ROOT) } elseif ($IsWindows) { 'F:\CABadgeBuild' } else { Join-Path $HOME '.cache/cabadge' }
 $baseVersion = (Get-Content -Raw -LiteralPath (Join-Path $firmware 'version.json') | ConvertFrom-Json).version
 if ($baseVersion -notmatch '^\d+\.\d+\.\d+(?:-[a-z0-9-]+)?$') { throw 'Invalid firmware version.' }
 if ($BuildVariant -and ($BuildVariant -cnotmatch '^[a-z0-9][a-z0-9-]{0,47}$' -or $BuildVariant -match '^(default|con|prn|aux|nul|com[0-9]|lpt[0-9])$')) { throw 'Use a safe lowercase build variant (1..48 letters, digits, hyphens).' }
@@ -27,7 +27,7 @@ $buildId = (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '-' + [guid]::NewGuid().To
 # Fresh sources per invocation prevent deleted files from surviving into a later build.
 $stage = Join-Path $buildRoot "staging\$checkoutId\usb-screen-$configuration\build-$buildId"
 $export = Join-Path $repository "outputs\builds\$checkoutId\cabadge-v$version-$configuration-$buildId"
-$python = Join-Path $buildRoot 'venv\Scripts\python.exe'
+$python = if ($IsWindows) { Join-Path $buildRoot 'venv/Scripts/python.exe' } else { Join-Path $buildRoot 'venv/bin/python' }
 if ($ConfigurationOnly) {
     [ordered]@{version=$version;base_version=$baseVersion;build_variant=$BuildVariant;member_name=$MemberName;build_root=$buildRoot;stage=$stage;export=$export;python=$python;build_flags=$flags} | ConvertTo-Json
     return

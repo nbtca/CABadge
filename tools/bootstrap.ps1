@@ -1,11 +1,11 @@
 param([string]$Python = 'python')
 $ErrorActionPreference = 'Stop'
-$buildRoot = if ($env:CABADGE_BUILD_ROOT) { [IO.Path]::GetFullPath($env:CABADGE_BUILD_ROOT) } else { 'F:\CABadgeBuild' }
+$buildRoot = if ($env:CABADGE_BUILD_ROOT) { [IO.Path]::GetFullPath($env:CABADGE_BUILD_ROOT) } elseif ($IsWindows) { 'F:\CABadgeBuild' } else { Join-Path $HOME '.cache/cabadge' }
 $env:TEMP = $env:TMP = Join-Path $buildRoot 'temp'
 $env:PIP_CACHE_DIR = Join-Path $buildRoot 'pip-cache'
 New-Item -ItemType Directory -Force -Path $env:TEMP | Out-Null
 $venv = Join-Path $buildRoot 'venv'
-$runtime = Join-Path $venv 'Scripts\python.exe'
+$runtime = if ($IsWindows) { Join-Path $venv 'Scripts/python.exe' } else { Join-Path $venv 'bin/python' }
 if (-not (Test-Path -LiteralPath $runtime)) {
     & $Python -m venv $venv
     if ($LASTEXITCODE -ne 0) { throw 'Cannot create the build environment; use Python 3.10 or newer with venv.' }

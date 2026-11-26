@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import struct
 import sys
+import tempfile
 import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'firmware-v7' / 'usb_screen'))
@@ -119,7 +120,7 @@ def self_test():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', help='Optional explicit port, e.g. COM3')
-    parser.add_argument('--log-dir', type=Path, default=Path('F:/CABadgeBuild/logs'))
+    parser.add_argument('--log-dir', type=Path, default=Path(tempfile.gettempdir()) / 'cabadge-logs')
     parser.add_argument('--duration', type=float, default=0, help='Stop after N seconds; default runs until Ctrl+C')
     parser.add_argument('--self-test', action='store_true')
     args = parser.parse_args()
