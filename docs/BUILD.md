@@ -13,7 +13,7 @@ pwsh -NoProfile -File tools/bootstrap.ps1 -Python python3
 
 工具目录由 `CABADGE_BUILD_ROOT` 指定。未设置时，Windows 默认使用 `F:\CABadgeBuild`，macOS 和 Linux 默认使用 `~/.cache/cabadge`。Windows 的解释器位于 `<工具目录>\venv\Scripts\python.exe`。TEMP、缓存、宿主测试和按工作树隔离的构建暂存都放在这个目录下。
 
-依赖固定在 [requirements-dev.txt](../tools/requirements-dev.txt)，包括 PlatformIO、Zig、pyserial、esptool 和 Pillow。`setup_deps.py` 把 LVGL 9.4.0 和固定提交的 OFL 字体下载到本工作树的 vendor 目录，并校验 SHA-256。生成资源已经入库，普通板端编译不需要重新生成字库。依赖版本固定后，仍不保证不同系统编译出逐字节相同的固件。
+依赖固定在 [requirements-dev.txt](../tools/requirements-dev.txt)，包括 PlatformIO、Zig、pyserial、esptool 和 Pillow。`setup_deps.py` 把 LVGL 9.4.0 和固定提交的 OFL 字体下载到本工作树的 vendor 目录，并校验 SHA-256。生成资源已经入库，普通板端编译不需要重新生成。修改素材后，`firmware-v7/generate_assets.py` 用 `ui/logo.png` 和 `ui/wallpaper.png` 生成字库与图像 `ui/assets.c`，但在 Pillow 12.3.0 下与入库版本的字形位图不一致，提交前需目视核对；`firmware-v7/generate_app_assets.py` 把 `ui/app_assets/*.webp` 转成 `ui/app_assets.c`。依赖版本固定后，仍不保证不同系统编译出逐字节相同的固件。
 
 ## 板端构建
 
