@@ -13,13 +13,13 @@
     },
     {
       "path": "ASSEMBLY.md",
-      "bytes": 3427,
-      "sha256": "1d1f875b5846883c19116e48fe378b27d2f009a386df3886a6559ffdb1fa6c4f"
+      "bytes": 3429,
+      "sha256": "a06ebae4a3c87c42098cb549570472cb872c54ac39635f05d61e590d4eaf0ddf"
     },
     {
-      "path": "cad/CABadge_V11_V2_1-SolidWorks.zip",
-      "bytes": 47756006,
-      "sha256": "bc40142591cc59d22f33691d1313467b0d1579ca189f9a8bee6e0311edf77bf2"
+      "path": "README.md",
+      "bytes": 4163,
+      "sha256": "c57acfdf75c35a96ce188ad2463caf42ef2a9d4890058c01c4a16156cb408517"
     },
     {
       "path": "cad/CABadge_V11_V2_1-STEP.zip",
@@ -27,14 +27,14 @@
       "sha256": "9b1867fc734eea8331fbbfd3358d312c3a81a7b17ce89b14ecce7cc75bd114fd"
     },
     {
+      "path": "cad/CABadge_V11_V2_1-SolidWorks.zip",
+      "bytes": 47756006,
+      "sha256": "bc40142591cc59d22f33691d1313467b0d1579ca189f9a8bee6e0311edf77bf2"
+    },
+    {
       "path": "cad/README.md",
       "bytes": 437,
       "sha256": "ab1cbe79b38a6c12d63d0c275760733c352752079d66032ab83154f626f73a49"
-    },
-    {
-      "path": "images/assembly-details.png",
-      "bytes": 497724,
-      "sha256": "168819f1d015f1aa128471d5b8e780344fcf1012814bf1625f6d3553e5f273c7"
     },
     {
       "path": "images/assembly-details.svg",
@@ -42,14 +42,19 @@
       "sha256": "031c95f108740492d006ead9203b139f52f71c242a1a64f4df4c50a5eecfdc56"
     },
     {
-      "path": "images/assembly-exploded.png",
-      "bytes": 518400,
-      "sha256": "61839ae7782771a4fecbdda6ba4650c76dea1312c4d84d9834e93f6952ce2855"
+      "path": "images/assembly-details.webp",
+      "bytes": 207432,
+      "sha256": "7cbccfb9a7257836819b6f56c69f8a379af388dbf32edc676040cdba3b8cef7b"
     },
     {
       "path": "images/assembly-exploded.svg",
       "bytes": 324791,
       "sha256": "2109e986224c500b945d851125a2d0252d3b5250396d3df404d3b6ae5e53d8fd"
+    },
+    {
+      "path": "images/assembly-exploded.webp",
+      "bytes": 211534,
+      "sha256": "9ef0aa5a22cc48095c4b94f40c3bb40cf05df25fe7f1b48f17b6c31e1b0494fb"
     },
     {
       "path": "images/assembly-guide.pdf",
@@ -65,11 +70,6 @@
       "path": "print/V11_Cup.stl",
       "bytes": 298384,
       "sha256": "95edfb94aef2894de189daf03e3f17c5dafdcc599bde935e03f9709567fd91e1"
-    },
-    {
-      "path": "README.md",
-      "bytes": 4161,
-      "sha256": "eee7886f26616cbd005eab95cf6654f3270644af86c5a9da6d8bf09f4e14cbc8"
     },
     {
       "path": "verification/assembly-cup-button.json",

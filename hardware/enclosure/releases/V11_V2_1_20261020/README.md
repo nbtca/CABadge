@@ -28,9 +28,9 @@
 
 ## 装配图
 
-![Cup 与 Button 两件打印方案爆炸图](images/assembly-exploded.png)
+![Cup 与 Button 两件打印方案爆炸图](images/assembly-exploded.webp)
 
-![装配半剖及按帽与开关位置](images/assembly-details.png)
+![装配半剖及按帽与开关位置](images/assembly-details.webp)
 
 图中只有 01～07 七个部件，打印件为 06 Cup 与 07 Button_R2。图片基于同一组 STEP 几何与参考坐标，爆炸位移仅用于辨认层次。PCB 采用板边先入、再在壳内转平的装入方式，图中轴向展开不表示整板平放直降。
 
