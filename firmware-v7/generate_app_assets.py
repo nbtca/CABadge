@@ -12,5 +12,5 @@ for i,(name,size) in enumerate(zip(names,sizes)):
     out.append(f'static const uint8_t sprite{i}[]={{'+','.join(map(str,raw))+'};\n')
     out.append('static const lv_image_dsc_t image%d={.header={.magic=LV_IMAGE_HEADER_MAGIC,.cf=LV_COLOR_FORMAT_ARGB8888,.w=%d,.h=%d,.stride=%d},.data_size=sizeof(sprite%d),.data=sprite%d};\n'%(i,im.width,im.height,im.width*4,i,i))
 out.append('const lv_image_dsc_t *const miner_sprites[53]={'+','.join(f'&image{i}' for i in range(53))+'};\n')
-(ROOT/'ui/app_assets.c').write_text(''.join(out),encoding='utf-8')
+(ROOT/'ui/app_assets.c').write_text(''.join(out),encoding='utf-8',newline='\r\n')
 print('Converted',len(names),'original sprites')

@@ -2,11 +2,14 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 import uuid
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from host_support import BUILD_ROOT
 BUILD = ROOT / 'firmware-v7/usb_screen/build.ps1'
 
 class BuildConfiguration(unittest.TestCase):
@@ -40,7 +43,7 @@ class BuildConfiguration(unittest.TestCase):
         self.assertNotEqual(custom['stage'], alternate['stage'])
 
     def test_each_build_uses_fresh_stage_after_source_deletion(self):
-        parent = Path(os.environ.get('CABADGE_BUILD_ROOT') or 'F:/CABadgeBuild') / 'temp'
+        parent = BUILD_ROOT / 'temp'
         parent.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix='stage-contract-', dir=parent) as temporary:
             env = dict(os.environ, CABADGE_BUILD_ROOT=temporary)
@@ -65,7 +68,7 @@ class BuildConfiguration(unittest.TestCase):
                 self.config('-BuildVariant', 'custom', '-MemberName', name, ok=False)
 
     def test_build_root_override_and_diagnostics_separation(self):
-        parent = Path(os.environ.get('CABADGE_BUILD_ROOT') or 'F:/CABadgeBuild') / 'temp'
+        parent = BUILD_ROOT / 'temp'
         env = dict(os.environ, CABADGE_BUILD_ROOT=str(parent / ('config-only-' + uuid.uuid4().hex)), CABADGE_DISPLAY_PERF='1')
         cfg = self.config(env=env)
         self.assertTrue(Path(cfg['stage']).is_relative_to(Path(env['CABADGE_BUILD_ROOT'])))

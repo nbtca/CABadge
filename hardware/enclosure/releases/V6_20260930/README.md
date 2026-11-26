@@ -22,10 +22,10 @@
 
 照片展示打印外壳及装入点亮的屏幕，不单独证明内部无顶压、USB/拨片全功能或长期使用通过。具体瑕疵尚待反馈。
 
-![控制中心与手持外观](photos/01-control-center.jpg)
+![控制中心与手持外观](photos/01-control-center.webp)
 
-![会员名片与外壳正面](photos/02-member-card.jpg)
+![会员名片与外壳正面](photos/02-member-card.webp)
 
-![表情画面与外壳正面](photos/03-expression.jpg)
+![表情画面与外壳正面](photos/03-expression.webp)
 
-`SHA256SUMS.txt`用于校验3个STL及3张原照片的下载完整性，不代表实物验收。本次不修改PCB或固件。
+`SHA256SUMS.txt`用于校验3个STL及3张照片的下载完整性，不代表实物验收。本次不修改PCB或固件。

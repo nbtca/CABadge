@@ -14,7 +14,7 @@
 | 06 | V11_Cup | 打印 1 件，一体杯壳 |
 | 07 | V11_Button_R2 | 打印 1 件，R2 侧面按帽 |
 
-![零件层次与编号](images/assembly-exploded.png)
+![零件层次与编号](images/assembly-exploded.webp)
 
 ## 装入顺序
 
@@ -36,7 +36,7 @@
 
 R2 按面 9.6 × 2.6 mm 与原孔 10.4 × 3.4 mm 保持，按面单边名义间隙为 0.4 mm。图中按帽为原 CAD 参考位置；触发与释放按实际装配检查。
 
-![整机半剖及按帽与开关位置](images/assembly-details.png)
+![整机半剖及按帽与开关位置](images/assembly-details.webp)
 
 ## 模型与验证范围
 
