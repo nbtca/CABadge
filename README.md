@@ -26,7 +26,7 @@
 - **日常交互**：亮度设置、姿态与唤醒交互、可选 FPS 显示。
 - **小应用**：Grok 表情、MC 二维地图、奶蛙矿工、重力小球，以及测试版中的 FluidBox、TimeTiles 和 BLE 心率。详见[应用说明](firmware-v7/APPS.md)。
 
-GIF/视频需先在电脑端转换为 EAF，设备不直接播放 GIF/视频。OTA 与 BLE 传图尚未提供；功能适用版本及待测项见[已知问题](docs/KNOWN_ISSUES.md)。
+GIF/视频需先在电脑端转换为 EAF，设备不直接播放 GIF/视频。功能限制见[已知限制](docs/KNOWN_ISSUES.md)。
 
 ## 快速入口
 
@@ -44,15 +44,15 @@ GIF/视频需先在电脑端转换为 EAF，设备不直接播放 GIF/视频。O
 | 资料 | 当前版本 | 下载或说明 |
 | --- | --- | --- |
 | 正式固件 | v1.2.0 / 7.9.16-eaf-transition | [正式 Release](https://github.com/nbtca/CABadge/releases/tag/v1.2.0)，工作台默认安装此版 |
-| 测试固件 | v1.3.0-rc.1 / 7.9.23-timetiles-fix | [测试 Release](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1)，新功能仍有待测项 |
+| 测试固件 | v1.3.0-rc.1 / 7.9.23-timetiles-fix | [测试 Release](https://github.com/nbtca/CABadge/releases/tag/v1.3.0-rc.1) |
 | 公开源码 | [7.9.23-timetiles-fix](firmware-v7/version.json) | `main` 分支；[自行编译](docs/BUILD.md) |
 | 当前 PCB | V2.1 GEK100 / 星火计划 | [工程说明](hardware/pcb/current/README.md)：[嘉立创EDA原生重画版](hardware/pcb/current/easyeda/CABadge_V2_1_GEK100.epro2)（2026-10-27）与 [KiCad 原工程](hardware/pcb/current/kicad/CABadge_V2_1.kicad_pro)（2026-10-20），两者不自动同步 |
-| 配套外壳 | V11 一体杯壳 + V11_Button_R2 | [打印件与装配](hardware/enclosure/releases/V11_V2_1_20261020/README.md)、[SolidWorks / STEP](https://github.com/nbtca/CABadge/releases/tag/enclosure-v11-cup-button-20261029)；仅 Cup + Button，按键专项待验证 |
+| 配套外壳 | V11 一体杯壳 + V11_Button_R2 | [打印件与装配](hardware/enclosure/releases/V11_V2_1_20261020/README.md)、[SolidWorks / STEP](https://github.com/nbtca/CABadge/releases/tag/enclosure-v11-cup-button-20261029)，仅 Cup + Button |
 | 历史硬件 | V1 首板 c7c59dff，仅 KiCad | [V1 归档](hardware/pcb/archive/V1_c7c59dff/README.md)；冻结制造包属于此版 |
 
 **自行编译请使用 `main`。** `v1.3.0-rc.1` 标签的自动 `Source code (zip)` 是旧源码快照，与其 7.9.23 固件附件不对应；[下载说明](docs/REPRODUCE.md#1-下载固件与配套硬件)解释各文件的用途。
 
-首板 c7c59dff 的实测证据见[首板测试记录](首板测试记录.md)。V2.1 新增电源与机构、R2 按钮，以及测试固件的部分交互和长稳仍需分项验证；照片、构建或 CAD 检查不代表这些项目已全部通过。
+实测结果见[首板测试记录](首板测试记录.md)，待验证项目见[实板复测跟踪](https://github.com/nbtca/CABadge/issues/10)。
 
 ## 硬件概览
 
