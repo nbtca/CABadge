@@ -43,6 +43,6 @@
 
 实板脚本 `firmware-v7/usb_screen/fluidbox_probe.py --port COM3 --seconds 10 --output <证据文件>` 使用现有管理协议；type41/sub1 页14 打开，sub12 模式0..4 / reset5。分别记录 GUI 图片交接率及 runtime 最后块 DMA 完成率、求解频率、各模式耗时和内存，检查休眠/恢复、六次开关应用、返回原 EAF 播放及库 CRC/设置保持。真实 tilt、触摸、颜色、撕裂和长时间稳定性须实物反馈，计数不代替目视。
 
-物理测试状态与结果统一见根目录 `首板测试记录.md` 的 R99；构建发布时 `verification.json` 保持待测含义，新增实测证据单独保存。独立固件目录 `outputs/cabadge-v7.9.19-fluidbox/`，正式发布和 Workbench 默认包保持原记录。
+物理测试状态与结果见[首板测试记录 R99](../首板测试记录.md#r99)；构建发布时 `verification.json` 保持待测含义，新增实测证据单独保存。独立固件目录 `outputs/cabadge-v7.9.19-fluidbox/`，正式发布和 Workbench 默认包保持原记录。
 
 上游参考：https://github.com/eMUQI/esp-mosaico-fluidbox；原性能表：https://github.com/eMUQI/esp-mosaico-fluidbox/blob/75d0c076b3f5b3529253f9238bc936875c47a159/TESTING.md 。
